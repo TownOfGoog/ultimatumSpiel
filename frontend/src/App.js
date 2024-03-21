@@ -13,7 +13,6 @@ function App() {
       <div className='body'>
         {game.state.body}
       </div>
-      <button>TsdfsdfES!! ?</button>
     </>
   );
 }

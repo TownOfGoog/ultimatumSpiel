@@ -1,17 +1,15 @@
 import Grid from "@mui/joy/Grid";
-import FormLabel from "@mui/joy/FormLabel";
 import FormControl from "@mui/joy/FormControl";
 import FormHelperText from "@mui/joy/FormHelperText";
 import { useState } from "react";
-import MyInput from "./myInput";
-import MyButton from "./myButton";
+import MyInput from "../components/myInput";
+import MyButton from "../components/myButton";
 import useGameManager from "../service/useGameManager";
 
 export default function Landinpage() {
   const [codeValue, setCodeValue] = useState(""); //this value will be formatted to mostly avoid faulty inputs
   const game = useGameManager();
   return (
-    <>
       <Grid
         container
         columns={2}
@@ -24,6 +22,7 @@ export default function Landinpage() {
             display: "flex",
             flexDirection: "column",
             justifyContent: "center",
+            borderRight: "1px solid black",
           }}
         >
           <div
@@ -47,35 +46,25 @@ export default function Landinpage() {
               alignContent: "center",
             }}
           >
-            <FormLabel
-              sx={{ color: "black", fontWeight: "bold", fontSize: "1.7em" }}
-            >
-              Code eingeben
-            </FormLabel>
-            <MyInput value={codeValue} setValue={setCodeValue} big={true} />
+            <MyInput
+              value={codeValue}
+              setValue={setCodeValue}
+              big={true}
+              title={"Code eingeben"}
+            />
             {/* error handling for another day */}
             {/* <FormHelperText> 
                 Dieser Code muss 5-stellig sein.
               </FormHelperText> */}
           </FormControl>
 
-          <div
-            style={{
-              position: "relative",
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-              textAlign: "center",
-              marginTop: "1.3em",
+          <MyButton
+            onClick={() => {
+              game.join_lobby(codeValue);
             }}
           >
-            <MyButton
-              text="Lobby betreten"
-              onClick={() => {
-                game.newEvent({ type: "join", data: codeValue }); 
-              }}
-            />
-          </div>
+            Lobby betreten
+          </MyButton>
         </Grid>
 
         <Grid
@@ -85,6 +74,7 @@ export default function Landinpage() {
             display: "flex",
             flexDirection: "column",
             justifyContent: "center",
+            borderLeft: "1px solid black",
           }}
         >
           <div
@@ -102,25 +92,14 @@ export default function Landinpage() {
             Spiel erstellen
           </div>
 
-          <div
-            style={{
-              position: "relative",
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-              textAlign: "center",
-              marginTop: "1.3em",
+          <MyButton
+            onClick={() => {
+              game.change_page("create_game");
             }}
           >
-            <MyButton
-              text="Anmelden"
-              onClick={() => {
-                game.newEvent({ type: "change_page", data: "login_page" });
-              }}
-            />
-          </div>
+            Lobby erstellen
+          </MyButton>
         </Grid>
       </Grid>
-    </>
   );
 }
