@@ -100,11 +100,11 @@ export async function startExpress() {
     // hohle daten aus der datenbank mit dem Lobbycode
     // lade es zum nutzer so
     
-    
-    app.get("/lobby/create", (request, response) =>{
-      var lobbies = request.query
+    var lobbies = app.get("/lobby/create", (request, response) =>{
+      const lobbies = request.query;
+      console.log(lobbies);
+      return lobbies
   })
-
   var num = ["00000", "99999", "93845", "99303"]
   // Das ist ein Websocket/Lobbie   /lobby/:00000   -----
   app.ws('/lobby/', function(ws, req) {
@@ -115,7 +115,7 @@ export async function startExpress() {
     
     if (req.includes(lobbies)){
       //sag backend er soll Nutzer umleiten
-      
+
     }
     
 
