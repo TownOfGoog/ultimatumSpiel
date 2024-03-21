@@ -5,6 +5,7 @@
   "scripts": {
     "front": "cd ./frontend && npm run start",
     "back": "cd ./Backend && node server.js",
-    "test": "node --experimental-vm-modules node_modules/jest/bin/jest.js"
+    "test": "node --experimental-vm-modules node_modules/jest/bin/jest.js",
+    "start": "npm-run-all --parallel front back"
   }
 }
