@@ -1,7 +1,5 @@
 import './App.css';
-import Landinpage from './components/landingpage';
 import Nav from './components/nav';
-import { useContext } from 'react';
 import useGameManager from './service/useGameManager';
 
 function App() {
@@ -15,6 +13,7 @@ function App() {
       <div className='body'>
         {game.state.body}
       </div>
+      <button>TsdfsdfES!! ?</button>
     </>
   );
 }
