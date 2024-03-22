@@ -59,6 +59,7 @@ export function GameManagerProvider({ children }) {
   }
 
   function connect_websocket(code) {
+    console.log(`connecting to websocket with code: ${code}...`);
     ws = new WebSocket(`ws://${process.env.REACT_APP_BACKEND_URL}/lobby/${code}`);
     ws.onopen = () => {
       console.log("connected");
@@ -70,7 +71,6 @@ export function GameManagerProvider({ children }) {
     ws.onclose = () => {
       console.log("disconnected");
     };
-    console.log("url: ", code);
   }
 
   public_function("state", state);
@@ -93,22 +93,14 @@ export function GameManagerProvider({ children }) {
     })
       .then((response) => response.json())
       .then((data) => {
-        console.log("Success:", data);
-        console.log('code: ', data.code);
-        const code = data.code
+        console.log('got code: ', data);
+        const code = data
         change_page("waiting_players_page", code); 
         connect_websocket(code);
-        
       })
-      // hardcode lobby code
       .catch((error) => {
-        const code = 15583
-        console.log('code: ', code);
-        change_page("waiting_players_page", code)
+        console.error("Error:", error);
       });
-      // .catch((error) => {
-      //   console.error("Error:", error);
-      // });
   });
 
   return (
