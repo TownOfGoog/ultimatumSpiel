@@ -1,9 +1,9 @@
 
+console.log('hello');
 
 import express from "express"
 import expressWs from "express-ws"
 import expresssession from "express-session" 
-
 
 //algo()
 // speichere gemischte Angebotsnehmer in die Datenbank

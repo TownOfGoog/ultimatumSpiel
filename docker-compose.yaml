@@ -22,4 +22,4 @@ services:
       - /usr/src/app/node_modules
     environment:
       - NODE_ENV=production
-      # - REACT_BACKEND_URL=localhost:3000
+      # - REACT_APP_BACKEND_URL=localhost:3000

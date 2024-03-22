@@ -49,9 +49,8 @@ export function GameManagerProvider({ children }) {
         setState({ title: "Lobby erstellen", body: <CreateGame /> });
         break;
       case "waiting_players_page":
-        // if host / player
         console.log("going to waiting players page...");
-        setState({ title: "Warte auf Spieler", body: <WaitingPlayers code={additional_info}/> });
+        setState({ title: "Warte auf Spieler", body: <WaitingPlayersHost code={additional_info}/> });
         break;
       default:
         setState({ title: "Wilkommen!", body: <Landinpage /> });
@@ -60,7 +59,7 @@ export function GameManagerProvider({ children }) {
   }
 
   function connect_websocket(code) {
-    ws = new WebSocket("ws://localhost:8000/lobby/" + code);
+    ws = new WebSocket(`ws://${process.env.REACT_APP_BACKEND_URL}/lobby/${code}`);
     ws.onopen = () => {
       console.log("connected");
       ws.send("hello");
@@ -84,9 +83,8 @@ export function GameManagerProvider({ children }) {
   });
 
   public_function("create_lobby", (name) => {
-    console.log('process.env: ', process.env);
 
-    fetch(`http://${process.env.BACKEND_URL}/lobby/create`, {
+    fetch(`http://${process.env.REACT_APP_BACKEND_URL}/lobby/create`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -98,7 +96,9 @@ export function GameManagerProvider({ children }) {
         console.log("Success:", data);
         console.log('code: ', data.code);
         const code = data.code
-        change_page("waiting_players_page", code)
+        change_page("waiting_players_page", code); 
+        connect_websocket(code);
+        
       })
       // hardcode lobby code
       .catch((error) => {
