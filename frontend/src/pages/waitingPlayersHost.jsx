@@ -44,7 +44,7 @@ export default function WaitingPlayersHost({ code }) {
         {/* bottom center part of the screen */}
         <Grid xs={2} sx={{ height: "40%", display: 'flex', justifyContent: 'center'}} >
           <Typography>
-            Spieler: {game.data}
+            Spieler: {game.state.data}
           </Typography>
         </Grid>
       </Grid> 
