@@ -4,7 +4,8 @@ import { createContext, useContext, useRef, useState } from "react";
 import Landinpage from "../pages/home";
 import Loginpage from "../pages/login";
 import Play from "../pages/play";
-import CreateGame from "../pages/creategame";
+import CreateGame from "../pages/createGame";
+import WaitingPlayers from "../pages/waitingPlayers";
 
 const GameManagerContext = createContext();
 
@@ -28,11 +29,11 @@ export function GameManagerProvider({ children }) {
   }
 
   // const wsRef = useRef(null);
-  
+
   let ws;
 
   //controls which page will be rendered
-  function change_page(page) {
+  function change_page(page, additional_info = null) {
     switch (page) {
       case "login_page":
         console.log("going to login page...");
@@ -45,6 +46,10 @@ export function GameManagerProvider({ children }) {
       case "create_game":
         console.log("going to create game page...");
         setState({ title: "Lobby erstellen", body: <CreateGame /> });
+        break;
+      case "waiting_players_page":
+        console.log("going to waiting players page...");
+        setState({ title: "Warte auf Spieler", body: <WaitingPlayers code={additional_info}/> });
         break;
       default:
         setState({ title: "Wilkommen!", body: <Landinpage /> });
@@ -88,9 +93,14 @@ export function GameManagerProvider({ children }) {
       .then((data) => {
         console.log("Success:", data);
       })
+      // hardcode lobby code
       .catch((error) => {
-        console.error("Error:", error);
+        const code = 15583
+        change_page("waiting_players_page", code)
       });
+      // .catch((error) => {
+      //   console.error("Error:", error);
+      // });
   });
 
   return (

@@ -1,7 +1,8 @@
+import Grid from '../components/myGrid';
 import FormControl from "@mui/joy/FormControl";
 import MyInput from "../components/myInput";
 import MyButton from "../components/myButton";
-import Grid from "@mui/joy/Grid";
+// import Grid from "@mui/joy/Grid";
 import { useState } from "react";
 import useGameManager from "../service/useGameManager";
 
