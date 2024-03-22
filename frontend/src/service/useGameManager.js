@@ -92,10 +92,14 @@ export function GameManagerProvider({ children }) {
       .then((response) => response.json())
       .then((data) => {
         console.log("Success:", data);
+        console.log('code: ', data.code);
+        const code = data.code
+        change_page("waiting_players_page", code)
       })
       // hardcode lobby code
       .catch((error) => {
         const code = 15583
+        console.log('code: ', code);
         change_page("waiting_players_page", code)
       });
       // .catch((error) => {
