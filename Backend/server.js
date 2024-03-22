@@ -48,7 +48,8 @@ let datenbank = {
 export async function startExpress() {
   var app = express();
   var session = expresssession();
-  expressWs(app);
+  var expressWss = expressWs(app);
+  //Wss 
   //Registrierungs Magie   /register
   app.use(cors()); 
   
@@ -100,21 +101,24 @@ export async function startExpress() {
   // ist der Code vorhanden:
     // hohle daten aus der datenbank mit dem Lobbycode
     // lade es zum nutzer so
-    app.ws('/', function(ws, req) {
-      ws.on('message', function(msg) {
-        console.log(msg);
-        
-        ws.send("AAAAA")
-      });
-      console.log('socket', req.testing);
-      
-    });
-  var lobbycode = "00000"
+
+   var wss = expressWss.getWss('/lobby/:lobby');
   // Das ist ein Websocket/Lobbie   /lobby/:00000   -----
-  app.ws('/lobby/00000', function(ws,req) {
+  app.ws('/lobby/:lobby', function(ws,req) {
+    console.log(req.params.lobby)
+    //const lobbyCodeFromUser = req.params.lobby
+    ws.send("aaaaaa")
     ws.on('message', function(msg) {
       console.log(msg);
+      wss.clients.forEach(function (client) {
+        client.send("msg.data");
+        client.send(JSON.stringify({
+          type: 'player_count',
+          data: wss.clients.size
+        }))
+      });
     });
+
     console.log('socket', req.testing);      
   })
 
