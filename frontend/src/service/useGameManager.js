@@ -5,6 +5,7 @@ import Landinpage from "../pages/home";
 import Loginpage from "../pages/login";
 import Play from "../pages/play";
 import CreateGame from "../pages/createGame";
+import WaitingPlayersHost from "../pages/waitingPlayersHost";
 import WaitingPlayers from "../pages/waitingPlayers";
 
 const GameManagerContext = createContext();
@@ -48,6 +49,7 @@ export function GameManagerProvider({ children }) {
         setState({ title: "Lobby erstellen", body: <CreateGame /> });
         break;
       case "waiting_players_page":
+        // if host / player
         console.log("going to waiting players page...");
         setState({ title: "Warte auf Spieler", body: <WaitingPlayers code={additional_info}/> });
         break;
@@ -82,7 +84,7 @@ export function GameManagerProvider({ children }) {
   });
 
   public_function("create_lobby", (name) => {
-    fetch("http://localhost:8080/lobby/create", {
+    fetch(`http://${process.env.BACKEND_URL}/lobby/create`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",

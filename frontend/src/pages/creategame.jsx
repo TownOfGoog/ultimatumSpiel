@@ -38,7 +38,6 @@ export default function CreateGame() {
           <MyButton
             onClick={() => {
               game.create_lobby(lobbyName);
-              console.log('game: ', game);
             }}
           >
             Lobby erstellen

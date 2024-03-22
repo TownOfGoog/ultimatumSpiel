@@ -6,6 +6,7 @@ services:
       - "3000:3000"
     environment:
       - NODE_ENV=production
+      # - FRONTEND_URL=localhost:80
     volumes:
       - ./backend:/usr/src/app
       - /usr/src/app/node_modules
@@ -19,3 +20,6 @@ services:
     volumes:
       - ./frontend:/usr/src/app
       - /usr/src/app/node_modules
+    environment:
+      - NODE_ENV=production
+      # - BACKEND_URL=localhost:3000
