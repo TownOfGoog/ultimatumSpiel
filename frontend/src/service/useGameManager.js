@@ -84,6 +84,8 @@ export function GameManagerProvider({ children }) {
   });
 
   public_function("create_lobby", (name) => {
+    console.log('process.env: ', process.env);
+
     fetch(`http://${process.env.BACKEND_URL}/lobby/create`, {
       method: "POST",
       headers: {
