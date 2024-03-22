@@ -48,10 +48,14 @@ export function GameManagerProvider({ children }) {
         console.log("going to create game page...");
         setState({ title: "Lobby erstellen", body: <CreateGame /> });
         break;
-      case "waiting_players_page":
+      case "waiting_players_page_host":
         console.log("going to waiting players page...");
         setState({ title: "Warte auf Spieler", body: <WaitingPlayersHost code={additional_info}/> });
         break;
+        case "waiting_players_page":
+          console.log("going to waiting players page...");
+          setState({ title: "Warte auf Spieler", body: <WaitingPlayers/> });
+          break;
       default:
         setState({ title: "Wilkommen!", body: <Landinpage /> });
         break;
@@ -66,7 +70,15 @@ export function GameManagerProvider({ children }) {
       ws.send("hello");
     };
     ws.onmessage = (e) => {
-      console.log(e.data);
+      switch(e.data.type) {
+        case "player_count":
+          console.log("player count: ", e.data.data);
+          setState((prev) => ({...prev, data: e.data.data}));
+          break;
+        default:
+          console.log('response from server:',  e.data);
+          break;
+      }
     };
     ws.onclose = () => {
       console.log("disconnected");
@@ -78,7 +90,7 @@ export function GameManagerProvider({ children }) {
   public_function("change_page", change_page);
 
   public_function("join_lobby", (code) => {
-    change_page("play_page");
+    change_page("waiting_players_page");
     connect_websocket(code);
   });
 
@@ -95,7 +107,7 @@ export function GameManagerProvider({ children }) {
       .then((data) => {
         console.log('got code: ', data);
         const code = data
-        change_page("waiting_players_page", code); 
+        change_page("waiting_players_page_host", code); 
         connect_websocket(code);
       })
       .catch((error) => {
