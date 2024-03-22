@@ -1,6 +1,6 @@
 //service to handle game logic / events
 
-import { createContext, useContext, useRef, useState } from "react";
+import { createContext, useContext, useState } from "react";
 import Landinpage from "../pages/home";
 import Loginpage from "../pages/login";
 import Play from "../pages/play";
@@ -70,13 +70,14 @@ export function GameManagerProvider({ children }) {
       ws.send("hello");
     };
     ws.onmessage = (e) => {
-      switch(e.data.type) {
+      const message = JSON.parse(e.data)
+      switch(message.type) {
         case "player_count":
-          console.log("player count: ", e.data.data);
-          setState((prev) => ({...prev, data: e.data.data}));
+          console.log("player count: ", message.data);
+          setState((prev) => ({...prev, data: message.data}));
           break;
         default:
-          console.log('response from server:',  e.data);
+          console.log('response from server:',  message);
           break;
       }
     };

@@ -46,6 +46,7 @@ export default function WaitingPlayersHost({ code }) {
           <Typography>
             Spieler: {game.state.data}
           </Typography>
+          <button onClick={() => {console.log(game.state)}}>state logger</button>
         </Grid>
       </Grid> 
 
