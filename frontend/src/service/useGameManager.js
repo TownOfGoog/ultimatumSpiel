@@ -70,15 +70,19 @@ export function GameManagerProvider({ children }) {
       ws.send("hello");
     };
     ws.onmessage = (e) => {
-      const message = JSON.parse(e.data)
-      switch(message.type) {
-        case "player_count":
-          console.log("player count: ", message.data);
-          setState((prev) => ({...prev, data: message.data}));
-          break;
-        default:
-          console.log('response from server:',  message);
-          break;
+      try {
+        const message = JSON.parse(e.data)
+        switch(message.type) {
+          case "player_count":
+            console.log("player count: ", message.data);
+            setState((prev) => ({...prev, player_count: message.data}));
+            break;
+          default:
+            console.log('response from server:',  message);
+            break;
+        }
+      } catch (error) {
+        console.log('response from server is not json: ', e.data);        
       }
     };
     ws.onclose = () => {
@@ -91,6 +95,7 @@ export function GameManagerProvider({ children }) {
   public_function("change_page", change_page);
 
   public_function("join_lobby", (code) => {
+    console.log(code);
     change_page("waiting_players_page");
     connect_websocket(code);
   });

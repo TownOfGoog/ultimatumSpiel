@@ -1,13 +1,13 @@
-import Grid from '../components/myGrid';
 import FormControl from "@mui/joy/FormControl";
 import MyInput from "../components/myInput";
 import MyButton from "../components/myButton";
+import Grid from "../components/myGrid";
 // import Grid from "@mui/joy/Grid";
 import { useState } from "react";
 import useGameManager from "../service/useGameManager";
 
 export default function CreateGame() {
-  const [lobbyName, setLobbyName] = useState('')
+  const [lobbyName, setLobbyName] = useState("");
 
   const game = useGameManager();
 
@@ -34,7 +34,11 @@ export default function CreateGame() {
             alignContent: "center",
           }}
         >
-          <MyInput label={"Lobby Name"} value={lobbyName} setValue={setLobbyName}/>
+          <MyInput
+            label={"Lobby Name"}
+            value={lobbyName}
+            setValue={setLobbyName}
+          />
           <MyButton
             onClick={() => {
               game.create_lobby(lobbyName);

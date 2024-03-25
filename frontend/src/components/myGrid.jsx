@@ -1,7 +1,7 @@
 import React from 'react';
 import { Grid } from '@mui/joy';
 
-export default function MyGrid(props) {
+export default function MyGrid({...props}) {
   //this exists so that when woring in a development environment, the grid will have a random color
   const isDevelopment = process.env.NODE_ENV === 'development';
 
@@ -9,5 +9,5 @@ export default function MyGrid(props) {
   const randomColor =  isDevelopment ? '#' + Math.floor(Math.random()*16777215).toString(16) : 'auto';
   
   const style = { ...props.style, backgroundColor: randomColor };
-  return <Grid {...props} style={style} />;
+  return <Grid {...props} style={style} >{props.children}</Grid>;
 }
