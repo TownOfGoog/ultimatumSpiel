@@ -52,10 +52,10 @@ export function GameManagerProvider({ children }) {
         console.log("going to waiting players page...");
         setState({ title: "Warte auf Spieler", body: <WaitingPlayersHost code={additional_info}/> });
         break;
-        case "waiting_players_page":
-          console.log("going to waiting players page...");
-          setState({ title: "Warte auf Spieler", body: <WaitingPlayers/> });
-          break;
+      case "waiting_players_page":
+        console.log("going to waiting players page...");
+        setState({ title: "Warte auf Spieler", body: <WaitingPlayers/> });
+        break;
       default:
         setState({ title: "Wilkommen!", body: <Landinpage /> });
         break;
