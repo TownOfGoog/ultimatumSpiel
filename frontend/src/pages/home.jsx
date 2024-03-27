@@ -1,4 +1,3 @@
-// import Grid from "@mui/joy/Grid";
 import Grid from '../components/myGrid';
 import FormControl from "@mui/joy/FormControl";
 import FormHelperText from "@mui/joy/FormHelperText";
@@ -7,7 +6,7 @@ import MyInput from "../components/myInput";
 import MyButton from "../components/myButton";
 import useGameManager from "../service/useGameManager";
 
-export default function Landinpage() {
+export default function Home() {
   const [codeValue, setCodeValue] = useState(""); //this value will be formatted to mostly avoid faulty inputs
   const game = useGameManager();
   return (

@@ -30,7 +30,7 @@ export default function WaitingPlayers() {
           xs={3}
           sx={{ height: "40%", display: "flex", justifyContent: "center" }}
         >
-          <MyText>{game.state.player_count} Spieler sind hier</MyText>
+          <MyText>{game.playerCount} Spieler sind hier</MyText>
         </Grid>
       </Grid>
 

@@ -5,7 +5,7 @@ import Typography from '@mui/joy/Typography';
 import QRCode from 'react-qr-code';
 import useGameManager from '../service/useGameManager';
 
-export default function WaitingPlayersHost({ code }) {
+export default function WaitingPlayersHost() {
   const game = useGameManager();
 
   return (
@@ -32,21 +32,20 @@ export default function WaitingPlayersHost({ code }) {
             Der Code:
           </Typography>
           <Typography level="h1" fontSize="5em">
-            {code}
+            {game.code}
           </Typography>
         </Grid>
 
         {/* right center part of the screen */}
         <Grid xs={1} sx={{ height: "40%", display: 'flex', justifyContent: 'center', alignItems: 'center', backgroundColor: 'green' }} >
-          <QRCode value={window.location.href} size={200} xlinkTitle="test" />
+          <QRCode value={window.location.href + 'lobby/' + game.code} size={200} />
         </Grid>
 
         {/* bottom center part of the screen */}
         <Grid xs={2} sx={{ height: "40%", display: 'flex', justifyContent: 'center'}} >
           <Typography>
-            Spieler: {game.state.player_count}
+            Spieler: {game.playerCount }
           </Typography>
-          <button onClick={() => {console.log(game.state)}}>state logger</button>
         </Grid>
       </Grid> 
 

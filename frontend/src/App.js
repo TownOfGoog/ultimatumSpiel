@@ -1,18 +1,24 @@
+import { useEffect } from 'react';
 import './App.css';
 import Nav from './components/nav';
 import useGameManager from './service/useGameManager';
 
 function App() {
-  const game = useGameManager()
+  const game = useGameManager();
+
+  useEffect(() => {
+    game.change_page("home_page");
+  }, [])
 
   return (
     <>
       <div className='nav'>
-        <Nav title={game.state.title}/>
+        <Nav title={game.title}/>
       </div>
       <div className='body'>
-        {game.state.body}
+        {game.body}
       </div>
+      <button onClick={() => game.setCurrentRound((a) => a + 1)}> change title</button>
     </>
   );
 }

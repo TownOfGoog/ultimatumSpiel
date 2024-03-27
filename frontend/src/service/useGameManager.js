@@ -1,7 +1,7 @@
 //service to handle game logic / events
 
-import { createContext, useContext, useState } from "react";
-import Landinpage from "../pages/home";
+import { createContext, useContext, useEffect, useState } from "react";
+import Home from "../pages/home";
 import Loginpage from "../pages/login";
 import Play from "../pages/play";
 import CreateGame from "../pages/createGame";
@@ -15,74 +15,95 @@ export default function useGameManager() {
   return useContext(GameManagerContext);
 }
 
+//here is the main logic of the game
 export function GameManagerProvider({ children }) {
-  //changing states will affect how the components (eg. navbar) are rendered
-  const [state, setState] = useState({
-    title: "Wilkommen!",
-    body: <Landinpage />,
-  });
+  const [title, setTitle] = useState("something went wrong"); //title to be displayed in the navbar
+  const [body, setBody] = useState(<p>something went wrong</p>); //content of the page
+  const [code, setCode] = useState(null); //lobbycode
+  const [playerCount, setPlayerCount] = useState(0); //number of players in the lobby
 
-  let publicFunctions = {}; //functions that will be made global
-
-  //use this function to declare it public/global
-  function public_function(name, func) {
-    publicFunctions[name] = func;
-  }
-
-  // const wsRef = useRef(null);
-
-  let ws;
-
-  //controls which page will be rendered
-  function change_page(page, additional_info = null) {
+  //central function to control what is on the page
+  function change_page(page) {
     switch (page) {
+      case "home_page":
+        console.log("going to home page...");
+        setTitle("Wilkommen!");
+        setBody(<Home />);
+        break;
       case "login_page":
         console.log("going to login page...");
-        setState({ title: "Anmelden", body: <Loginpage /> });
+        setTitle("Anmelden");
+        setBody(<Loginpage />);
         break;
       case "play_page":
         console.log("going to play page...");
-        setState({ title: "Spiel 1 / Runde 2", body: <Play /> });
+        // setTitle("") //should be set from websocket logic
+        setBody(<Play />);
         break;
       case "create_game":
         console.log("going to create game page...");
-        setState({ title: "Lobby erstellen", body: <CreateGame /> });
+        setTitle("Spiel erstellen");
+        setBody(<CreateGame />);
         break;
       case "waiting_players_page_host":
         console.log("going to waiting players page...");
-        setState({ title: "Warte auf Spieler", body: <WaitingPlayersHost code={additional_info}/> });
+        setTitle("Warte auf Spieler");
+        setBody(<WaitingPlayersHost />);
         break;
       case "waiting_players_page":
         console.log("going to waiting players page...");
-        setState({ title: "Warte auf Spieler", body: <WaitingPlayers/> });
+        setTitle("Warte auf Spieler");
+        setBody(<WaitingPlayers />);
         break;
       default:
-        setState({ title: "Wilkommen!", body: <Landinpage /> });
+        console.log("function change_page: unknown page: ", page);
+        setTitle("something went wrong, how did you get here?");
         break;
     }
   }
 
   function connect_websocket(code) {
     console.log(`connecting to websocket with code: ${code}...`);
-    ws = new WebSocket(`ws://${process.env.REACT_APP_BACKEND_URL}/lobby/${code}`);
+
+    const ws = new WebSocket(
+      `ws://${process.env.REACT_APP_BACKEND_URL}/lobby/${code}`
+    );
+
     ws.onopen = () => {
       console.log("connected");
       ws.send("hello");
     };
+
     ws.onmessage = (e) => {
+      // a message from the server could look like this:
+      // message = {
+      //   type: "play_round",
+      //   data: {
+      //     game: 1,
+      //     round: 1,
+      //     action: "ask" //or "answer"
+      //   }
+      // }
       try {
-        const message = JSON.parse(e.data)
-        switch(message.type) {
+        const message = JSON.parse(e.data);
+        switch (message.type) {
           case "player_count":
             console.log("player count: ", message.data);
-            setState((prev) => ({...prev, player_count: message.data}));
+            setPlayerCount(message.data);
+            break;
+          case "play_round":
+            console.log("game is starting...");
+            setTitle(
+              `Spiel ${message.data.game} / Runde ${message.data.round}`
+            );
+            change_page("play_page");
             break;
           default:
-            console.log('response from server:',  message);
+            console.log("response from server:", message);
             break;
         }
       } catch (error) {
-        console.log('response from server is not json: ', e.data);        
+        console.warn("response from server (but not json): ", e.data);
       }
     };
     ws.onclose = () => {
@@ -90,18 +111,8 @@ export function GameManagerProvider({ children }) {
     };
   }
 
-  public_function("state", state);
-
-  public_function("change_page", change_page);
-
-  public_function("join_lobby", (code) => {
-    console.log(code);
-    change_page("waiting_players_page");
-    connect_websocket(code);
-  });
-
-  public_function("create_lobby", (name) => {
-
+  function create_lobby(name) {
+    //when creating a lobby, save the code and join it's lobby
     fetch(`http://${process.env.REACT_APP_BACKEND_URL}/lobby/create`, {
       method: "POST",
       headers: {
@@ -111,18 +122,38 @@ export function GameManagerProvider({ children }) {
     })
       .then((response) => response.json())
       .then((data) => {
-        console.log('got code: ', data);
-        const code = data
-        change_page("waiting_players_page_host", code); 
-        connect_websocket(code);
+        console.log("got code: ", data);
+        const code = data;
+        setCode(code);
+        join_lobby(code);
       })
       .catch((error) => {
         console.error("Error:", error);
       });
-  });
+  }
 
+  function join_lobby(code) {
+    console.log("joining lobby with code:", code);
+    //if host:
+    change_page("waiting_players_page_host");
+    //else:
+    // change_page("waiting_players_page");
+    connect_websocket(code);
+  }
+
+  //all the variables and functions made global
+  let publicVariables = {
+    title,
+    body,
+    code,
+    playerCount,
+    join_lobby,
+    create_lobby,
+    change_page,
+  };
+  
   return (
-    <GameManagerContext.Provider value={publicFunctions}>
+    <GameManagerContext.Provider value={publicVariables}>
       {children}
     </GameManagerContext.Provider>
   );
