@@ -3,7 +3,7 @@ import logo from "../assets/logo.png"
 
 export default function Nav({ title }) {
   return (
-    <Grid container columns={{ xs: 3 }} sx={{ flexGrow: 1, bgcolor: "black", color: "white", height: "100%" }}>
+    <Grid container columns={{ xs: 3 }} sx={{ flexGrow: 1, bgcolor: "black", color: "white", height: "100%", flexWrap: "nowrap" }}>
       <Grid
         xs={1} sx={{
           display: "flex",
