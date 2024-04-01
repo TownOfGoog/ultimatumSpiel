@@ -104,20 +104,37 @@ export async function startExpress() {
 
    var wss = expressWss.getWss('/lobby/:lobby');
   // Das ist ein Websocket/Lobbie   /lobby/:00000   -----
-  app.ws('/lobby/:lobby', function(ws,req) {
+  app.ws('/lobby/:lobby', function(ws, req) {
     console.log(req.params.lobby)
     //const lobbyCodeFromUser = req.params.lobby
-    ws.send("aaaaaa")
     ws.on('message', function(msg) {
       console.log(msg);
       wss.clients.forEach(function (client) {
-        client.send("msg.data");
         client.send(JSON.stringify({
           type: 'player_count',
-          data: wss.clients.size
+          data: wss.clients.size-1
         }))
       });
     });
+    
+    // if nachricht == "spiel startet":
+      // Alle aus der Lobby erhalten Signal: "Spiel Startet"
+      // nächste runde in die datenbank
+    ws.on("message", function(msg) {
+      if(msg == JSON.stringify({
+        type: "start_round"
+      })){
+        client.send(JSON.stringify({
+          type: "play_round",
+          data: {
+            game:1,
+            round: 1,
+            class: "I3a",
+            action: "ask"
+          }
+        }))
+      }
+    })
 
     console.log('socket', req.testing);      
   })
@@ -133,9 +150,6 @@ export async function startExpress() {
     //
     //
     // warte auf nachricht
-    // if nachricht == "spiel startet":
-      // Alle aus der Lobby erhalten Signal: "Spiel Startet"
-      // nächste runde in die datenbank
 
 
 
