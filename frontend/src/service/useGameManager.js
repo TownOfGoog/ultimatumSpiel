@@ -17,7 +17,9 @@ export default function useGameManager() {
 
 //here is the main logic of the game
 export function GameManagerProvider({ children }) {
+  const [ws, setWs] = useState(null); //websocket connection
   const [title, setTitle] = useState("something went wrong"); //title to be displayed in the navbar
+  const [topRight, setTopRight] = useState("login"); //top right corner of the page (login or current class)
   const [body, setBody] = useState(<p>something went wrong</p>); //content of the page
   const [code, setCode] = useState(null); //lobbycode
   const [playerCount, setPlayerCount] = useState(0); //number of players in the lobby
@@ -81,11 +83,13 @@ export function GameManagerProvider({ children }) {
       //   data: {
       //     game: 1,
       //     round: 1,
-      //     action: "ask" //or "answer"
+      //     class: "I3a"
+      //     action: "place_offer" //or "answer_offer" // should it be offer or ask?
       //   }
       // }
       try {
         const message = JSON.parse(e.data);
+        console.log("response from server:", message);
         switch (message.type) {
           case "player_count":
             console.log("player count: ", message.data);
@@ -93,13 +97,13 @@ export function GameManagerProvider({ children }) {
             break;
           case "play_round":
             console.log("game is starting...");
+            setTopRight(message.data.class);
             setTitle(
               `Spiel ${message.data.game} / Runde ${message.data.round}`
             );
             change_page("play_page");
             break;
           default:
-            console.log("response from server:", message);
             break;
         }
       } catch (error) {
@@ -109,6 +113,37 @@ export function GameManagerProvider({ children }) {
     ws.onclose = () => {
       console.log("disconnected");
     };
+
+    setWs(ws);
+  }
+
+  function place_offer(amount) {
+    console.log(`vergebe ${amount} geld...`);
+    const message = JSON.stringify({
+      type: "offer",
+      data: {
+        amount: amount
+      },
+    })
+    ws.send(message);
+  }
+
+  function accept_offer() {
+    console.log('akzeptiere angebot...');
+    const message = JSON.stringify({
+      type: "accept_offer",
+      data: {},
+    })
+    ws.send(message);
+  }
+
+  function decline_offer() {
+    console.log('lehne angebot ab...');
+    const message = JSON.stringify({
+      type: "decline_offer",
+      data: {},
+    })
+    ws.send(message);
   }
 
   function create_lobby(name) {
@@ -144,11 +179,15 @@ export function GameManagerProvider({ children }) {
   //all the variables and functions made global
   let publicVariables = {
     title,
+    topRight,
     body,
     code,
     playerCount,
-    join_lobby,
     create_lobby,
+    join_lobby,
+    place_offer,
+    accept_offer,
+    decline_offer,
     change_page,
   };
   

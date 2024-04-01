@@ -18,7 +18,6 @@ function App() {
       <div className='body'>
         {game.body}
       </div>
-      <button onClick={() => game.setCurrentRound((a) => a + 1)}> change title</button>
     </>
   );
 }

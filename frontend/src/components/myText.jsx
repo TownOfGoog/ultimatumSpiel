@@ -1,11 +1,11 @@
 import { Typography } from "@mui/joy";
 
-export default function MyText({children, inNav, ...props}) {
-  const sx = { ...props.sx, color: inNav ? '' : 'black'};
+export default function MyText({isInNav, bold, color, small, ...props}) {
+  const sx = { color: isInNav ? '' : color ? color : 'black', fontWeight: bold ? 'bold' : 'normal', ...props.sx };
 
   return(
-    <Typography  sx={sx} level="body-lg" {...props}>
-      {children}
+    <Typography level="h1" {...props} sx={sx}>
+      {props.children}
     </Typography>
   )
 }

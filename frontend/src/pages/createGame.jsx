@@ -39,6 +39,7 @@ export default function CreateGame() {
             value={lobbyName}
             setValue={setLobbyName}
           />
+          <br />
           <MyButton
             onClick={() => {
               game.create_lobby(lobbyName);

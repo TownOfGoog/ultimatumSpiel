@@ -4,6 +4,7 @@ import Grid from '../components/myGrid';
 import Typography from '@mui/joy/Typography';
 import QRCode from 'react-qr-code';
 import useGameManager from '../service/useGameManager';
+import MyText from '../components/myText';
 
 export default function WaitingPlayersHost() {
   const game = useGameManager();
@@ -21,19 +22,19 @@ export default function WaitingPlayersHost() {
 
         {/* top center part of the screen */}
         <Grid xs={2} sx={{ height: "20%", display: 'flex', alignItems: 'center', justifyContent: 'center', backgroundColor: 'blue' }} >
-          <Typography level="h1" fontSize="3em" sx={{textDecoration: 'underline'}} >
+          <MyText level="h1" fontSize="3em" sx={{textDecoration: 'underline'}} >
             {window.location.href}
-          </Typography>
+          </MyText>
         </Grid>
 
         {/* left center part of the screen */}
         <Grid xs={1} sx={{ height: "40%", display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', backgroundColor: 'pink' }} >
-          <Typography level="title-sm" fontSize="2.5em" sx={{marginBottom: '-20px'}}>
+          <MyText level="title-sm" fontSize="2.5em" sx={{marginBottom: '-20px'}}>
             Der Code:
-          </Typography>
-          <Typography level="h1" fontSize="5em">
+          </MyText>
+          <MyText level="h1" fontSize="5em">
             {game.code}
-          </Typography>
+          </MyText>
         </Grid>
 
         {/* right center part of the screen */}
@@ -43,9 +44,9 @@ export default function WaitingPlayersHost() {
 
         {/* bottom center part of the screen */}
         <Grid xs={2} sx={{ height: "40%", display: 'flex', justifyContent: 'center'}} >
-          <Typography>
+          <MyText>
             Spieler: {game.playerCount }
-          </Typography>
+          </MyText>
         </Grid>
       </Grid> 
 
