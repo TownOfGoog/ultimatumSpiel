@@ -147,31 +147,19 @@ export async function startExpress() {
         case "offer":
           client.send(JSON.stringify({
             type: "wait",
-            data: {
-              game:datenbank.Lobby.LobbyID,
-              round: datenbank.Runden.runden_id,
-              class: datenbank.Lobby.name,
-            }
+            data: {}
           }))
           break
         case "accept_offer":
           client.send(JSON.stringify({
             type: "wait",
-            data: {
-              game:datenbank.Lobby.LobbyID,
-              round: datenbank.Runden.runden_id,
-              class: datenbank.Lobby.name,
-            }
+            data: {}
           }))
           break
         case "decline_offer":
           client.send(JSON.stringify({
             type: "wait",
-            data: {
-              game:datenbank.Lobby.LobbyID,
-              round: datenbank.Runden.runden_id,
-              class: datenbank.Lobby.name,
-            }
+            data: {}
           }))
           break
         
