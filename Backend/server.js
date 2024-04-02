@@ -13,36 +13,36 @@ import cors from "cors"
 
 let datenbank = {
   "Lobby":{
-    "LobbyID":["1"],
-    "spielID":[1, 2],
-    "wirt":["1"],
-    "spieler":[["1, 2"]],
-    "lobby_kennwort":["00000"],
-    "name": ["I3a"]
+    "LobbyID":[],
+    "spielID":[],
+    "wirt":[],
+    "spieler":[[]],
+    "lobby_kennwort":[],
+    "name": []
   },
   "Lehrer":{
-    "LehrerID":["1"],
-    "benutzername":["Anita Metzger"],
-    "email":["@"],
-    "kennwort":["123456"]
+    "LehrerID":[],
+    "benutzername":[],
+    "email":[],
+    "kennwort":[]
   },
   "Spiel":{
-    "spiel_id":["1"],
-    "runden_id":["1"]
+    "spiel_id":[],
+    "runden_id":[]
   },
   "Runden":{
-    "runden_id":["1"],
-    "angebot":["1"]
+    "runden_id":[],
+    "angebot":[]
   },
   "Angebote":{
-    "angebot_id":["1"],
-    "angebot_nehmer":["1"],
-    "angebot_geber":["2"],
-    "angebot_summe":["10"],
-    "angebot_angenommen":["TRUE"]
+    "angebot_id":[],
+    "angebot_nehmer":[],
+    "angebot_geber":[],
+    "angebot_summe":[],
+    "angebot_angenommen":[]
   },
   "Spieler":{
-    "spieler_id":[1, 2]
+    "spieler_id":[]
   }
 }
 export async function startExpress() {
@@ -120,19 +120,65 @@ export async function startExpress() {
     // if nachricht == "spiel startet":
       // Alle aus der Lobby erhalten Signal: "Spiel Startet"
       // nächste runde in die datenbank
+    //place_offer answer_offer
+
     ws.on("message", function(msg) {
-      if(msg == JSON.stringify({
-        type: "start_round"
-      })){
-        client.send(JSON.stringify({
-          type: "play_round",
-          data: {
-            game:1,
-            round: 1,
-            class: "I3a",
-            action: "ask"
-          }
-        }))
+      switch(msg.type){
+        case "start_round":
+          client.send(JSON.stringify({
+            type: "place_offer",
+            data: {
+              game:datenbank.Lobby.LobbyID,
+              round: datenbank.Runden.runden_id,
+              class: datenbank.Lobby.name,
+            }
+          }))
+          break
+        case "start_game":
+          client.send(JSON.stringify({
+            type: "place_offer",
+            data: {
+              game:datenbank.Lobby.LobbyID,
+              round: datenbank.Runden.runden_id,
+              class: datenbank.Lobby.name,
+            }
+          }))
+          break
+        case "offer":
+          client.send(JSON.stringify({
+            type: "wait",
+            data: {
+              game:datenbank.Lobby.LobbyID,
+              round: datenbank.Runden.runden_id,
+              class: datenbank.Lobby.name,
+            }
+          }))
+          break
+        case "accept_offer":
+          client.send(JSON.stringify({
+            type: "wait",
+            data: {
+              game:datenbank.Lobby.LobbyID,
+              round: datenbank.Runden.runden_id,
+              class: datenbank.Lobby.name,
+            }
+          }))
+          break
+        case "decline_offer":
+          client.send(JSON.stringify({
+            type: "wait",
+            data: {
+              game:datenbank.Lobby.LobbyID,
+              round: datenbank.Runden.runden_id,
+              class: datenbank.Lobby.name,
+            }
+          }))
+          break
+        
+        
+            
+        
+        
       }
     })
 
