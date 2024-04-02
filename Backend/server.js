@@ -13,10 +13,10 @@ import cors from "cors"
 
 let datenbank = {
   "Lobby":{
-    "LobbyID":[],
+    "LobbyID":[0,1,2],
     "spielID":[],
     "wirt":[],
-    "spieler":[[]],
+    "spieler_id":[[]],
     "lobby_kennwort":[],
     "name": []
   },
@@ -24,7 +24,8 @@ let datenbank = {
     "LehrerID":[],
     "benutzername":[],
     "email":[],
-    "kennwort":[]
+    "kennwort":[],
+    "websocket":[]
   },
   "Spiel":{
     "spiel_id":[],
@@ -32,7 +33,7 @@ let datenbank = {
   },
   "Runden":{
     "runden_id":[],
-    "angebot":[]
+    "angebot_id":[[]]
   },
   "Angebote":{
     "angebot_id":[],
@@ -42,7 +43,8 @@ let datenbank = {
     "angebot_angenommen":[]
   },
   "Spieler":{
-    "spieler_id":[]
+    "spieler_id":[],
+    "websocket":[]
   }
 }
 export async function startExpress() {
@@ -72,24 +74,21 @@ export async function startExpress() {
 
   //jedes mal wenn wir vom Frontend eine Anfrage für eine Neue Lobby erhalten, /lobby/create   -----
   app.post("/lobby/create", (req, res) => {
-    
-
     //wird kontrolliert ob der Nutzer bereits eine lobby offen hat:
     //hole alle nutzer
     
       //Wenn ja 
       //wird die alte Lobby aus der Datenbank gelöscht
 
-
-
     //es wird ein neuer Lobbycode generiert
     let newCode = Math.floor(Math.random() * 90000) + 10000
-    //und in der Datenbank gespeichert
 
+    //und in der Datenbank gespeichert
     datenbank.Lobby.lobby_kennwort.push(newCode)
-    console.log(JSON.stringify(newCode))
+
     //sende den generierten lobbycode an das frontend
     res.send(JSON.stringify(newCode))
+    datenbank.Lobby.LobbyID.push(datenbank.Lobby.LobbyID.length+1)
   })
   //
   
@@ -109,7 +108,13 @@ export async function startExpress() {
     //const lobbyCodeFromUser = req.params.lobby
     ws.on('message', function(msg) {
       console.log(msg);
-      wss.clients.forEach(function (client) {
+      if(datenbank.Lobby.kennwort.includes(req.params.lobby)){
+        datenbank.Spieler.websocket.push(ws)
+      } else {
+        ws.close()
+      }
+
+      datenbank.Spieler.websocket.forEach(function (client) {
         client.send(JSON.stringify({
           type: 'player_count',
           data: wss.clients.size-1
@@ -145,22 +150,31 @@ export async function startExpress() {
           }))
           break
         case "offer":
-          client.send(JSON.stringify({
+          if(datenbank.Lobby.spieler.length!=datenbank.Runden.angebot_id.length){
+            client.send(JSON.stringify({
             type: "wait",
             data: {}
-          }))
+          }))}else{
+            //schicke jedem message.type =
+          }
           break
         case "accept_offer":
+          if(datenbank.Lobby.spieler.length!=datenbank.Angebote.angebot_angenommen.length){
           client.send(JSON.stringify({
             type: "wait",
             data: {}
-          }))
+          }))}else{
+            //schicke jedem message.type =
+          }
           break
         case "decline_offer":
+          if(datenbank.Lobby.spieler.length!=datenbank.Angebote.angebot_angenommen.length){
           client.send(JSON.stringify({
             type: "wait",
             data: {}
-          }))
+          }))}else{
+            //schicke jedem message.type =
+          }
           break
         
         
