@@ -23,13 +23,10 @@ wenn ein Schüler sein erhaltenes Angebot ablent
 
 
 ### backend
-message.type = play_round
-wenn der Server allen einen Befehl gibt
+message.type = place_offer
+wenn der Server will, dass alle ein Angebot abgeben
 
-message.data.action = place_offer
-wenn der Server will, dass alle ein Angebot geben
-
-message.data.action = answer_offer
+message.type = answer_offer
 wenn der Server will, dass alle ein Angebot annehmen/ablehnen.
 message.data.amount = z.B. 100
 
