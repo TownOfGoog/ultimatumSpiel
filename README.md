@@ -10,29 +10,40 @@ docker-compose -f docker-compose.dev.yaml up --build
 ### frontend
 message.type = start_round
 wenn der Lehrer das Spiel startet:
+  backend schickt allen ein message.type = place_offer 
 
 message.type = offer
-wenn ein Schüler ein Angebot abgeben
 message.data.amount = z.B. 100
+wenn ein Schüler ein Angebot abgeben:
+  backend schickt allen ein message.type = wait 
 
 message.type = accept_offer
-wenn ein Schüler sein erhaltenes Angebot akzeptiert
+wenn ein Schüler sein erhaltenes Angebot akzeptiert:
+  backend schickt allen ein message.type = wait 
 
 message.type = decline_offer
-wenn ein Schüler sein erhaltenes Angebot ablent
+wenn ein Schüler sein erhaltenes Angebot ablent:
+  backend schickt allen ein message.type = wait 
 
 
 ### backend
 message.type = place_offer
-wenn der Server will, dass alle ein Angebot abgeben
+wenn der Server will, dass alle ein Angebot abgeben:
+  frontent schickt message.type = offer
+  message.data.amount = z.B. 100
 
 message.type = answer_offer
-wenn der Server will, dass alle ein Angebot annehmen/ablehnen.
 message.data.amount = z.B. 100
+wenn der Server will, dass alle ein Angebot annehmen/ablehnen:
+  frontent schickt message.type = accept_offer
+  oder
+  frontent schickt message.type = decline_offer
 
 message.type = player_count
-wenn der server die anzahl Spieler schickt
 message.data = z.B. 6
+wenn der server die anzahl Spieler schickt:
+  frontend schickt nichts
 
 message.type = wait
-wenn der Server will, dass der Frontend einfach wartet
+wenn der Server will, dass der Frontend einfach wartet:
+  frontend schickt nichts
