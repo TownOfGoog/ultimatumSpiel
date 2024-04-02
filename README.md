@@ -7,7 +7,16 @@ docker-compose -f docker-compose.dev.yaml up --build
 
 
 ## message types:
-### frontend
+### frontend schickt:
+neuer websocket
+wenn der jemand joint:
+  backend schickt allen ein message.type = player_count 
+  message.data.count = z.B. 6
+
+message.type = start_game
+wenn der Lehrer das Spiel startet:
+  backend schickt allen ein message.type = place_offer 
+
 message.type = start_round
 wenn der Lehrer das Spiel startet:
   backend schickt allen ein message.type = place_offer 
@@ -16,6 +25,9 @@ message.type = offer
 message.data.amount = z.B. 100
 wenn ein Schüler ein Angebot abgeben:
   backend schickt allen ein message.type = wait 
+  falls alle abgegeben haben:
+  backend schickt allen ein message.type = answer_offer
+  message.data.amount 0 z.B. 0
 
 message.type = accept_offer
 wenn ein Schüler sein erhaltenes Angebot akzeptiert:
@@ -26,7 +38,7 @@ wenn ein Schüler sein erhaltenes Angebot ablent:
   backend schickt allen ein message.type = wait 
 
 
-### backend
+### backend schickt:
 message.type = place_offer
 wenn der Server will, dass alle ein Angebot abgeben:
   frontent schickt message.type = offer
@@ -40,7 +52,7 @@ wenn der Server will, dass alle ein Angebot annehmen/ablehnen:
   frontent schickt message.type = decline_offer
 
 message.type = player_count
-message.data = z.B. 6
+message.data.count = z.B. 6
 wenn der server die anzahl Spieler schickt:
   frontend schickt nichts
 
