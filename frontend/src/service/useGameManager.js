@@ -1,6 +1,6 @@
 //service to handle game logic / events
 
-import { createContext, useContext, useEffect, useState } from "react";
+import { createContext, useContext, useState } from "react";
 import Home from "../pages/home";
 import Loginpage from "../pages/login";
 import CreateGame from "../pages/createGame";
@@ -174,10 +174,7 @@ export function GameManagerProvider({ children }) {
 
   function join_lobby(code) {
     console.log("joining lobby with code:", code);
-    //if host:
     change_page("waiting_players_page_host");
-    //else:
-    // change_page("waiting_players_page");
     connect_websocket(code);
   }
 

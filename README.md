@@ -9,9 +9,10 @@ docker-compose -f docker-compose.dev.yaml up --build
 ## message types:
 ### frontend schickt:
 neuer websocket
-wenn der jemand joint:
-  backend schickt allen ein message.type = player_count 
+wenn jemand joint:
+  backend schickt dem ersten verbundeten websocket ein message.type = player_count 
   message.data.count = z.B. 6
+  backend schickt allen auser den ersten verbundeten websocket ein message.type = wait 
 
 message.type = start_game
 wenn der Lehrer das Spiel startet:
