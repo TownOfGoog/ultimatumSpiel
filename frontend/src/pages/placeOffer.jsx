@@ -3,10 +3,9 @@ import MyGrid from "../components/myGrid";
 import MySlider from "../components/mySlider";
 import MyText from "../components/myText";
 import useGameManager from "../service/useGameManager";
-import Coin from "../components/myCoin";
 import MyButton from "../components/myButton";
 
-export default function Play() {
+export default function PlaceOffer() {
   const game = useGameManager();
   const [amountToGiveAway, setAmountToGiveAway] = useState(0);
 

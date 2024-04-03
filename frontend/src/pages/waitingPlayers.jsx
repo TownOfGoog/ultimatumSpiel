@@ -5,7 +5,6 @@ import MyText from "../components/myText";
 import useGameManager from "../service/useGameManager";
 
 export default function WaitingPlayers() {
-  const game = useGameManager();
   return (
     <Grid container columns={3} sx={{ height: "100%", flexWrap: "nowrap" }}>
       {/* left margin */}
@@ -30,7 +29,7 @@ export default function WaitingPlayers() {
           xs={3}
           sx={{ height: "40%", display: "flex", justifyContent: "center" }}
         >
-          <MyText>{game.playerCount} Spieler sind hier</MyText>
+          <MyText>Warte auf anderen Spieler...</MyText>
         </Grid>
       </Grid>
 

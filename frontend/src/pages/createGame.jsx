@@ -15,7 +15,7 @@ export default function CreateGame() {
     <Grid
       container
       columns={4}
-      sx={{ flexGrow: 1, bgcolor: "white", height: "100%" }}
+      sx={{ flexGrow: 1, height: "100%" }}
     >
       <Grid xs={1} />
 

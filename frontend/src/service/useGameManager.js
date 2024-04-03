@@ -3,10 +3,11 @@
 import { createContext, useContext, useEffect, useState } from "react";
 import Home from "../pages/home";
 import Loginpage from "../pages/login";
-import Play from "../pages/play";
 import CreateGame from "../pages/createGame";
 import WaitingPlayersHost from "../pages/waitingPlayersHost";
 import WaitingPlayers from "../pages/waitingPlayers";
+import PlaceOffer from "../pages/placeOffer";
+import AnswerOffer from "../pages/answerOffer";
 
 const GameManagerContext = createContext();
 
@@ -36,11 +37,6 @@ export function GameManagerProvider({ children }) {
         console.log("going to login page...");
         setTitle("Anmelden");
         setBody(<Loginpage />);
-        break;
-      case "play_page":
-        console.log("going to play page...");
-        // setTitle("") //should be set from websocket logic
-        setBody(<Play />);
         break;
       case "create_game":
         console.log("going to create game page...");
@@ -84,7 +80,8 @@ export function GameManagerProvider({ children }) {
       //     game: 1,
       //     round: 1,
       //     class: "I3a"
-      //     action: "place_offer" //or "answer_offer" // should it be offer or ask?
+      //     amount: 100,
+      //     action: "place_offer" //or "answer_offer"
       //   }
       // }
       try {
@@ -95,13 +92,21 @@ export function GameManagerProvider({ children }) {
             console.log("player count: ", message.data);
             setPlayerCount(message.data);
             break;
-          case "play_round":
-            console.log("game is starting...");
+          case "place_offer":
+            console.log("Wähle dein Angebot");
             setTopRight(message.data.class);
             setTitle(
               `Spiel ${message.data.game} / Runde ${message.data.round}`
             );
-            change_page("play_page");
+            setBody(<PlaceOffer />);
+            break;
+          case "answer_offer":
+            console.log("Antworte auf das Angebot");
+            setBody(<AnswerOffer amount={message.data.amount}/>);
+            break;
+          case "wait":
+            console.log("request accepted, waiting for other players...");
+            change_page("waiting_players_page");
             break;
           default:
             break;

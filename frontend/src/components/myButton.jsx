@@ -1,20 +1,32 @@
 import Button from "@mui/joy/Button";
 
 export default function MyButton({
-  shouldFillAll = false,
+  shouldFillAll,
+  answer,
   onClick,
   sx,
   children,
 }) {
   let defaultStyle = {
-    width: shouldFillAll ? "100%" : "60%",
+    width: shouldFillAll ? "100%" : answer ? "7em" : "60%",
     height: shouldFillAll ? "100%" : "2em",
-    fontSize: "2.5em",
     borderRadius: 12,
+    fontSize: "2.5em",
     fontWeight: "100",
+    ...(answer === "accept" && {
+      backgroundColor: "lightGreen",
+      "&:hover": {
+        backgroundColor: "green",
+      },
+    }),
+    ...(answer === "decline" && {
+      backgroundColor: "tomato",
+      "&:hover": {
+        backgroundColor: "red",
+      },
+    }),
     ...sx,
   };
-
   return (
     <div
       style={{
