@@ -13,36 +13,38 @@ import cors from "cors"
 
 let datenbank = {
   "Lobby":{
-    "LobbyID":["1"],
-    "spielID":[1, 2],
-    "wirt":["1"],
-    "spieler":[["1, 2"]],
-    "lobby_kennwort":["00000"],
-    "name": ["I3a"]
+    "LobbyID":[0,1,2],
+    "spielID":[],
+    "wirt":[],
+    "spieler_id":[[]],
+    "lobby_kennwort":[],
+    "name": []
   },
   "Lehrer":{
-    "LehrerID":["1"],
-    "benutzername":["Anita Metzger"],
-    "email":["@"],
-    "kennwort":["123456"]
+    "LehrerID":[],
+    "benutzername":[],
+    "email":[],
+    "kennwort":[],
+    "websocket":[]
   },
   "Spiel":{
-    "spiel_id":["1"],
-    "runden_id":["1"]
+    "spiel_id":[],
+    "runden_id":[]
   },
   "Runden":{
-    "runden_id":["1"],
-    "angebot":["1"]
+    "runden_id":[],
+    "angebot_id":[[]]
   },
   "Angebote":{
-    "angebot_id":["1"],
-    "angebot_nehmer":["1"],
-    "angebot_geber":["2"],
-    "angebot_summe":["10"],
-    "angebot_angenommen":["TRUE"]
+    "angebot_id":[],
+    "angebot_nehmer":[],
+    "angebot_geber":[],
+    "angebot_summe":[],
+    "angebot_angenommen":[]
   },
   "Spieler":{
-    "spieler_id":[1, 2]
+    "spieler_id":[],
+    "websocket":[]
   }
 }
 export async function startExpress() {
@@ -72,24 +74,21 @@ export async function startExpress() {
 
   //jedes mal wenn wir vom Frontend eine Anfrage für eine Neue Lobby erhalten, /lobby/create   -----
   app.post("/lobby/create", (req, res) => {
-    
-
     //wird kontrolliert ob der Nutzer bereits eine lobby offen hat:
     //hole alle nutzer
     
       //Wenn ja 
       //wird die alte Lobby aus der Datenbank gelöscht
 
-
-
     //es wird ein neuer Lobbycode generiert
     let newCode = Math.floor(Math.random() * 90000) + 10000
-    //und in der Datenbank gespeichert
 
+    //und in der Datenbank gespeichert
     datenbank.Lobby.lobby_kennwort.push(newCode)
-    console.log(JSON.stringify(newCode))
+
     //sende den generierten lobbycode an das frontend
     res.send(JSON.stringify(newCode))
+    datenbank.Lobby.LobbyID.push(datenbank.Lobby.LobbyID.length+1)
   })
   //
   
@@ -109,7 +108,13 @@ export async function startExpress() {
     //const lobbyCodeFromUser = req.params.lobby
     ws.on('message', function(msg) {
       console.log(msg);
-      wss.clients.forEach(function (client) {
+      if(datenbank.Lobby.kennwort.includes(req.params.lobby)){
+        datenbank.Spieler.websocket.push(ws)
+      } else {
+        ws.close()
+      }
+
+      datenbank.Spieler.websocket.forEach(function (client) {
         client.send(JSON.stringify({
           type: 'player_count',
           data: wss.clients.size-1
@@ -120,19 +125,62 @@ export async function startExpress() {
     // if nachricht == "spiel startet":
       // Alle aus der Lobby erhalten Signal: "Spiel Startet"
       // nächste runde in die datenbank
+    //place_offer answer_offer
+
     ws.on("message", function(msg) {
-      if(msg == JSON.stringify({
-        type: "start_round"
-      })){
-        client.send(JSON.stringify({
-          type: "play_round",
-          data: {
-            game:1,
-            round: 1,
-            class: "I3a",
-            action: "ask"
+      switch(msg.type){
+        case "start_round":
+          client.send(JSON.stringify({
+            type: "place_offer",
+            data: {
+              game:datenbank.Lobby.LobbyID,
+              round: datenbank.Runden.runden_id,
+              class: datenbank.Lobby.name,
+            }
+          }))
+          break
+        case "start_game":
+          client.send(JSON.stringify({
+            type: "place_offer",
+            data: {
+              game:datenbank.Lobby.LobbyID,
+              round: datenbank.Runden.runden_id,
+              class: datenbank.Lobby.name,
+            }
+          }))
+          break
+        case "offer":
+          if(datenbank.Lobby.spieler.length!=datenbank.Runden.angebot_id.length){
+            client.send(JSON.stringify({
+            type: "wait",
+            data: {}
+          }))}else{
+            //schicke jedem message.type =
           }
-        }))
+          break
+        case "accept_offer":
+          if(datenbank.Lobby.spieler.length!=datenbank.Angebote.angebot_angenommen.length){
+          client.send(JSON.stringify({
+            type: "wait",
+            data: {}
+          }))}else{
+            //schicke jedem message.type =
+          }
+          break
+        case "decline_offer":
+          if(datenbank.Lobby.spieler.length!=datenbank.Angebote.angebot_angenommen.length){
+          client.send(JSON.stringify({
+            type: "wait",
+            data: {}
+          }))}else{
+            //schicke jedem message.type =
+          }
+          break
+        
+        
+            
+        
+        
       }
     })
 
