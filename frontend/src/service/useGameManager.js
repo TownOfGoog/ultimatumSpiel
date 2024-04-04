@@ -69,7 +69,7 @@ export function GameManagerProvider({ children }) {
 
     ws.onopen = () => {
       console.log("connected");
-      ws.send("hello");
+      ws.send(JSON.stringify({ msg: 'hello'}));
     };
 
     ws.onmessage = (e) => {
@@ -107,6 +107,7 @@ export function GameManagerProvider({ children }) {
           case "wait":
             console.log("request accepted, waiting for other players...");
             change_page("waiting_players_page");
+            setTopRight(message.data.class)
             break;
           default:
             break;
@@ -116,39 +117,11 @@ export function GameManagerProvider({ children }) {
       }
     };
     ws.onclose = () => {
+      change_page('home_page')
       console.log("disconnected");
     };
 
     setWs(ws);
-  }
-
-  function place_offer(amount) {
-    console.log(`vergebe ${amount} geld...`);
-    const message = JSON.stringify({
-      type: "offer",
-      data: {
-        amount: amount
-      },
-    })
-    ws.send(message);
-  }
-
-  function accept_offer() {
-    console.log('akzeptiere angebot...');
-    const message = JSON.stringify({
-      type: "accept_offer",
-      data: {},
-    })
-    ws.send(message);
-  }
-
-  function decline_offer() {
-    console.log('lehne angebot ab...');
-    const message = JSON.stringify({
-      type: "decline_offer",
-      data: {},
-    })
-    ws.send(message);
   }
 
   function create_lobby(name) {
@@ -178,6 +151,45 @@ export function GameManagerProvider({ children }) {
     connect_websocket(code);
   }
 
+  function start_game() {
+    console.log('starte spiel...');
+    const message = JSON.stringify({
+      type: "start_game",
+      data: {},
+    })
+    ws.send(message);
+  }
+  
+  function place_offer(amount) {
+    console.log(`vergebe ${amount} geld...`);
+    const message = JSON.stringify({
+      type: "offer",
+      data: {
+        amount: amount
+      },
+    })
+    ws.send(message);
+  }
+
+  function accept_offer() {
+    console.log('akzeptiere angebot...');
+    const message = JSON.stringify({
+      type: "accept_offer",
+      data: {},
+    })
+    ws.send(message);
+  }
+
+  function decline_offer() {
+    console.log('lehne angebot ab...');
+    const message = JSON.stringify({
+      type: "decline_offer",
+      data: {},
+    })
+    ws.send(message);
+  }
+
+
   //all the variables and functions made global
   let publicVariables = {
     title,
@@ -185,12 +197,13 @@ export function GameManagerProvider({ children }) {
     body,
     code,
     playerCount,
+    change_page,
     create_lobby,
     join_lobby,
+    start_game,
     place_offer,
     accept_offer,
     decline_offer,
-    change_page,
   };
   
   return (
