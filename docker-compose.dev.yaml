@@ -6,6 +6,7 @@ services:
       dockerfile: Dockerfile.dev
     volumes:
       - ./backend:/usr/src/app
+      - ./backend/node_modules:/usr/src/app/node_modules
     ports:
       - "8080:8080"
     environment:
@@ -19,6 +20,7 @@ services:
     volumes:
       - ./frontend/src:/usr/src/app/src
       - ./frontend/public:/usr/src/app/public
+      - ./frontend/node_modules:/usr/src/app/node_modules
     ports:
       - "3000:3000"
     environment:
