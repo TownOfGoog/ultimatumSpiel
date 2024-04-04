@@ -12,11 +12,14 @@ neuer websocket
 wenn jemand joint:
   backend schickt dem ersten verbundeten websocket ein message.type = player_count 
   message.data.count = z.B. 6
-  backend schickt allen auser den ersten verbundeten websocket ein message.type = wait 
+  backend schickt allen ausser den ersten verbundeten websocket ein message.type = wait 
+  NUR AM ERSTEN MAL: message.data.class = z.B. "I3a"
 
 message.type = start_game
 wenn der Lehrer das Spiel startet:
   backend schickt allen ein message.type = place_offer 
+  message.data.game = z.B. 1
+  message.data.round = z.B. 1
 
 message.type = start_round
 wenn der Lehrer das Spiel startet:
@@ -28,7 +31,7 @@ wenn ein Schüler ein Angebot abgeben:
   backend schickt allen ein message.type = wait 
   falls alle abgegeben haben:
   backend schickt allen ein message.type = answer_offer
-  message.data.amount 0 z.B. 0
+  message.data.amount = z.B. 0
 
 message.type = accept_offer
 wenn ein Schüler sein erhaltenes Angebot akzeptiert:
