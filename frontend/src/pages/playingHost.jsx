@@ -3,7 +3,7 @@ import MyGrid from "../components/myGrid";
 import MyText from "../components/myText";
 import useGameManager from "../service/useGameManager";
 
-import { ChartContainer, BarPlot } from '@mui/x-charts';
+// import { ChartContainer, BarPlot } from '@mui/x-charts';
 
 export default function PlayingHost() {
   const game = useGameManager();

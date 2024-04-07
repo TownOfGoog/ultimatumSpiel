@@ -1,23 +1,18 @@
 
-import { ChartContainer, BarPlot } from '@mui/x-charts';
+// import { BarChart } from '@mui/x-charts/BarChart';
 
-export default function MyChart() {
-  return (
-    <ChartContainer
-      width={500}
-      height={300}
-      series={[{ data: [4000, 3000, 2000, 2780, 1890, 2390, 3490], label: 'uv', type: 'bar' }]}
-      xAxis={[{ scaleType: 'band', data: [
-        'Page A',
-        'Page B',
-        'Page C',
-        'Page D',
-        'Page E',
-        'Page F',
-        'Page G',
-      ] }]}
-    >
-      <BarPlot />
-    </ChartContainer>
-  );
-}
+// export default function MyChart() {
+//   return (
+//     <BarChart
+//       series={[
+//         { data: [3, 4, 1, 6, 5], stack: 'A', label: 'Series A1' },
+//         { data: [4, 3, 1, 5, 8], stack: 'A', label: 'Series A2' },
+//         { data: [4, 2, 5, 4, 1], stack: 'B', label: 'Series B1' },
+//         { data: [2, 8, 1, 3, 1], stack: 'B', label: 'Series B2' },
+//         { data: [10, 6, 5, 8, 9], label: 'Series C1' },
+//       ]}
+//       width={600}
+//       height={350}
+//     />
+//   );
+// }
