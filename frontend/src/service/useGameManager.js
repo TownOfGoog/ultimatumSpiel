@@ -29,7 +29,7 @@ export function GameManagerProvider({ children }) {
   const [isGivingOfferPhase, setIsGivingOfferPhase] = useState(false); //if true, the player is giving an offer, if false, the player is answering an offer
   useEffect(() => {
     if (playerCount === totalPlayerCount) {
-      console.log('nächste phase... title: ', title);
+      console.log('nächste phase...');
       setPlayerCount(0);
       isGivingOfferPhase ? setIsGivingOfferPhase(false) : setIsGivingOfferPhase(true);
     }
@@ -107,11 +107,23 @@ export function GameManagerProvider({ children }) {
             console.log("player count: ", message.data);
             setPlayerCount(message.data);
             break;
-          case "count_players":
-            const count = parseInt(message.data.count)
-            console.log("jemand hat ein Angebot gemacht, nun sind es %d Spieler", count);
-            setPlayerCount(count);
+          case 'new_player':
+            console.log('neuer spieler');
+            setPlayerCount((prev) => prev + 1);
             break;
+          case 'new_offer':
+            console.log('neues angebot: ', message.data.amount);
+            setPlayerCount((prev) => prev + 1);
+            break;
+          case 'offer_response':
+            console.log('angebot wurde beantwortet: ', message.data);
+            setPlayerCount((prev) => prev + 1);
+            break;
+          // case "count_players":
+          //   const count = parseInt(message.data.count)
+          //   console.log("jemand hat ein Angebot gemacht, nun sind es %d Spieler", count);
+          //   setPlayerCount(count);
+          //   break;
           case "new_round":
             console.log("neue runde: ", message.data);
             setIsGivingOfferPhase(true)
@@ -136,7 +148,7 @@ export function GameManagerProvider({ children }) {
             break;
         }
       } catch (error) {
-        console.warn("response from server (but not json): ", e.data);
+        console.warn("response from server (but not json): ", e.data, error);
       }
     };
     ws.onclose = () => {
