@@ -40,7 +40,6 @@ export default function Home() {
         >
           Spiel spielen
         </div>
-        <MyChart/>
 
         <FormControl
           sx={{
