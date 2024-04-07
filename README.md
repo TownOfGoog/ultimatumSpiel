@@ -29,6 +29,8 @@ message.type = offer
 message.data.amount = z.B. 100
 wenn ein Schüler ein Angebot abgeben:
   backend schickt allen ein message.type = wait 
+  backend schickt Lehrperson ein message.type = count_players
+  message.data.count = z.B. 2
   falls alle abgegeben haben:
   backend schickt allen ein message.type = answer_offer
   message.data.amount = z.B. 0
@@ -36,10 +38,14 @@ wenn ein Schüler ein Angebot abgeben:
 message.type = accept_offer
 wenn ein Schüler sein erhaltenes Angebot akzeptiert:
   backend schickt allen ein message.type = wait 
+  backend schickt Lehrperson ein message.type = count_players
+  message.data.count = z.B. 2
 
 message.type = decline_offer
 wenn ein Schüler sein erhaltenes Angebot ablent:
   backend schickt allen ein message.type = wait 
+  backend schickt Lehrperson ein message.type = count_players
+  message.data.count = z.B. 2
 
 
 ### backend schickt:
