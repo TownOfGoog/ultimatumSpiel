@@ -13,23 +13,23 @@ import cors from "cors"
 
 let datenbank = {
   "Lobby":{
-    "LobbyID":[0,1,2],
-    "spielID":[],
+    "LobbyID":[],
+    "spielID":[[]],
     "wirt":[],
     "spieler_id":[[]],
     "lobby_kennwort":[],
     "name": []
   },
   "Lehrer":{
-    "LehrerID":[],
-    "benutzername":[],
-    "email":[],
-    "kennwort":[],
+    "LehrerID":[0],
+    "benutzername":["Anita"],
+    "email":["@"],
+    "kennwort":["123456"],
     "websocket":[]
   },
   "Spiel":{
     "spiel_id":[],
-    "runden_id":[]
+    "runden_id":[[]]
   },
   "Runden":{
     "runden_id":[],
@@ -55,6 +55,9 @@ export async function startExpress() {
   //Registrierungs Magie   /register
   app.use(cors()); 
   
+
+  app.use(express.json());
+
 
   //Login magie   /login
   app.post("/login", (req, res) =>{
@@ -88,7 +91,13 @@ export async function startExpress() {
 
     //sende den generierten lobbycode an das frontend
     res.send(JSON.stringify(newCode))
-    datenbank.Lobby.LobbyID.push(datenbank.Lobby.LobbyID.length+1)
+    datenbank.Lobby.LobbyID[datenbank.Lobby.LobbyID.length] = datenbank.Lobby.LobbyID.length
+    datenbank.Lobby.wirt.push(datenbank.Lehrer.LehrerID[0])
+    datenbank.Lobby.spieler_id.push([])
+    console.log(datenbank.Lobby)
+    datenbank.Lobby.spielID.push([])
+    datenbank.Spiel.runden_id.push([])
+    counter = 0
   })
   //
   
@@ -100,26 +109,52 @@ export async function startExpress() {
   // ist der Code vorhanden:
     // hohle daten aus der datenbank mit dem Lobbycode
     // lade es zum nutzer so
-
+let counter = 0
    var wss = expressWss.getWss('/lobby/:lobby');
   // Das ist ein Websocket/Lobbie   /lobby/:00000   -----
   app.ws('/lobby/:lobby', function(ws, req) {
-    console.log(req.params.lobby)
-    //const lobbyCodeFromUser = req.params.lobby
+    let lobbycode
+    let runde
+    counter = counter +1
+    //const lobbyCodeFromUser = req.params.lobbycon
     ws.on('message', function(msg) {
-      console.log(msg);
-      if(datenbank.Lobby.kennwort.includes(req.params.lobby)){
-        datenbank.Spieler.websocket.push(ws)
+      
+      if(datenbank.Lobby.lobby_kennwort.includes(parseInt(req.params.lobby))){
+        lobbycode = datenbank.Lobby.LobbyID[datenbank.Lobby.lobby_kennwort.indexOf(parseInt(req.params.lobby))]
       } else {
+
+
         ws.close()
       }
-
+      
+      if(counter == 1){
+        datenbank.Lehrer.websocket[0] = ws
+      }
       datenbank.Spieler.websocket.forEach(function (client) {
-        client.send(JSON.stringify({
+        datenbank.Lehrer.websocket[0].send(JSON.stringify({
           type: 'player_count',
-          data: wss.clients.size-1
+          data: datenbank.Lobby.spieler_id[lobbycode].length
         }))
       });
+      console.log(datenbank.Lobby)
+      console.log((datenbank.Lobby.wirt[lobbycode] === undefined))
+      console.log(datenbank.Lobby.wirt[lobbycode], "oooooooooooooo")
+      if(ws !== datenbank.Lehrer.websocket[0]){
+        let spieler = datenbank.Spieler.spieler_id.length
+        datenbank.Spieler.spieler_id.push(spieler)
+        datenbank.Spieler.websocket.push(ws)
+        datenbank.Lobby.spieler_id[lobbycode].push(spieler)
+        ws.send(JSON.stringify({
+          type: "wait",
+          data: {}
+        }))
+        console.log(datenbank.Lobby, "iiiiiiiiiiiiii")
+        datenbank.Lehrer.websocket[0].send(JSON.stringify({
+          data:{
+            count: 6
+          }
+        }))
+      }
     });
     
     // if nachricht == "spiel startet":
@@ -128,9 +163,13 @@ export async function startExpress() {
     //place_offer answer_offer
 
     ws.on("message", function(msg) {
-      switch(msg.type){
+      console.log(msg)
+
+
+      let data = JSON.parse(msg)
+      switch(data.type){
         case "start_round":
-          client.send(JSON.stringify({
+          datenbank.Lehrer.websocket[0].send(JSON.stringify({
             type: "place_offer",
             data: {
               game:datenbank.Lobby.LobbyID,
@@ -140,18 +179,32 @@ export async function startExpress() {
           }))
           break
         case "start_game":
-          client.send(JSON.stringify({
+          console.log(lobbycode)
+          let spiel_id = datenbank.Spiel.spiel_id.length
+          datenbank.Spiel.spiel_id.push(spiel_id)
+          console.log(spiel_id)
+          datenbank.Lobby.spielID[lobbycode].push(spiel_id)
+          let runden = datenbank.Runden.runden_id.length
+          datenbank.Runden.runden_id.push(runden)
+          runde = runden
+          datenbank.Spiel.runden_id[lobbycode].push(runden)
+          datenbank.Runden.angebot_id.push([])
+          console.log(datenbank.Runden, datenbank.Spiel)
+          console.log(datenbank.Lobby)
+          console.log(datenbank.Spieler)
+          console.log(runde, datenbank.Runden.runden_id[runde], "aaaaaaa")
+          datenbank.Spieler.websocket[0].send(JSON.stringify({ //wird an den spieler geschickt oder
             type: "place_offer",
             data: {
               game:datenbank.Lobby.LobbyID,
-              round: datenbank.Runden.runden_id,
+              round: datenbank.Spiel.runden_id[0],
               class: datenbank.Lobby.name,
             }
           }))
           break
         case "offer":
           if(datenbank.Lobby.spieler.length!=datenbank.Runden.angebot_id.length){
-            client.send(JSON.stringify({
+            datenbank.Lehrer.websocket[0].send(JSON.stringify({
             type: "wait",
             data: {}
           }))}else{
@@ -160,7 +213,7 @@ export async function startExpress() {
           break
         case "accept_offer":
           if(datenbank.Lobby.spieler.length!=datenbank.Angebote.angebot_angenommen.length){
-          client.send(JSON.stringify({
+          clients.send(JSON.stringify({
             type: "wait",
             data: {}
           }))}else{
@@ -169,7 +222,7 @@ export async function startExpress() {
           break
         case "decline_offer":
           if(datenbank.Lobby.spieler.length!=datenbank.Angebote.angebot_angenommen.length){
-          client.send(JSON.stringify({
+          clients.send(JSON.stringify({
             type: "wait",
             data: {}
           }))}else{
@@ -184,7 +237,7 @@ export async function startExpress() {
       }
     })
 
-    console.log('socket', req.testing);      
+        
   })
 
   
