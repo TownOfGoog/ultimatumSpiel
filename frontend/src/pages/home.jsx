@@ -5,6 +5,7 @@ import { useState } from "react";
 import MyInput from "../components/myInput";
 import MyButton from "../components/myButton";
 import useGameManager from "../service/useGameManager";
+import MyChart from "../components/myChart";
 
 export default function Home() {
   const [codeValue, setCodeValue] = useState(""); //this value will be formatted to mostly avoid faulty inputs
@@ -39,6 +40,7 @@ export default function Home() {
         >
           Spiel spielen
         </div>
+        <MyChart/>
 
         <FormControl
           sx={{
