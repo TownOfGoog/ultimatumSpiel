@@ -12,7 +12,7 @@ neuer websocket
 wenn jemand joint:
   backend schickt dem ersten verbundeten websocket ein message.type = player_count 
   message.data.count = z.B. 6
-  backend schickt allen ausser den ersten verbundeten websocket ein message.type = wait 
+  backend schickt allen ausser dem ersten verbundenen websocket ein message.type = wait 
   NUR AM ERSTEN MAL: message.data.class = z.B. "I3a"
 
 message.type = start_game
