@@ -39,7 +39,7 @@ export default function CreateGame() {
             value={lobbyName}
             setValue={setLobbyName}
           />
-          <br />
+          <div style={{margin: '0.3em 0 0.3em 0'}}></div>
           <MyButton
             onClick={() => {
               game.create_lobby(lobbyName);

@@ -58,7 +58,9 @@ export default function Home() {
                 Dieser Code muss 5-stellig sein.
               </FormHelperText> */}
         </FormControl>
-        <br />
+        
+        <div style={{margin: '0.3em 0 0.3em 0'}}></div>
+
           <MyButton
             onClick={() => {
               game.join_lobby(codeValue);
