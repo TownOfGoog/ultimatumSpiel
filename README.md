@@ -10,10 +10,9 @@ docker-compose -f docker-compose.dev.yaml up --build
 ### frontend schickt:
 neuer websocket
 wenn jemand joint:
-  backend schickt dem ersten verbundeten websocket ein message.type = player_count 
-  message.data.count = z.B. 6
+  backend schickt dem ersten verbundeten websocket ein message.type = new_player
   backend schickt allen ausser den ersten verbundeten websocket ein message.type = wait 
-  NUR AM ERSTEN MAL: message.data.class = z.B. "I3a"
+  message.data.class = z.B. "I3a"
 
 message.type = start_game
 wenn der Lehrer das Spiel startet:
@@ -71,11 +70,6 @@ wenn der Server will, dass alle ein Angebot annehmen/ablehnen:
   frontent schickt message.type = accept_offer
   oder
   frontent schickt message.type = decline_offer
-
-message.type = player_count
-message.data.count = z.B. 6
-wenn der server die anzahl Spieler schickt:
-  frontend schickt nichts
 
 message.type = wait
 wenn der Server will, dass der Frontend einfach wartet:
