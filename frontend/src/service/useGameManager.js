@@ -1,6 +1,6 @@
 //service to handle game logic / events
 
-import { createContext, useContext, useState } from "react";
+import { createContext, useContext, useEffect, useState } from "react";
 import Home from "../pages/home";
 import Loginpage from "../pages/login";
 import CreateGame from "../pages/createGame";
@@ -8,6 +8,7 @@ import WaitingPlayersHost from "../pages/waitingPlayersHost";
 import WaitingPlayers from "../pages/waitingPlayers";
 import PlaceOffer from "../pages/placeOffer";
 import AnswerOffer from "../pages/answerOffer";
+import PlayingHost from "../pages/playingHost";
 
 const GameManagerContext = createContext();
 
@@ -24,13 +25,24 @@ export function GameManagerProvider({ children }) {
   const [body, setBody] = useState(<p>something went wrong</p>); //content of the page
   const [code, setCode] = useState(null); //lobbycode
   const [playerCount, setPlayerCount] = useState(0); //number of players in the lobby
+  const [totalPlayerCount, setTotalPlayerCount] = useState(Infinity); //number of players in the lobby, will be set once the game starts
+  const [isGivingOfferPhase, setIsGivingOfferPhase] = useState(false); //if true, the player is giving an offer, if false, the player is answering an offer
+  useEffect(() => {
+    if (playerCount === totalPlayerCount) {
+      console.log('nächste phase... title: ', title);
+      setPlayerCount(0);
+      isGivingOfferPhase ? setIsGivingOfferPhase(false) : setIsGivingOfferPhase(true);
+    }
+  //eslint-disable-next-line react-hooks/exhaustive-deps 
+  }, [playerCount, totalPlayerCount])
+  //we dont need to rerun this effect when title changes, because this effect changes the title
 
   //central function to control what is on the page
   function change_page(page) {
     switch (page) {
       case "home_page":
         console.log("going to home page...");
-        setTitle("Wilkommen!");
+        setTitle("Willkommen!");
         setBody(<Home />);
         break;
       case "login_page":
@@ -50,8 +62,11 @@ export function GameManagerProvider({ children }) {
         break;
       case "waiting_players_page":
         console.log("going to waiting players page...");
-        setTitle("Warte auf Spieler");
         setBody(<WaitingPlayers />);
+        break;
+      case "playingHost":
+        console.log("going to playingHost page...");
+        setBody(<PlayingHost />);
         break;
       default:
         console.log("function change_page: unknown page: ", page);
@@ -92,12 +107,20 @@ export function GameManagerProvider({ children }) {
             console.log("player count: ", message.data);
             setPlayerCount(message.data);
             break;
-          case "place_offer":
-            console.log("Wähle dein Angebot");
-            setTopRight(message.data.class);
+          case "count_players":
+            const count = parseInt(message.data.count)
+            console.log("jemand hat ein Angebot gemacht, nun sind es %d Spieler", count);
+            setPlayerCount(count);
+            break;
+          case "new_round":
+            console.log("neue runde: ", message.data);
+            setIsGivingOfferPhase(true)
             setTitle(
               `Spiel ${message.data.game} / Runde ${message.data.round}`
             );
+            break;
+          case "place_offer":
+            console.log("Wähle dein Angebot");
             setBody(<PlaceOffer />);
             break;
           case "answer_offer":
@@ -107,7 +130,7 @@ export function GameManagerProvider({ children }) {
           case "wait":
             console.log("request accepted, waiting for other players...");
             change_page("waiting_players_page");
-            setTopRight(message.data.class)
+            if (message.data.class) setTopRight(message.data.class)
             break;
           default:
             break;
@@ -138,6 +161,7 @@ export function GameManagerProvider({ children }) {
         console.log("got code: ", data);
         const code = data;
         setCode(code);
+        setTopRight(name)
         join_lobby(code);
       })
       .catch((error) => {
@@ -147,6 +171,7 @@ export function GameManagerProvider({ children }) {
 
   function join_lobby(code) {
     console.log("joining lobby with code:", code);
+    setTitle("Warte auf Spieler");
     change_page("waiting_players_page_host");
     connect_websocket(code);
   }
@@ -157,7 +182,10 @@ export function GameManagerProvider({ children }) {
       type: "start_game",
       data: {},
     })
-    ws.send(message);
+    ws.send(message);    
+    setTotalPlayerCount(playerCount)
+    setPlayerCount(0)
+    change_page("playingHost")
   }
   
   function place_offer(amount) {
@@ -189,14 +217,27 @@ export function GameManagerProvider({ children }) {
     ws.send(message);
   }
 
+  function skip() {
+    console.log('überspringe runde...');
+    setPlayerCount(totalPlayerCount) //this will trigger the useEffect to change the phase
+    const message = JSON.stringify({
+      type: "skip",
+      data: {},
+    })
+    ws.send(message);
+  }
+
+
 
   //all the variables and functions made global
   let publicVariables = {
-    title,
+    title, 
     topRight,
     body,
     code,
     playerCount,
+    totalPlayerCount,
+    isGivingOfferPhase,
     change_page,
     create_lobby,
     join_lobby,
@@ -204,6 +245,7 @@ export function GameManagerProvider({ children }) {
     place_offer,
     accept_offer,
     decline_offer,
+    skip
   };
   
   return (

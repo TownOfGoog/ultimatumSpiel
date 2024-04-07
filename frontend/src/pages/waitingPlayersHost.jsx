@@ -1,7 +1,6 @@
 // import { Grid } from '@mui/joy';
 import Grid from '../components/myGrid';
 
-import Typography from '@mui/joy/Typography';
 import QRCode from 'react-qr-code';
 import useGameManager from '../service/useGameManager';
 import MyText from '../components/myText';
