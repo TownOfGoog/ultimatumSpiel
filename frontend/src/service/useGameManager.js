@@ -126,6 +126,10 @@ export function GameManagerProvider({ children }) {
           //   break;
           case "new_round":
             console.log("neue runde: ", message.data);
+            
+            setTotalPlayerCount(playerCount)
+            setPlayerCount(0)
+            change_page("playingHost")
             setIsGivingOfferPhase(true)
             setTitle(
               `Spiel ${message.data.game} / Runde ${message.data.round}`
@@ -152,9 +156,8 @@ export function GameManagerProvider({ children }) {
       }
     };
     ws.onclose = () => {
-      setPlayerCount(0)
-      change_page('home_page')
       console.log("disconnected");
+      window.location.reload();
     };
 
     setWs(ws);
@@ -195,10 +198,7 @@ export function GameManagerProvider({ children }) {
       type: "start_game",
       data: {},
     })
-    ws.send(message);    
-    setTotalPlayerCount(playerCount)
-    setPlayerCount(0)
-    change_page("playingHost")
+    ws.send(message);
   }
   
   function place_offer(amount) {
