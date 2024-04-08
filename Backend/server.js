@@ -115,6 +115,7 @@ let counter = 0
   app.ws('/lobby/:lobby', function(ws, req) {
     let lobbycode
     let runde
+    let spieler_id
     counter = counter +1
     //const lobbyCodeFromUser = req.params.lobbycon
     ws.on('message', function(msg) {
@@ -128,42 +129,36 @@ let counter = 0
       }
       
       if(counter == 1){
-        datenbank.Lehrer.websocket[0] = ws
+        datenbank.Lehrer.websocket.push(ws)
       }
-      datenbank.Spieler.websocket.forEach(function (client) {
-        datenbank.Lehrer.websocket[0].send(JSON.stringify({
-          type: 'player_count',
-          data: datenbank.Lobby.spieler_id[lobbycode].length
-        }))
-      });
-      console.log(datenbank.Lobby)
-      console.log((datenbank.Lobby.wirt[lobbycode] === undefined))
-      console.log(datenbank.Lobby.wirt[lobbycode], "oooooooooooooo")
-      if(ws !== datenbank.Lehrer.websocket[0]){
+      if(ws !== datenbank.Lehrer.websocket[lobbycode]){
+        console.log("aaaaaaaaaaaaaaaaaaaaaaaaaaaaaa")
         let spieler = datenbank.Spieler.spieler_id.length
         datenbank.Spieler.spieler_id.push(spieler)
+        spieler_id=spieler
         datenbank.Spieler.websocket.push(ws)
         datenbank.Lobby.spieler_id[lobbycode].push(spieler)
         ws.send(JSON.stringify({
           type: "wait",
           data: {}
         }))
-        console.log(datenbank.Lobby, "iiiiiiiiiiiiii")
-        datenbank.Lehrer.websocket[0].send(JSON.stringify({
-          data:{
-            count: 6
-          }
+        datenbank.Lehrer.websocket[lobbycode].send(JSON.stringify({
+          type: 'new_player',
         }))
+        
       }
+      
+      ;
     });
     
     // if nachricht == "spiel startet":
       // Alle aus der Lobby erhalten Signal: "Spiel Startet"
       // nächste runde in die datenbank
     //place_offer answer_offer
-
+    
+    let items
     ws.on("message", function(msg) {
-      console.log(msg)
+      console.log(msg)  
 
 
       let data = JSON.parse(msg)
@@ -189,26 +184,55 @@ let counter = 0
           runde = runden
           datenbank.Spiel.runden_id[lobbycode].push(runden)
           datenbank.Runden.angebot_id.push([])
-          console.log(datenbank.Runden, datenbank.Spiel)
-          console.log(datenbank.Lobby)
-          console.log(datenbank.Spieler)
-          console.log(runde, datenbank.Runden.runden_id[runde], "aaaaaaa")
-          datenbank.Spieler.websocket[0].send(JSON.stringify({ //wird an den spieler geschickt oder
+
+          items = datenbank.Lobby.spieler_id[lobbycode]
+
+          for (var i = 0; i < items.length; i++) {
+            var n = items[i];
+          datenbank.Spieler.websocket[n].send(JSON.stringify({ //wird an den spieler geschickt oder
             type: "place_offer",
             data: {
               game:datenbank.Lobby.LobbyID,
               round: datenbank.Spiel.runden_id[0],
               class: datenbank.Lobby.name,
             }
-          }))
+          }))}
           break
         case "offer":
-          if(datenbank.Lobby.spieler.length!=datenbank.Runden.angebot_id.length){
-            datenbank.Lehrer.websocket[0].send(JSON.stringify({
+          console.log("WWWWWWWWWWWWWWWWWWWWWWWW")
+          datenbank.Runden.angebot_id.push(datenbank.Angebote.angebot_id.length)
+          datenbank.Angebote.angebot_id.push(datenbank.Angebote.angebot_id.length)
+          datenbank.Angebote.angebot_summe.push(JSON.parse(msg).data.amount)
+          datenbank.Angebote.angebot_geber.push(spieler_id)
+          console.log(datenbank.Lobby.spieler_id.length!=datenbank.Runden.angebot_id.length)
+          
+        items = datenbank.Lobby.spieler_id[lobbycode]
+        if(datenbank.Lobby.spieler_id.length!=datenbank.Runden.angebot_id.length-1){
+             
+          ws.send(JSON.stringify({
             type: "wait",
             data: {}
+
+            
+          }))
+          datenbank.Lehrer.websocket[lobbycode].send(JSON.stringify({
+            type: 'new_offer',
           }))}else{
-            //schicke jedem message.type =
+
+          ws.send()
+            
+            for (var i = 0; i < items.length; i++) {
+              var n = items[i];
+            datenbank.Spieler.websocket[n].send(JSON.stringify({ //wird an den spieler geschickt oder
+              type: "answer_offer",
+              data: {
+                game:datenbank.Lobby.LobbyID,
+                round: datenbank.Spiel.runden_id[0],
+                class: datenbank.Lobby.name,
+              }
+            }))}
+
+            //schicke jedem message.type = answer_offer
           }
           break
         case "accept_offer":
