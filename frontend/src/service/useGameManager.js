@@ -26,7 +26,7 @@ export function GameManagerProvider({ children }) {
   const [code, setCode] = useState(null); //lobbycode
   const [playerCount, setPlayerCount] = useState(0); //number of players in the lobby
   const [totalPlayerCount, setTotalPlayerCount] = useState(Infinity); //number of players in the lobby, will be set once the game starts
-  const [isGivingOfferPhase, setIsGivingOfferPhase] = useState(false); //if true, the player is giving an offer, if false, the player is answering an offer
+  const [offerPhase, setOfferPhase] = useState(0); //if true, the player is giving an offer, if false, the player is answering an offer
     
   //data for chart 1
   const [offerPerMoneyData, setOfferPerMoneyData] = useState([0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,]); 
@@ -36,10 +36,13 @@ export function GameManagerProvider({ children }) {
   useEffect(() => {
     if (playerCount === totalPlayerCount) {
       console.log("nächste phase...");
-      setPlayerCount(0);
-      isGivingOfferPhase
-        ? setIsGivingOfferPhase(false)
-        : setIsGivingOfferPhase(true);
+      
+      if (offerPhase !== 1) setPlayerCount(0);
+      offerPhase === 0
+        ? setOfferPhase(1)
+        : offerPhase === 1
+        ? setOfferPhase(2)
+        : setOfferPhase(0);
     }
     //eslint-disable-next-line react-hooks/exhaustive-deps
   }, [playerCount, totalPlayerCount]);
@@ -171,7 +174,7 @@ export function GameManagerProvider({ children }) {
           case "new_round":
             console.log("neue runde: ", message.data);
             change_page("playingHost");
-            setIsGivingOfferPhase(true);
+            setOfferPhase(0);
             setTitle(
               `Spiel ${message.data.game} / Runde ${message.data.round}`
             );
@@ -296,7 +299,7 @@ export function GameManagerProvider({ children }) {
     code,
     playerCount,
     totalPlayerCount,
-    isGivingOfferPhase,
+    offerPhase,
     offerPerMoneyData,
     offerPerMoneyDataAccepted,
     offerPerMoneyDataDeclined,

@@ -8,6 +8,15 @@ import useGameManager from "../service/useGameManager";
 
 export default function PlayingHost() {
   const game = useGameManager();
+
+  function count_numbers_in_arr(arr) {
+    let counter = 0
+    arr.forEach((element) => {
+      counter += element
+    })
+    return counter
+  }
+
   return (
     
     <MyGrid
@@ -34,7 +43,7 @@ export default function PlayingHost() {
             ]}
             series={[
               {
-                data: game.offerPerMoneyData, stack: 'a', label: 'Total', color: 'black'
+                data: game.offerPerMoneyData, stack: 'a', label: 'Offene Angebote', color: 'black'
               },
               {
                 data: game.offerPerMoneyDataAccepted, stack: 'a', label: 'Angenommen', color: '#0afff7'
@@ -45,29 +54,44 @@ export default function PlayingHost() {
             ]}/>
 
 
-          {/* <MyChart 
+          <MyChart 
             layout="horizontal"
             grid={{ vertical: true }}
             yAxis={[
               {
-                data: ['bar A', 'bar B', 'bar C'],
+                data: ['Angebote angenommen', 'Angebote abgelehnt', 'Anzahl Spieler'],
                 scaleType: 'band',
+              },
+            ]}
+            
+            xAxis={[
+              {
+                label: 'Angebotenes Geld',
               },
             ]}
             series={[
               {
-                data: [2, 5, 3],
+                data: [count_numbers_in_arr(game.offerPerMoneyDataAccepted), null, null], stack: 'a', label: 'Angenommen', color: '#0afff7'
+              },
+              
+              {
+                data: [null, count_numbers_in_arr(game.offerPerMoneyDataDeclined), null], stack: 'a', label: 'Abgelehnt', color: '#ff8113'
+              },
+              
+              {
+                data: [null, null, game.playerCount], stack: 'a', label: 'Offene Angebote', color: '#555E68'
+              },
+              
+              {
+                data: [null, null, game.totalPlayerCount - game.playerCount], stack: 'a', label: 'Offene Angebote', color: 'black'
               },
             ]}
-          /> */}
+          />
         </MyGrid>
 
         <MyGrid xs={2} sx={{ height: "20%", borderTop: '2px solid black', display: 'flex', justifyContent: 'space-between', alignItems: 'center'}} >
           <MyText sx={{marginLeft: '0.5em', marginInline: 'auto'}}>
-            {game.playerCount} / {game.totalPlayerCount} Spieler haben {game.isGivingOfferPhase ? 'ein Angebot gegeben.' : 'ein Angebot abgelehnt oder angenommen.'}
-
-
-
+            {game.playerCount} / {game.totalPlayerCount}{game.offerPhase === 0 ? ' Spieler haben ein Angebot gegeben.' : game.offerPhase === 1 ? ' Spieler haben ein Angebot abgelehnt oder angenommen.' : ', alle haben ihre Antworten gegeben.'}
           </MyText>
 
           <MyButton sx={{width: 'auto', padding: '1em', marginRight: '0.5em'}} onClick={() => {game.skip()}}>
