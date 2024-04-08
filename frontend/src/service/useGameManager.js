@@ -152,6 +152,7 @@ export function GameManagerProvider({ children }) {
       }
     };
     ws.onclose = () => {
+      setPlayerCount(0)
       change_page('home_page')
       console.log("disconnected");
     };
