@@ -1,22 +1,17 @@
-import React from 'react';
-import ReactDOM from 'react-dom/client';
-import '@fontsource/inter';
-import './index.css';
-import App from './App';
-import reportWebVitals from './reportWebVitals';
-import { CssVarsProvider } from '@mui/joy/styles';
-import { GameManagerProvider } from './service/useGameManager'
+import React from "react";
+import ReactDOM from "react-dom/client";
+import "@fontsource/inter";
+import "./index.css";
+import App from "./App";
+import reportWebVitals from "./reportWebVitals";
+import { GameManagerProvider } from "./service/useGameManager";
 
-
-
-const root = ReactDOM.createRoot(document.getElementById('root'));
+const root = ReactDOM.createRoot(document.getElementById("root"));
 root.render(
   <React.StrictMode>
-    <CssVarsProvider defaultMode="dark">
-      <GameManagerProvider>
-        <App />
-      </GameManagerProvider>
-    </CssVarsProvider>
+    <GameManagerProvider>
+      <App />
+    </GameManagerProvider>
   </React.StrictMode>
 );
 

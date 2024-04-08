@@ -27,14 +27,22 @@ export function GameManagerProvider({ children }) {
   const [playerCount, setPlayerCount] = useState(0); //number of players in the lobby
   const [totalPlayerCount, setTotalPlayerCount] = useState(Infinity); //number of players in the lobby, will be set once the game starts
   const [isGivingOfferPhase, setIsGivingOfferPhase] = useState(false); //if true, the player is giving an offer, if false, the player is answering an offer
+    
+  //data for chart 1
+  const [offerPerMoneyData, setOfferPerMoneyData] = useState([0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,]); 
+  const [offerPerMoneyDataAccepted, setOfferPerMoneyDataAccepted] = useState([0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,]); //how many people accepted
+  const [offerPerMoneyDataDeclined, setOfferPerMoneyDataDeclined] = useState([0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,]); //how many people declined
+
   useEffect(() => {
     if (playerCount === totalPlayerCount) {
-      console.log('nächste phase...');
+      console.log("nächste phase...");
       setPlayerCount(0);
-      isGivingOfferPhase ? setIsGivingOfferPhase(false) : setIsGivingOfferPhase(true);
+      isGivingOfferPhase
+        ? setIsGivingOfferPhase(false)
+        : setIsGivingOfferPhase(true);
     }
-  //eslint-disable-next-line react-hooks/exhaustive-deps 
-  }, [playerCount, totalPlayerCount])
+    //eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [playerCount, totalPlayerCount]);
   //we dont need to rerun this effect when title changes, because this effect changes the title
 
   //central function to control what is on the page
@@ -84,7 +92,7 @@ export function GameManagerProvider({ children }) {
 
     ws.onopen = () => {
       console.log("connected");
-      ws.send(JSON.stringify({ msg: 'hello'}));
+      ws.send(JSON.stringify({ msg: "hello" }));
     };
 
     ws.onmessage = (e) => {
@@ -107,27 +115,63 @@ export function GameManagerProvider({ children }) {
             console.log("player count: ", message.data);
             setPlayerCount(message.data);
             break;
-          case 'new_player':
-            console.log('neuer spieler');
+          case "new_player":
+            console.log("neuer spieler");
             setPlayerCount((prev) => prev + 1);
             break;
-          case 'new_offer':
-            console.log('neues angebot: ', message.data.amount);
+          case "new_offer":
+            console.log("neues angebot: ", message.data.amount);
             setPlayerCount((prev) => prev + 1);
+            //change data for chart 1 (offers per money)
+            setOfferPerMoneyData((prev) => {
+              const newData = [...prev];
+              newData[parseInt(message.data.amount) / 10]++;
+              console.log("newData: ", newData);
+              return newData;
+            });
             break;
-          case 'offer_response':
-            console.log('angebot wurde beantwortet: ', message.data);
+          case "offer_response":
+            console.log("angebot wurde beantwortet: ", message.data);
             setPlayerCount((prev) => prev + 1);
+            //change data for chart 1 (offers per money)
+            if (message.data.accepted) {
+              //increase the amount of accepted offers for that money
+              setOfferPerMoneyDataAccepted((prev) => {
+                const newData = [...prev];
+                newData[parseInt(message.data.amount) / 10]++;
+                console.log("newData: ", newData);
+                return newData;
+              });
+              //decrease the total amount of offers for that money
+              setOfferPerMoneyData((prev) => {
+                const newData = [...prev];
+                newData[parseInt(message.data.amount) / 10]--;
+                console.log("newData: ", newData);
+                return newData;
+              });
+            }
+            //same for declined offers
+            else {
+              //increase the amount of declined offers for that money
+              setOfferPerMoneyDataDeclined((prev) => {
+                const newData = [...prev];
+                newData[parseInt(message.data.amount) / 10]++;
+                console.log("newData: ", newData);
+                return newData;
+              });
+              //decrease the total amount of offers for that money
+              setOfferPerMoneyData((prev) => {
+                const newData = [...prev];
+                newData[parseInt(message.data.amount) / 10]--;
+                console.log("newData: ", newData);
+                return newData;
+              });
+            }
             break;
-          // case "count_players":
-          //   const count = parseInt(message.data.count)
-          //   console.log("jemand hat ein Angebot gemacht, nun sind es %d Spieler", count);
-          //   setPlayerCount(count);
-          //   break;
           case "new_round":
             console.log("neue runde: ", message.data);
-            change_page("playingHost")
-            setIsGivingOfferPhase(true)
+            change_page("playingHost");
+            setIsGivingOfferPhase(true);
             setTitle(
               `Spiel ${message.data.game} / Runde ${message.data.round}`
             );
@@ -138,12 +182,13 @@ export function GameManagerProvider({ children }) {
             break;
           case "answer_offer":
             console.log("Antworte auf das Angebot");
-            setBody(<AnswerOffer amount={message.data.amount}/>);
+            setBody(<AnswerOffer amount={message.data.amount} />);
             break;
           case "wait":
             console.log("request accepted, waiting for other players...");
             change_page("waiting_players_page");
-            if (message.data && message.data.class) setTopRight(message.data.class)
+            if (message.data && message.data.class)
+              setTopRight(message.data.class);
             break;
           default:
             break;
@@ -153,10 +198,10 @@ export function GameManagerProvider({ children }) {
       }
     };
     ws.onclose = () => {
-      setPlayerCount(0)
-      setTotalPlayerCount(Infinity)
-      change_page('home_page')
-      window.location.reload()
+      setPlayerCount(0);
+      setTotalPlayerCount(Infinity);
+      change_page("home_page");
+      window.location.reload();
       console.log("disconnected");
     };
 
@@ -177,7 +222,7 @@ export function GameManagerProvider({ children }) {
         console.log("got code: ", data);
         const code = data;
         setCode(code);
-        setTopRight(name)
+        setTopRight(name);
         join_lobby(code);
       })
       .catch((error) => {
@@ -193,67 +238,68 @@ export function GameManagerProvider({ children }) {
   }
 
   function start_game() {
-    console.log('starte spiel...');
+    console.log("starte spiel...");
     const message = JSON.stringify({
       type: "start_game",
       data: {},
-    })
+    });
     ws.send(message);
-    setTotalPlayerCount(playerCount)
-    setPlayerCount(0)
-    change_page("playingHost")
+    setTotalPlayerCount(playerCount);
+    setPlayerCount(0);
+    change_page("playingHost");
   }
-  
+
   function place_offer(amount) {
     console.log(`vergebe ${amount} geld...`);
     const message = JSON.stringify({
       type: "offer",
       data: {
-        amount: amount
+        amount: amount,
       },
-    })
+    });
     ws.send(message);
   }
 
   function accept_offer() {
-    console.log('akzeptiere angebot...');
+    console.log("akzeptiere angebot...");
     const message = JSON.stringify({
       type: "accept_offer",
       data: {},
-    })
+    });
     ws.send(message);
   }
 
   function decline_offer() {
-    console.log('lehne angebot ab...');
+    console.log("lehne angebot ab...");
     const message = JSON.stringify({
       type: "decline_offer",
       data: {},
-    })
+    });
     ws.send(message);
   }
 
   function skip() {
-    console.log('überspringe runde...');
-    setPlayerCount(totalPlayerCount) //this will trigger the useEffect to change the phase
+    console.log("überspringe runde...");
+    setPlayerCount(totalPlayerCount); //this will trigger the useEffect to change the phase
     const message = JSON.stringify({
       type: "skip",
       data: {},
-    })
+    });
     ws.send(message);
   }
 
-
-
   //all the variables and functions made global
   let publicVariables = {
-    title, 
+    title,
     topRight,
     body,
     code,
     playerCount,
     totalPlayerCount,
     isGivingOfferPhase,
+    offerPerMoneyData,
+    offerPerMoneyDataAccepted,
+    offerPerMoneyDataDeclined,
     change_page,
     create_lobby,
     join_lobby,
@@ -261,9 +307,9 @@ export function GameManagerProvider({ children }) {
     place_offer,
     accept_offer,
     decline_offer,
-    skip
+    skip,
   };
-  
+
   return (
     <GameManagerContext.Provider value={publicVariables}>
       {children}
