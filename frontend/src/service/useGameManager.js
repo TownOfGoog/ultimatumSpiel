@@ -143,7 +143,7 @@ export function GameManagerProvider({ children }) {
           case "wait":
             console.log("request accepted, waiting for other players...");
             change_page("waiting_players_page");
-            if (message.data.class) setTopRight(message.data.class)
+            if (message.data && message.data.class) setTopRight(message.data.class)
             break;
           default:
             break;
@@ -154,7 +154,9 @@ export function GameManagerProvider({ children }) {
     };
     ws.onclose = () => {
       setPlayerCount(0)
+      setTotalPlayerCount(Infinity)
       change_page('home_page')
+      window.location.reload()
       console.log("disconnected");
     };
 
