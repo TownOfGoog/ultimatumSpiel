@@ -107,6 +107,7 @@ export async function startExpress() {
     datenbank.Spiel.runden_id.push([])
     counter = 0
     console.log(counter,"jijiojojojokjlkghierwhgfiiugfdzushfbkdsgzuf")
+    datenbank.Lobby.name.push(req.body.name)
   })
   
   
@@ -143,6 +144,8 @@ export async function startExpress() {
     }
     console.log(datenbank.Lehrer.websocket.length)
     console.log(ws !== datenbank.Lehrer.websocket[datenbank.Lehrer.websocket.length-1])
+
+    
     
     if(ws !== datenbank.Lobby.host_websocket[lobbycode]){
       console.log("aaaaaaaaaaaaaaaaaaaaaaaaaaaaaa")
@@ -154,7 +157,7 @@ export async function startExpress() {
       ws.send(JSON.stringify({
         type: "wait",
         data: {
-        
+          class: datenbank.Lobby.name[lobbycode]
         }
       }))
       datenbank.Lehrer.websocket[lobbycode].send(JSON.stringify({
@@ -178,16 +181,43 @@ export async function startExpress() {
       let data = JSON.parse(msg)
       switch(data.type){
         case "start_round":
-          datenbank.Lehrer.websocket[0].send(JSON.stringify({
+          let temp = datenbank.Runden.runden_id.length
+          datenbank.Runden.runden_id.push(temp)
+          datenbank.Spiel.runden_id[datenbank.Lobby.spielID[lobbycode].length-1].push(temp)
+          datenbank.Runden.angebot_id.push([])
+
+          items = datenbank.Lobby.spieler_id[lobbycode]
+
+          for (var i = 0; i < items.length; i++) {
+            var n = items[i];
+            datenbank.Lobby.host_websocket[lobbycode].send(JSON.stringify({
+              type: 'new_round',
+              data:{
+                game: datenbank.Lobby.spielID[lobbycode].length,
+                round: datenbank.Spiel.runden_id[datenbank.Lobby.spielID[lobbycode].length-1].length,
+                class:datenbank.Lobby.name[lobbycode]
+              }
+            }))
+          datenbank.Spieler.websocket[n].send(JSON.stringify({ //wird an den spieler geschickt oder
             type: "place_offer",
             data: {
-              game:datenbank.Lobby.LobbyID,
-              round: datenbank.Runden.runden_id,
-              class: datenbank.Lobby.name,
+              game: datenbank.Lobby.spielID[lobbycode].length,
+              round: datenbank.Spiel.runden_id[datenbank.Lobby.spielID[lobbycode].length-1].length,
+              class: datenbank.Lobby.name[lobbycode]
             }
           }))
+          datenbank.Spieler.websocket[n].send(JSON.stringify({
+            type: 'new_round',
+            data:{
+              game: datenbank.Lobby.spielID[lobbycode].length,
+              round: datenbank.Spiel.runden_id[datenbank.Lobby.spielID[lobbycode].length-1].length,
+              class:datenbank.Lobby.name[lobbycode]
+            }
+          }))
+        }
           break
         case "start_game":
+          datenbank.Spiel.runden_id.push([])
           console.log(runde, "12345678765432123456787654345678")
           console.log(lobbycode)
           let spiel_id = datenbank.Spiel.spiel_id.length
@@ -195,6 +225,7 @@ export async function startExpress() {
           console.log(spiel_id)
           datenbank.Lobby.spielID[lobbycode].push(spiel_id)
           datenbank.Runden.runden_id.push(runde)
+          console.log(datenbank.Spiel)
           datenbank.Spiel.runden_id[datenbank.Lobby.spielID[lobbycode].length-1].push(runde)
           console.log(datenbank.Spiel.runden_id[lobbycode],"ijjijijijijijijiiiijiji")
           datenbank.Runden.angebot_id.push([])
@@ -203,20 +234,31 @@ export async function startExpress() {
 
           for (var i = 0; i < items.length; i++) {
             var n = items[i];
+            datenbank.Spieler.websocket[n].send(JSON.stringify({
+              type: 'new_round',
+              data:{
+                game: datenbank.Lobby.spielID[lobbycode].length,
+                round: datenbank.Spiel.runden_id[datenbank.Lobby.spielID[lobbycode].length-1].length,
+                class:datenbank.Lobby.name[lobbycode]
+              }
+            }))
           datenbank.Spieler.websocket[n].send(JSON.stringify({ //wird an den spieler geschickt oder
             type: "place_offer",
             data: {
-              game:datenbank.Lobby.LobbyID,
-              round: datenbank.Spiel.runden_id[0],
-              class: datenbank.Lobby.name,
+              game: datenbank.Lobby.spielID[lobbycode].length,
+              round: datenbank.Spiel.runden_id[datenbank.Lobby.spielID[lobbycode].length-1].length,
+              class: datenbank.Lobby.name[lobbycode],
+              code: lobbycode
             }
-          }))}
-console.log(datenbank.Lehrer.websocket[datenbank.Lobby.wirt[lobbycode]],"jojojojojojojo")
+          }))
+        }
+          console.log(lobbycode)
           datenbank.Lobby.host_websocket[lobbycode].send(JSON.stringify({
             type: 'new_round',
             data:{
               game: datenbank.Lobby.spielID[lobbycode].length,
-              round: datenbank.Spiel.runden_id[datenbank.Lobby.spielID[lobbycode].length-1].length
+              round: datenbank.Spiel.runden_id[datenbank.Lobby.spielID[lobbycode].length-1].length,
+              class: datenbank.Lobby.name[lobbycode]
             }
           }))
           
@@ -227,9 +269,7 @@ console.log(datenbank.Lehrer.websocket[datenbank.Lobby.wirt[lobbycode]],"jojojoj
           datenbank.Angebote.angebot_id.push(datenbank.Angebote.angebot_id.length)
           datenbank.Angebote.angebot_summe.push(JSON.parse(msg).data.amount)
           datenbank.Angebote.angebot_geber.push(spieler_id)
-          console.log(spieler_id,"88888888888888888888")
-          console.log(datenbank.Lobby.spieler_id[lobbycode].length!=datenbank.Runden.angebot_id[runde].length)
-          
+
         items = datenbank.Lobby.spieler_id[lobbycode]
         datenbank.Lobby.host_websocket[lobbycode].send(JSON.stringify({
           type: 'new_offer',
@@ -257,23 +297,18 @@ console.log(datenbank.Lehrer.websocket[datenbank.Lobby.wirt[lobbycode]],"jojojoj
           //angebote.forEach(function(element){
           //  geber = datenbank.Angebote.
           //})
-          console.log(datenbank.Angebote)
-          console.log(datenbank.Runden)
-          console.log(datenbank.Angebote.angebot_geber)
-          console.log(runde)
+
           datenbank.Runden.angebot_id[runde-1].forEach(function(element) {
             temp.push(datenbank.Angebote.angebot_geber[element])
             }
           )
-          console.log(temp)
-          console.log(temp,"jojojoojojojoo")
+
           temp = shuffle(temp)
           temp.forEach(function(element) {
             datenbank.Angebote.angebot_nehmer.push(element)
             }
           )
-          console.log(temp, "jojoooaooaoaoaoao")
-          console.log(temp.length)
+
           for (var i = datenbank.Runden.angebot_id[runde][0]; i < temp.length+datenbank.Runden.angebot_id[runde][0]; i++) {
             n=temp[i]
             datenbank.Angebote.angebot_nehmer[i] = n
@@ -295,6 +330,16 @@ console.log(datenbank.Lehrer.websocket[datenbank.Lobby.wirt[lobbycode]],"jojojoj
           break
         case "accept_offer":
           console.log(msg)
+
+          let aktuelle_angebote = datenbank.Runden.angebot_id[runde-1]
+          let dieses_angebot
+          console.log(aktuelle_angebote)
+          aktuelle_angebote.forEach(function(element){
+            if(datenbank.Angebote.angebot_nehmer[element]==spieler_id){
+              dieses_angebot = element
+              console.log(dieses_angebot)
+            }
+          })
           
           
           datenbank.Angebote.angebot_angenommen[datenbank.Angebote.angebot_nehmer.indexOf(spieler_id)] = true
@@ -307,14 +352,22 @@ console.log(datenbank.Lehrer.websocket[datenbank.Lobby.wirt[lobbycode]],"jojojoj
             datenbank.Lobby.host_websocket[lobbycode].send(JSON.stringify({
               type:"offer_response",
               data:{
-                amount: datenbank.Angebote.angebot_summe[datenbank.Angebote.angebot_nehmer.indexOf(spieler_id)],
+                amount: datenbank.Angebote.angebot_summe[dieses_angebot],
                 accepted: true,
-                test: 3
               }            }))
 
           break
           case "decline_offer":
           datenbank.Angebote.angebot_angenommen[datenbank.Angebote.angebot_nehmer.indexOf(spieler_id)] = false
+          
+          let aktuelle_angebote2 = datenbank.Runden.angebot_id[runde-1]
+          let dieses_angebot2
+          aktuelle_angebote2.forEach(function(element){
+            if(datenbank.Angebote.angebot_nehmer[element]==spieler_id){
+              dieses_angebot2 = element
+              console.log(dieses_angebot2)
+            }
+          })
 
           ws.send(JSON.stringify({
             type: "wait",
@@ -323,7 +376,7 @@ console.log(datenbank.Lehrer.websocket[datenbank.Lobby.wirt[lobbycode]],"jojojoj
           datenbank.Lobby.host_websocket[lobbycode].send(JSON.stringify({
             type:"offer_response",
             data:{
-              amount:datenbank.Angebote.angebot_summe[datenbank.Angebote.angebot_nehmer.indexOf(spieler_id)],
+              amount:datenbank.Angebote.angebot_summe[dieses_angebot2],
               accepted: false
             }
           }))
