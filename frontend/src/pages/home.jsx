@@ -1,11 +1,10 @@
 import Grid from "../components/myGrid";
 import FormControl from "@mui/joy/FormControl";
-import FormHelperText from "@mui/joy/FormHelperText";
+// import FormHelperText from "@mui/joy/FormHelperText";
 import { useState } from "react";
 import MyInput from "../components/myInput";
 import MyButton from "../components/myButton";
 import useGameManager from "../service/useGameManager";
-import MyChart from "../components/myChart";
 
 export default function Home() {
   const [codeValue, setCodeValue] = useState(""); //this value will be formatted to mostly avoid faulty inputs
