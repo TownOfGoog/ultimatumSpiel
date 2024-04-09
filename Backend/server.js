@@ -153,7 +153,9 @@ export async function startExpress() {
       datenbank.Lobby.spieler_id[lobbycode].push(spieler)
       ws.send(JSON.stringify({
         type: "wait",
-        data: {}
+        data: {
+        
+        }
       }))
       datenbank.Lehrer.websocket[lobbycode].send(JSON.stringify({
         type: 'new_player',
@@ -193,7 +195,7 @@ export async function startExpress() {
           console.log(spiel_id)
           datenbank.Lobby.spielID[lobbycode].push(spiel_id)
           datenbank.Runden.runden_id.push(runde)
-          datenbank.Spiel.runden_id[lobbycode].push(runde)
+          datenbank.Spiel.runden_id[datenbank.Lobby.spielID[lobbycode].length-1].push(runde)
           console.log(datenbank.Spiel.runden_id[lobbycode],"ijjijijijijijijiiiijiji")
           datenbank.Runden.angebot_id.push([])
 
