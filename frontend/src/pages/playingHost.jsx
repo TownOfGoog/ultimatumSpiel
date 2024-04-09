@@ -118,7 +118,7 @@ export default function PlayingHost() {
 
         <MyGrid xs={2} sx={{ height: "20%", borderTop: '2px solid black', display: 'flex', justifyContent: 'space-between', alignItems: 'center'}} >
           <MyText sx={{marginLeft: '0.5em', marginInline: 'auto'}}>
-            {game.offerPhase === 'make_offer' ? `${game.playerCount} / ${game.totalPlayerCount} Spieler haben ein Angebot gegeben.` : game.offerPhase === 'answer_offer' ? `${game.playerCount} / ${game.totalPlayerCount} Spieler haben ein Angebot abgelehnt oder angenommen.` : ', alle haben ihre Antworten gegeben.'}
+            {game.offerPhase === 'make_offer' ? `${game.playerCount} / ${game.totalPlayerCount} Spieler haben ein Angebot gegeben.` : game.offerPhase === 'answer_offer' ? `${game.playerCount} / ${game.totalPlayerCount} Spieler haben ein Angebot abgelehnt oder angenommen.` : 'Alle haben geantwortet.'}
           </MyText>
 
             {game.offerPhase === 'wait' ? 
