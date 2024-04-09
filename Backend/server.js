@@ -188,6 +188,7 @@ export async function startExpress() {
           }))
           break
         case "start_game":
+          datenbank.Spiel.runden_id.push([])
           console.log(runde, "12345678765432123456787654345678")
           console.log(lobbycode)
           let spiel_id = datenbank.Spiel.spiel_id.length
@@ -195,6 +196,7 @@ export async function startExpress() {
           console.log(spiel_id)
           datenbank.Lobby.spielID[lobbycode].push(spiel_id)
           datenbank.Runden.runden_id.push(runde)
+          console.log(datenbank.Spiel)
           datenbank.Spiel.runden_id[datenbank.Lobby.spielID[lobbycode].length-1].push(runde)
           console.log(datenbank.Spiel.runden_id[lobbycode],"ijjijijijijijijiiiijiji")
           datenbank.Runden.angebot_id.push([])
