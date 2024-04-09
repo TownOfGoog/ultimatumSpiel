@@ -1,18 +1,15 @@
-# Stage 1: Build react client
 FROM node:16-alpine as build
 
-# Working directory be app
-WORKDIR /usr/src/app
+WORKDIR /app
 
-ENV PATH /usr/src/app/node_modules/.bin:$PATH
+COPY package*.json ./
+RUN npm install --omit=dev
 
-# Copying source files
 COPY . .
 
-# Installing dependencies
-RUN npm install
+ARG REACT_APP_BACKEND_URL
+ENV REACT_APP_BACKEND_URL $REACT_APP_BACKEND_URL
 
-# Building app
 RUN npm run build
 
 # Stage 2: Serve app with nginx server
@@ -21,7 +18,7 @@ RUN npm run build
 FROM nginx:alpine
 
 # Copy the build output to replace the default nginx contents
-COPY --from=build /usr/src/app/build /usr/share/nginx/html
+COPY --from=build /app/build /usr/share/nginx/html
 
 # Expose port 80 to the outside once the container has launched
 EXPOSE 80

@@ -5,26 +5,23 @@ services:
       context: ./backend
       dockerfile: Dockerfile.dev
     volumes:
-      - ./backend:/usr/src/app
-      - ./backend/node_modules:/usr/src/app/node_modules
+      - ./backend:/app
     ports:
       - "8080:8080"
     environment:
       - NODE_ENV=development
       - FRONTEND_URL=localhost:3000
 
-  frontend:
-    build:
+  frontend: 
+    build: 
       context: ./frontend
       dockerfile: Dockerfile.dev
     volumes:
-      - ./frontend/src:/usr/src/app/src
-      - ./frontend/public:/usr/src/app/public
-      - ./frontend/node_modules:/usr/src/app/node_modules
-    ports:
+      - ./frontend/src:/app/src
+      - ./frontend/public:/app/public
+    ports: 
       - "3000:3000"
     environment:
       - NODE_ENV=development
       - WATCHPACK_POLLING=true
       - REACT_APP_BACKEND_URL=localhost:8080
-

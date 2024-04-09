@@ -3,23 +3,18 @@ services:
   backend:
     build: ./backend
     ports:
-      - "3000:3000"
+      - "8080:8080"
     environment:
-      - NODE_ENV=production
-      # - FRONTEND_URL=localhost:80
-    volumes:
-      - ./backend:/usr/src/app
-      - /usr/src/app/node_modules
+      - FRONTEND_URL=localhost:80
     depends_on:
       - frontend
 
   frontend:
-    build: ./frontend
+    build: 
+      context: ./frontend
+      args:
+        - REACT_APP_BACKEND_URL=localhost:8080
     ports:
       - "80:80"
-    volumes:
-      - ./frontend:/usr/src/app
-      - /usr/src/app/node_modules
     environment:
       - NODE_ENV=production
-      - REACT_APP_BACKEND_URL=localhost:3000

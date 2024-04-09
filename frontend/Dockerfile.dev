@@ -1,18 +1,13 @@
-# Use the official Node.js 16 as a parent image
 FROM node:16-alpine
 
-# Set the working directory in the container
-WORKDIR /usr/src/app
+WORKDIR /app
 
-# Installing dependencies
 COPY package*.json ./
 RUN npm install
 
-# Adding source code
 COPY . .
 
-# Start app
+EXPOSE 3000
+
 CMD ["npm", "start"]
 
-# Make port 3000 available to the world outside this container
-EXPOSE 3000
