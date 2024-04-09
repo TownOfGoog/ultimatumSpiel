@@ -16,7 +16,6 @@ export default function PlayingHost() {
     })
     return counter
   }
-
   return (
     
     <MyGrid
@@ -26,12 +25,12 @@ export default function PlayingHost() {
     >
 
       <MyGrid xs={2} sx={{ height: "100%", alignContent: 'center' }} container columns={2} >
-
         <MyGrid xs={2} sx={{ height: "80%", display: 'flex', justifyContent: 'center', alignItems: 'center'}} >
-          <MyChart 
+          {/* <MyChart 
             yAxis={ [
               {
                 label: 'Anzahl der Angebote',
+                tickMinStep: 1,
               },
             ]}
             xAxis={[
@@ -51,10 +50,37 @@ export default function PlayingHost() {
               {
                 data: game.offerPerMoneyDataDeclined, stack: 'a', label: 'Abgelehnt', color: '#ff8113'
               },
-            ]}/>
+            ]}/> */}
+          <MyChart 
+            dataset={game.offerPerMoney}
+            yAxis={ [
+              {
+                label: 'Anzahl der Angebote',
+                tickMinStep: 1,
+              },
+            ]}
+            xAxis={[
+              {
+                dataKey: 'amount',
+                scaleType: 'band',
+              }
+            ]}
+            series={[
+              {
+                dataKey: 'open', stack: 'a', label: 'Offene Angebote', color: 'black'
+              },
+              {
+                dataKey: 'accepted', stack: 'a', label: 'Angenommen', color: '#0afff7' //#5eec77 green
+              },
+              {
+                dataKey: 'declined', stack: 'a', label: 'Abgelehnt', color: '#ff8113'
+              }
+            ]}
+          />
 
 
           <MyChart 
+            sx={{zIndex: 1}}
             layout="horizontal"
             grid={{ vertical: true }}
             yAxis={[
@@ -67,6 +93,7 @@ export default function PlayingHost() {
             xAxis={[
               {
                 label: 'Angebotenes Geld',
+                tickMinStep: 1,
               },
             ]}
             series={[
@@ -83,7 +110,7 @@ export default function PlayingHost() {
               },
               
               {
-                data: [null, null, game.totalPlayerCount - game.playerCount], stack: 'a', label: 'Offene Angebote', color: 'black'
+                data: [null, null, game.totalPlayerCount - game.playerCount], stack: 'a', label: 'Anzahl Spieler', color: 'black'
               },
             ]}
           />
@@ -91,12 +118,24 @@ export default function PlayingHost() {
 
         <MyGrid xs={2} sx={{ height: "20%", borderTop: '2px solid black', display: 'flex', justifyContent: 'space-between', alignItems: 'center'}} >
           <MyText sx={{marginLeft: '0.5em', marginInline: 'auto'}}>
-            {game.playerCount} / {game.totalPlayerCount}{game.offerPhase === 0 ? ' Spieler haben ein Angebot gegeben.' : game.offerPhase === 1 ? ' Spieler haben ein Angebot abgelehnt oder angenommen.' : ', alle haben ihre Antworten gegeben.'}
+            {game.offerPhase === 'make_offer' ? `${game.playerCount} / ${game.totalPlayerCount} Spieler haben ein Angebot gegeben.` : game.offerPhase === 'answer_offer' ? `${game.playerCount} / ${game.totalPlayerCount} Spieler haben ein Angebot abgelehnt oder angenommen.` : ', alle haben ihre Antworten gegeben.'}
           </MyText>
 
-          <MyButton sx={{width: 'auto', padding: '1em', marginRight: '0.5em'}} onClick={() => {game.skip()}}>
-            Fortfahren
-          </MyButton>
+            {game.offerPhase === 'wait' ? 
+            //when everyone has given their answer
+            <>
+              <MyButton sx={{width: 'auto', padding: '1em', marginRight: '0.5em'}} onClick={() => {game.new_game()}}>
+                Neues Spiel
+              </MyButton>
+              <MyButton sx={{width: 'auto', padding: '1em', marginRight: '0.5em'}} onClick={() => {game.new_round()}}>
+                Neue Runde
+              </MyButton>
+            </>
+            :
+            <MyButton sx={{width: 'auto', padding: '1em', marginRight: '0.5em'}} onClick={() => {game.skip()}}>
+              Fortfahren
+            </MyButton>}
+            <button onClick={() => {console.log(game.offerPhase, game.offerPerMoney)}}>test</button>
         </MyGrid>
         
       </MyGrid> 

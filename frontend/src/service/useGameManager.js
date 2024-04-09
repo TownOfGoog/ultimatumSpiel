@@ -9,6 +9,7 @@ import WaitingPlayers from "../pages/waitingPlayers";
 import PlaceOffer from "../pages/placeOffer";
 import AnswerOffer from "../pages/answerOffer";
 import PlayingHost from "../pages/playingHost";
+import useDefaultValues from "./useDefaultValues";
 
 const GameManagerContext = createContext();
 
@@ -19,30 +20,55 @@ export default function useGameManager() {
 
 //here is the main logic of the game
 export function GameManagerProvider({ children }) {
-  const [ws, setWs] = useState(null); //websocket connection
-  const [title, setTitle] = useState("something went wrong"); //title to be displayed in the navbar
-  const [topRight, setTopRight] = useState("login"); //top right corner of the page (login or current class)
-  const [body, setBody] = useState(<p>something went wrong</p>); //content of the page
-  const [code, setCode] = useState(null); //lobbycode
-  const [playerCount, setPlayerCount] = useState(0); //number of players in the lobby
-  const [totalPlayerCount, setTotalPlayerCount] = useState(Infinity); //number of players in the lobby, will be set once the game starts
-  const [offerPhase, setOfferPhase] = useState(0); //if true, the player is giving an offer, if false, the player is answering an offer
+  const dfault = useDefaultValues(); //default keyword doesnt work
+
+  const [ws, setWs] = useState(dfault.ws); //websocket connection
+  const [title, setTitle] = useState(dfault.title); //title to be displayed in the navbar
+  const [topRight, setTopRight] = useState(dfault.topRight) //top right corner of the page (login or current class)
+  const [body, setBody] = useState(dfault.body); //content of the page
+  const [code, setCode] = useState(dfault.code); //lobbycode
+  const [playerCount, setPlayerCount] = useState(dfault.playerCount); //number of players in the lobby
+  const [totalPlayerCount, setTotalPlayerCount] = useState(dfault.totalPlayerCount); //number of players in the lobby, will be set once the game starts
+  const [offerPhase, setOfferPhase] = useState(dfault.offerPhase); //if true, the player is giving an offer, if false, the player is answering an offer
     
   //data for chart 1
   const [offerPerMoneyData, setOfferPerMoneyData] = useState([0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,]); 
   const [offerPerMoneyDataAccepted, setOfferPerMoneyDataAccepted] = useState([0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,]); //how many people accepted
   const [offerPerMoneyDataDeclined, setOfferPerMoneyDataDeclined] = useState([0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,]); //how many people declined
-
+  //data for chart 1 aggregated
+  const [offerPerMoneyDataTotal, setOfferPerMoneyDataTotal] = useState([0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,]); 
+  const [offerPerMoney, setOfferPerMoney] = useState(dfault.offerPerMoney)
+  const [offerPerMoneyTotal, setOfferPerMoneyTotal] = useState(dfault.offerPerMoney)
   useEffect(() => {
+    console.log("nächste phase...", playerCount, totalPlayerCount);
     if (playerCount === totalPlayerCount) {
-      console.log("nächste phase...");
+      console.log('offerPhase: ', offerPhase);
       
-      if (offerPhase !== 1) setPlayerCount(0);
-      offerPhase === 0
-        ? setOfferPhase(1)
-        : offerPhase === 1
-        ? setOfferPhase(2)
-        : setOfferPhase(0);
+      if (offerPhase === 'make_offer') {
+        console.log('nun sind wir in der antwortphase...');
+        setOfferPhase('answer_offer');
+        setPlayerCount(0);
+      } else if (offerPhase === 'answer_offer') {
+        console.log('nun sind wir in der warte-phase...');
+        setOfferPhase('wait');
+        setPlayerCount(0);
+      } else {
+        console.log('nun sind wir in der angebotsphase...');
+        setOfferPhase('make_offer');
+        setPlayerCount(0);
+        //append current data to total data
+        setOfferPerMoneyTotal((prev) => {
+          const newData = [...prev];
+          for (let i = 0; i < offerPerMoney.length; i++) {
+            newData[i].open += offerPerMoney[i].open;
+            newData[i].accepted += offerPerMoney[i].accepted;
+            newData[i].declined += offerPerMoney[i].declined;
+          }
+          return newData;
+        });
+        //reset current data
+        setOfferPerMoney(dfault.offerPerMoney)
+      }
     }
     //eslint-disable-next-line react-hooks/exhaustive-deps
   }, [playerCount, totalPlayerCount]);
@@ -126,6 +152,12 @@ export function GameManagerProvider({ children }) {
             console.log("neues angebot: ", message.data.amount);
             setPlayerCount((prev) => prev + 1);
             //change data for chart 1 (offers per money)
+            setOfferPerMoney((prev) => {
+              const newData = [...prev];
+              newData[parseInt(message.data.amount) / 10].open++;
+              return newData;
+            })
+
             setOfferPerMoneyData((prev) => {
               const newData = [...prev];
               newData[parseInt(message.data.amount) / 10]++;
@@ -137,6 +169,16 @@ export function GameManagerProvider({ children }) {
             console.log("angebot wurde beantwortet: ", message.data);
             setPlayerCount((prev) => prev + 1);
             //change data for chart 1 (offers per money)
+            setOfferPerMoney((prev) => {
+              const newData = [...prev];
+              const answer = message.data.accepted ? "accepted" : "declined";
+              //set accepted or declined
+              newData[parseInt(message.data.amount) / 10][answer]++;
+              //decrease open offers for that money
+              newData[parseInt(message.data.amount) / 10].open--;
+
+              return newData;
+            })
             if (message.data.accepted) {
               //increase the amount of accepted offers for that money
               setOfferPerMoneyDataAccepted((prev) => {
@@ -174,7 +216,7 @@ export function GameManagerProvider({ children }) {
           case "new_round":
             console.log("neue runde: ", message.data);
             change_page("playingHost");
-            setOfferPhase(0);
+            setOfferPhase('make_offer');
             setTitle(
               `Spiel ${message.data.game} / Runde ${message.data.round}`
             );
@@ -251,6 +293,26 @@ export function GameManagerProvider({ children }) {
     setPlayerCount(0);
     change_page("playingHost");
   }
+  
+  function new_game() {
+    console.log("neues Spiel...");
+    setPlayerCount(totalPlayerCount); //this will trigger the useEffect to change the phase
+    const message = JSON.stringify({
+      type: "start_game",
+      data: {},
+    });
+    ws.send(message);
+  }
+
+  function new_round() {
+    console.log("neue Runde...");
+    setPlayerCount(totalPlayerCount); //this will trigger the useEffect to change the phase
+    const message = JSON.stringify({
+      type: "start_round",
+      data: {},
+    });
+    ws.send(message);
+  }
 
   function place_offer(amount) {
     console.log(`vergebe ${amount} geld...`);
@@ -303,10 +365,13 @@ export function GameManagerProvider({ children }) {
     offerPerMoneyData,
     offerPerMoneyDataAccepted,
     offerPerMoneyDataDeclined,
+    offerPerMoney,
     change_page,
     create_lobby,
     join_lobby,
     start_game,
+    new_game,
+    new_round,
     place_offer,
     accept_offer,
     decline_offer,
