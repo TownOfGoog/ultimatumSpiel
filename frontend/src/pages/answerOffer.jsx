@@ -41,7 +41,7 @@ export default function AnswerOffer({ amount }) {
             alignItems: "flex-start",
           }}
         >
-          <MyText>amount: {amount}</MyText>
+          <MyText>Jemand möchte dir <MyText bold>{amount}</MyText> anbieten</MyText>
         </MyGrid>
         <MyGrid
           xs={2}

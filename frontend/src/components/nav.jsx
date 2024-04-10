@@ -29,7 +29,8 @@ export default function Nav({ title }) {
           alignItems: "center",
           justifyContent: "center",
           fontWeight: "bold",
-          fontSize: 64
+          fontSize: 64,
+          minWidth: '8em'
         }}>
         <div>{title}</div>
       </Grid>
