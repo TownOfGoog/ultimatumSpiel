@@ -181,9 +181,11 @@ export async function startExpress() {
       let data = JSON.parse(msg)
       switch(data.type){
         case "start_round":
+          let spiel2 = datenbank.Lobby.spielID[lobbycode][datenbank.Lobby.spielID[lobbycode].length-1]
+
           let temp = datenbank.Runden.runden_id.length
           datenbank.Runden.runden_id.push(temp)
-          datenbank.Spiel.runden_id[datenbank.Lobby.spielID[lobbycode].length-1].push(temp)
+          datenbank.Spiel.runden_id[spiel2].push(temp)
           datenbank.Runden.angebot_id.push([])
 
           items = datenbank.Lobby.spieler_id[lobbycode]
@@ -194,7 +196,7 @@ export async function startExpress() {
               type: 'new_round',
               data:{
                 game: datenbank.Lobby.spielID[lobbycode].length,
-                round: datenbank.Spiel.runden_id[datenbank.Lobby.spielID[lobbycode].length-1].length,
+                round: datenbank.Spiel.runden_id[spiel2].length,
                 class:datenbank.Lobby.name[lobbycode]
               }
             }))
@@ -202,7 +204,7 @@ export async function startExpress() {
               type: 'new_round',
               data:{
                 game: datenbank.Lobby.spielID[lobbycode].length,
-                round: datenbank.Spiel.runden_id[datenbank.Lobby.spielID[lobbycode].length-1].length,
+                round: datenbank.Spiel.runden_id[spiel2].length,
                 class:datenbank.Lobby.name[lobbycode]
               }
             }))
@@ -210,7 +212,7 @@ export async function startExpress() {
               type: "place_offer",
               data: {
                 game: datenbank.Lobby.spielID[lobbycode].length,
-                round: datenbank.Spiel.runden_id[datenbank.Lobby.spielID[lobbycode].length-1].length,
+                round: datenbank.Spiel.runden_id[spiel2].length,
                 class: datenbank.Lobby.name[lobbycode]
               }
             }))
@@ -218,19 +220,22 @@ export async function startExpress() {
           break
         case "start_game":
           datenbank.Spiel.runden_id.push([])
-          console.log(runde, "12345678765432123456787654345678")
           console.log(lobbycode)
           let spiel_id = datenbank.Spiel.spiel_id.length
           datenbank.Spiel.spiel_id.push(spiel_id)
           console.log(spiel_id)
           datenbank.Lobby.spielID[lobbycode].push(spiel_id)
           datenbank.Runden.runden_id.push(runde)
+          console.log(runde, "12345678765432123456787654345678")
           console.log(datenbank.Spiel)
-          datenbank.Spiel.runden_id[datenbank.Lobby.spielID[lobbycode].length-1].push(runde)
+          datenbank.Spiel.runden_id[spiel_id].push(runde)
           console.log(datenbank.Spiel.runden_id[lobbycode],"ijjijijijijijijiiiijiji")
           datenbank.Runden.angebot_id.push([])
+          
+          let spiel = datenbank.Lobby.spielID[lobbycode][datenbank.Lobby.spielID[lobbycode].length-1]
 
           items = datenbank.Lobby.spieler_id[lobbycode]
+          console.log(spiel, "jojjojjjauuueueueueueueueu")
 
           for (var i = 0; i < items.length; i++) {
             var n = items[i];
@@ -238,7 +243,7 @@ export async function startExpress() {
               type: 'new_round',
               data:{
                 game: datenbank.Lobby.spielID[lobbycode].length,
-                round: datenbank.Spiel.runden_id[datenbank.Lobby.spielID[lobbycode].length-1].length,
+                round: datenbank.Spiel.runden_id[spiel].length,
                 class:datenbank.Lobby.name[lobbycode]
               }
             }))
@@ -246,7 +251,7 @@ export async function startExpress() {
             type: "place_offer",
             data: {
               game: datenbank.Lobby.spielID[lobbycode].length,
-              round: datenbank.Spiel.runden_id[datenbank.Lobby.spielID[lobbycode].length-1].length,
+              round: datenbank.Spiel.runden_id[spiel].length,
               class: datenbank.Lobby.name[lobbycode],
               code: lobbycode
             }
@@ -257,7 +262,7 @@ export async function startExpress() {
             type: 'new_round',
             data:{
               game: datenbank.Lobby.spielID[lobbycode].length,
-              round: datenbank.Spiel.runden_id[datenbank.Lobby.spielID[lobbycode].length-1].length,
+              round: datenbank.Spiel.runden_id[spiel].length,
               class: datenbank.Lobby.name[lobbycode]
             }
           }))
