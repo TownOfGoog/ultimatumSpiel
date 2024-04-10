@@ -31,14 +31,12 @@ export function GameManagerProvider({ children }) {
   const [totalPlayerCount, setTotalPlayerCount] = useState(dfault.totalPlayerCount); //number of players in the lobby, will be set once the game starts
   const [offerPhase, setOfferPhase] = useState(dfault.offerPhase); //if true, the player is giving an offer, if false, the player is answering an offer
     
-  //data for chart 1
-  const [offerPerMoneyData, setOfferPerMoneyData] = useState([0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,]); 
-  const [offerPerMoneyDataAccepted, setOfferPerMoneyDataAccepted] = useState([0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,]); //how many people accepted
-  const [offerPerMoneyDataDeclined, setOfferPerMoneyDataDeclined] = useState([0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,]); //how many people declined
-  //data for chart 1 aggregated
-  const [offerPerMoneyDataTotal, setOfferPerMoneyDataTotal] = useState([0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,]); 
+  //data for chart
   const [offerPerMoney, setOfferPerMoney] = useState(dfault.offerPerMoney)
+  
+  //data for chart aggregated over the whole game (lobby)
   const [offerPerMoneyTotal, setOfferPerMoneyTotal] = useState(dfault.offerPerMoney)
+  
   useEffect(() => {
     console.log("nächste phase...", playerCount, totalPlayerCount);
     if (playerCount === totalPlayerCount) {
@@ -68,8 +66,6 @@ export function GameManagerProvider({ children }) {
         });
         //reset current data
         setOfferPerMoney(dfault.offerPerMoney)
-        setOfferPerMoneyDataAccepted([0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,])
-        setOfferPerMoneyDataDeclined([0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,])
       }
     }
     //eslint-disable-next-line react-hooks/exhaustive-deps
@@ -159,13 +155,6 @@ export function GameManagerProvider({ children }) {
               newData[parseInt(message.data.amount) / 10].open++;
               return newData;
             })
-
-            setOfferPerMoneyData((prev) => {
-              const newData = [...prev];
-              newData[parseInt(message.data.amount) / 10]++;
-              console.log("newData: ", newData);
-              return newData;
-            });
             break;
           case "offer_response":
             console.log("angebot wurde beantwortet: ", message.data);
@@ -181,39 +170,6 @@ export function GameManagerProvider({ children }) {
 
               return newData;
             })
-            if (message.data.accepted) {
-              //increase the amount of accepted offers for that money
-              setOfferPerMoneyDataAccepted((prev) => {
-                const newData = [...prev];
-                newData[parseInt(message.data.amount) / 10]++;
-                console.log("newData: ", newData);
-                return newData;
-              });
-              //decrease the total amount of offers for that money
-              setOfferPerMoneyData((prev) => {
-                const newData = [...prev];
-                newData[parseInt(message.data.amount) / 10]--;
-                console.log("newData: ", newData);
-                return newData;
-              });
-            }
-            //same for declined offers
-            else {
-              //increase the amount of declined offers for that money
-              setOfferPerMoneyDataDeclined((prev) => {
-                const newData = [...prev];
-                newData[parseInt(message.data.amount) / 10]++;
-                console.log("newData: ", newData);
-                return newData;
-              });
-              //decrease the total amount of offers for that money
-              setOfferPerMoneyData((prev) => {
-                const newData = [...prev];
-                newData[parseInt(message.data.amount) / 10]--;
-                console.log("newData: ", newData);
-                return newData;
-              });
-            }
             break;
           case "new_round":
             console.log("neue runde: ", message.data);
@@ -364,9 +320,6 @@ export function GameManagerProvider({ children }) {
     playerCount,
     totalPlayerCount,
     offerPhase,
-    offerPerMoneyData,
-    offerPerMoneyDataAccepted,
-    offerPerMoneyDataDeclined,
     offerPerMoney,
     change_page,
     create_lobby,

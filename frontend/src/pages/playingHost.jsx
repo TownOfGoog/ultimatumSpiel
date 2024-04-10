@@ -9,10 +9,10 @@ import useGameManager from "../service/useGameManager";
 export default function PlayingHost() {
   const game = useGameManager();
 
-  function count_numbers_in_arr(arr) {
+  function aggregate_obj_in_arr(arr, obj) {
     let counter = 0
     arr.forEach((element) => {
-      counter += element
+      counter += element[obj]
     })
     return counter
   }
@@ -58,34 +58,31 @@ export default function PlayingHost() {
             sx={{zIndex: 1}}
             layout="horizontal"
             grid={{ vertical: true }}
-            yAxis={[
-              {
-                data: ['Angebote angenommen', 'Angebote abgelehnt', 'Anzahl Spieler'],
-                scaleType: 'band',
-              },
-            ]}
-            
+            dataset={game.offerPerMoney}            
             xAxis={[
               {
                 label: 'Angebotenes Geld',
                 tickMinStep: 1,
               },
             ]}
+            yAxis={[
+              {
+                data: ['Angebote angenommen', 'Angebote abgelehnt', 'Anzahl Spieler'],
+                scaleType: 'band',
+              },
+            ]}
             series={[
               {
-                data: [count_numbers_in_arr(game.offerPerMoneyDataAccepted), null, null], stack: 'a', label: 'Angenommen', color: '#0afff7'
+                data: [null, null, game.totalPlayerCount - aggregate_obj_in_arr(game.offerPerMoney, 'open')], stack: 'a', label: 'Anzahl Spieler', color: 'black'
               },
-              
               {
-                data: [null, count_numbers_in_arr(game.offerPerMoneyDataDeclined), null], stack: 'a', label: 'Abgelehnt', color: '#ff8113'
+                data: [null, null, aggregate_obj_in_arr(game.offerPerMoney, 'open')], stack: 'a', label: 'Anzahl Angeboten', color: '#555E68'
               },
-              
               {
-                data: [null, null, game.playerCount], stack: 'a', label: 'Offene Angebote', color: '#555E68'
+                data: [aggregate_obj_in_arr(game.offerPerMoney, 'accepted'), null, null], stack: 'a', label: 'Angenommen', color: '#0afff7' 
               },
-              
               {
-                data: [null, null, game.totalPlayerCount - game.playerCount], stack: 'a', label: 'Anzahl Spieler', color: 'black'
+                data: [null, aggregate_obj_in_arr(game.offerPerMoney, 'declined'), null], stack: 'a', label: 'Abgelehnt', color: '#ff8113'
               },
             ]}
           />
@@ -110,7 +107,7 @@ export default function PlayingHost() {
             <MyButton sx={{width: 'auto', padding: '1em', marginRight: '0.5em'}} onClick={() => {game.skip()}}>
               Fortfahren
             </MyButton>}
-            {/* <button onClick={() => {console.log(game.offerPhase, game.offerPerMoney)}}>test</button> */}
+            <button onClick={() => {console.log(game.offerPhase, game.offerPerMoney)}}>test</button>
         </MyGrid>
         
       </MyGrid> 
