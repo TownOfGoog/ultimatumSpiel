@@ -51,7 +51,7 @@ export default function WaitingPlayersHost() {
       </Grid> 
 
       <Grid xs={1} sx={{ height: "100%", justifyContent: 'flex-end', alignContent: 'flex-end', flexWrap: 'wrap' }} >
-        <MyButton sx={{width: 'auto', padding: '1em', margin: '0.5em'}} onClick={game.start_game}>
+        <MyButton disabled={game.playerCount <= 0} sx={{width: 'auto', padding: '1em', margin: '0.5em'}} onClick={game.start_game}>
           Starten
         </MyButton>
       </Grid>
