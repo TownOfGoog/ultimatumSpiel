@@ -7,6 +7,6 @@
     "back": "cd ./Backend && node server.js",
     "test": "cd ./Backend && node --experimental-vm-modules node_modules/jest/bin/jest.js",
     "dev": "cd ./Backend && npm i && cd .. && docker-compose -f docker-compose.dev.yaml -p ultimatum-spiel-development up",
-    "prod": "docker-compose -p ultimatum-spiel-production up"
+    "prod": "docker-compose -p ultimatum-spiel-production up --build"
   }
 }
