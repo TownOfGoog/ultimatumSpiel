@@ -5,8 +5,8 @@ export default function MyChart({...props}) {
   return (
     <BarChart
       {...props}
-      width={600}
-      height={430}
+      width={520}
+      height={370}
     />
   );
 }

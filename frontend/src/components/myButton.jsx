@@ -6,7 +6,9 @@ export default function MyButton({
   onClick,
   sx,
   children,
+  disabled=false
 }) {
+  // todo: danger style
   let defaultStyle = {
     width: shouldFillAll ? "100%" : answer ? "7em" : "60%",
     height: shouldFillAll ? "100%" : "2em",
@@ -41,6 +43,7 @@ export default function MyButton({
         sx={defaultStyle}
         color="neutral"
         variant="solid"
+        disabled={disabled}
         slotProps={{
           button: {
             sx: {
