@@ -198,22 +198,22 @@ export async function startExpress() {
                 class:datenbank.Lobby.name[lobbycode]
               }
             }))
-          datenbank.Spieler.websocket[n].send(JSON.stringify({ //wird an den spieler geschickt oder
-            type: "place_offer",
-            data: {
-              game: datenbank.Lobby.spielID[lobbycode].length,
-              round: datenbank.Spiel.runden_id[datenbank.Lobby.spielID[lobbycode].length-1].length,
-              class: datenbank.Lobby.name[lobbycode]
-            }
-          }))
-          datenbank.Spieler.websocket[n].send(JSON.stringify({
-            type: 'new_round',
-            data:{
-              game: datenbank.Lobby.spielID[lobbycode].length,
-              round: datenbank.Spiel.runden_id[datenbank.Lobby.spielID[lobbycode].length-1].length,
-              class:datenbank.Lobby.name[lobbycode]
-            }
-          }))
+            datenbank.Spieler.websocket[n].send(JSON.stringify({
+              type: 'new_round',
+              data:{
+                game: datenbank.Lobby.spielID[lobbycode].length,
+                round: datenbank.Spiel.runden_id[datenbank.Lobby.spielID[lobbycode].length-1].length,
+                class:datenbank.Lobby.name[lobbycode]
+              }
+            }))
+            datenbank.Spieler.websocket[n].send(JSON.stringify({ //wird an den spieler geschickt oder
+              type: "place_offer",
+              data: {
+                game: datenbank.Lobby.spielID[lobbycode].length,
+                round: datenbank.Spiel.runden_id[datenbank.Lobby.spielID[lobbycode].length-1].length,
+                class: datenbank.Lobby.name[lobbycode]
+              }
+            }))
         }
           break
         case "start_game":
