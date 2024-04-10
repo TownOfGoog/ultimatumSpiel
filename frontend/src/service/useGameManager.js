@@ -68,6 +68,8 @@ export function GameManagerProvider({ children }) {
         });
         //reset current data
         setOfferPerMoney(dfault.offerPerMoney)
+        setOfferPerMoneyDataAccepted([0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,])
+        setOfferPerMoneyDataDeclined([0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,])
       }
     }
     //eslint-disable-next-line react-hooks/exhaustive-deps
