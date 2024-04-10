@@ -30,7 +30,7 @@ export default function Nav({ title }) {
           justifyContent: "center",
           fontWeight: "bold",
           fontSize: 64,
-          minWidth: '8em'
+          minWidth: '10em'
         }}>
         <div>{title}</div>
       </Grid>
