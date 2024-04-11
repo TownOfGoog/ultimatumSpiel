@@ -243,6 +243,14 @@ export async function startExpress() {
               }
             }))
         }
+        
+        datenbank.Lobby.host_websocket[lobbycode].send(JSON.stringify({ //wird an den spieler geschickt oder
+          type: "total_players",
+          data: {
+            amount: datenbank.Lobby.spieler_id[lobbycode]
+          }
+        }))
+        
           break
         case "start_game":
           open = false
@@ -286,6 +294,12 @@ export async function startExpress() {
               round: datenbank.Spiel.runden_id[spiel].length,
               class: datenbank.Lobby.name[lobbycode],
               name: message.data.name
+            }
+          }))
+          datenbank.Lobby.host_websocket[lobbycode].send(JSON.stringify({ //wird an den spieler geschickt oder
+            type: "total_players",
+            data: {
+              amount: datenbank.Lobby.spieler_id[lobbycode]
             }
           }))
           
@@ -497,7 +511,7 @@ export async function startExpress() {
             type: "wait",
             data: {}
           }))}
-          datenbank.Spieler.websocket[n].send(JSON.stringify({ //wird an den spieler geschickt oder
+          datenbank.Lobby.host_websocket[lobbycode].send(JSON.stringify({ //wird an den spieler geschickt oder
             type: "total_players",
             data: {
               amount: temp.length
