@@ -177,8 +177,8 @@ export async function startExpress() {
     ws.on("message", function(msg) {
       runde = datenbank.Runden.runden_id.length
 
-      let data = JSON.parse(msg)
-      switch(data.type){
+      let message = JSON.parse(msg)
+      switch(message.type){
         case "start_round":
           let spiel2 = datenbank.Lobby.spielID[lobbycode][datenbank.Lobby.spielID[lobbycode].length-1]
 
@@ -226,7 +226,7 @@ export async function startExpress() {
           datenbank.Runden.runden_id.push(runde)
           datenbank.Spiel.runden_id[spiel_id].push(runde)
           datenbank.Runden.angebot_id.push([])
-          datenbank.Spiel.spiel_name.push(data.data.name)
+          datenbank.Spiel.spiel_name.push(message.data.name)
           
           let spiel = datenbank.Lobby.spielID[lobbycode][datenbank.Lobby.spielID[lobbycode].length-1]
 
@@ -240,7 +240,7 @@ export async function startExpress() {
                 game: datenbank.Lobby.spielID[lobbycode].length,
                 round: datenbank.Spiel.runden_id[spiel].length,
                 class:datenbank.Lobby.name[lobbycode],
-                name: data.data.name
+                name: message.data.name
               }
             }))
           datenbank.Spieler.websocket[n].send(JSON.stringify({ //wird an den spieler geschickt oder
@@ -254,7 +254,7 @@ export async function startExpress() {
               game: datenbank.Lobby.spielID[lobbycode].length,
               round: datenbank.Spiel.runden_id[spiel].length,
               class: datenbank.Lobby.name[lobbycode],
-              name: data.data.name
+              name: message.data.name
             }
           }))
           
@@ -270,7 +270,7 @@ export async function startExpress() {
           datenbank.Lobby.host_websocket[lobbycode].send(JSON.stringify({
             type: 'new_offer',
             data:{
-              amount:data.data.amount
+              amount:message.data.amount
             }
           }))
           if(datenbank.Lobby.spieler_id[lobbycode].length!=datenbank.Runden.angebot_id[runde-1].length){
@@ -454,6 +454,12 @@ export async function startExpress() {
             type: "wait",
             data: {}
           }))}
+          datenbank.Spieler.websocket[n].send(JSON.stringify({ //wird an den spieler geschickt oder
+            type: "total_players",
+            data: {
+              amount: temp.length
+            }
+          }))
 
               break
               case "answer_offer":
