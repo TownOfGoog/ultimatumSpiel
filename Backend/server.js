@@ -178,9 +178,8 @@ export async function startExpress() {
     //place_offer answer_offer
     ws.on("close", function(msg) {
       if(ws == datenbank.Lobby.host_websocket){
-      app.delete("/lobby/create", (req, res) => {
-        req = lobbycode
-      })}
+      datenbank.Lobby.lobby_kennwort[lobbycode] = undefined
+      }
 
       if(ws != datenbank.Lobby.host_websocket[lobbycode]){
         let index = datenbank.Lobby.spieler_id[lobbycode].indexOf(spieler_id)
@@ -522,7 +521,7 @@ export async function startExpress() {
               case "answer_offer":
                 console.log("rorororororororor")
 
-              
+                if(ws != datenbank.Lobby.host_websocket){return}
                 for (var i = 0; i < datenbank.Lobby.spieler_id; i++) {
                   var n = datenbank.Lobby.spieler_id[i];
                   datenbank.Spieler.websocket[n].send(JSON.stringify({ //wird an den spieler geschickt oder
@@ -545,19 +544,11 @@ export async function startExpress() {
               type: "exit",
               data: {}
             }))}
-            app.delete("/lobby/create", (req, res) => {
-              req = lobbycode
-            })
+            datenbank.Lobby.lobby_kennwort[lobbycode] = undefined
           break
 
         
-        //offer_response
-        //data
-       // amount
-        //accepted: 
-            
-        
-        
+
       }
     })
 
@@ -566,57 +557,7 @@ export async function startExpress() {
 
   
   
-  // Speichere den Code der Anfrage in eine Variabel  
-    // wenn Nutzer nicht eingeloggt:
-      // trage Schüler in die Datenbank ein
-      // schicke anzahl Spieler in Lobby an den Lehrer
-    // else
-      // trage Lehrer in die Datenbank ein
-    //
-    //
-    // warte auf nachricht
 
-
-
-      //  
-      //  
-      // if nachricht == "angebot fertig"
-        // Angebot Nehmer/Geber zufällige mischen: algo()
-        // Alle aus der Lobby erhalten ein Angebot welche vom algo eingeteilt wurden
-        // 
-        //  
-      // if nachricht == "nachfrage fertig":
-        // Alle aus der Lobby erhalten Signal: "Angenommen" || "Abgelehnt" aus der Datenbank
-        //
-      // if nachricht == "nächste runde":
-        // Alle aus der Lobby erhalten Signal: "nächste Runde"
-        // nächste runde in die datenbank 
-        //
-      // if nachricht == "nächstes spiel":
-        // Alle aus der Lobby erhalten Signal: "nächstes Spiel"
-        // neue runde und neues Spiel werden in die Datenbank eingefügt
-        //
-      // if nachricht == "lobby schliessen":
-        // SOLLTEN ALLE DATEN AUS DER DATENBANK GELÖSCHT WERDEN!?!?!?
-        //
-        //
-        //
-      // if nachricht == "angebot :00"
-        // in der datenbank wird summe und angebotgeber gespeichert
-        // lehrer update schicken
-        //
-      // if nachricht == "nachfrage :0"
-        // in der datenbank wird angenommen gespeichert
-        // lehrer update schicken
-        //
-        //
-      
-
-
-
-
-
-  // 
   
   
   return app.listen(8080);
@@ -624,19 +565,3 @@ export async function startExpress() {
 
 startExpress()
 
-
-// app.ws('/lobby', function (ws, req) {
-//   console.log("object");
-  
-//   ws.send("momomo");
-  
-  
-
-//   ws.on('message', function (msg) {
-//     console.log(ws);
-//     console.log(msg);
-//     ws.send("s");
-
-
-//   });
-// });
