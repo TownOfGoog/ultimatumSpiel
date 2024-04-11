@@ -302,7 +302,7 @@ export async function startExpress() {
           //angebote.forEach(function(element){
           //  geber = datenbank.Angebote.
           //})
-
+          temp = []
           datenbank.Runden.angebot_id[runde-1].forEach(function(element) {
             temp.push(datenbank.Angebote.angebot_geber[element])
             }
@@ -313,11 +313,23 @@ export async function startExpress() {
             datenbank.Angebote.angebot_nehmer.push(element)
             }
           )
+          console.log(datenbank.Angebote.angebot_nehmer)
+            console.log(temp, "uuuuuuuuuui")
+          let angebote
+          angebote = []
+          angebote = datenbank.Runden.angebot_id[runde-1]
+          console.log(datenbank.Runden.angebot_id)
+          console.log(runde-1)
+          console.log(angebote, "---------------")
 
-          for (var i = datenbank.Runden.angebot_id[runde][0]; i < temp.length+datenbank.Runden.angebot_id[runde][0]; i++) {
-            n=temp[i]
-            datenbank.Angebote.angebot_nehmer[i] = n
+
+          for (var i = 0; i < temp.length; i++) {
+            datenbank.Angebote.angebot_nehmer[angebote[i]] = temp[i]
           }
+          console.log(datenbank.Angebote.angebot_nehmer)
+
+
+
           for (var i = 0; i < temp.length; i++) {
             var n = temp[i];
             datenbank.Spieler.websocket[n].send(JSON.stringify({ //wird an den spieler geschickt oder
@@ -326,7 +338,7 @@ export async function startExpress() {
               game:datenbank.Lobby.spielID[lobbycode].length,
               round: datenbank.Spiel.runden_id[datenbank.Lobby.spielID[lobbycode].length-1].length,
               class: datenbank.Lobby.name,
-              amount: datenbank.Angebote.angebot_summe[i]
+              amount: datenbank.Angebote.angebot_summe[angebote[i]]
             }
           }))}
 
