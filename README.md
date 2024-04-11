@@ -61,7 +61,7 @@ wenn ein Schüler sein erhaltenes Angebot ablent:
 
 message.type = exit
 wenn der Lehrer das Spiel beenden will:
-  backend schickt allen message.type = exit
+  backend schickt allen message.type = exit 
 
 ### backend schickt:
 message.type = place_offer

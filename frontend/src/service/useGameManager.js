@@ -213,6 +213,10 @@ export function GameManagerProvider({ children }) {
             if (message.data && message.data.class)
               setTopRight(message.data.class);
             break;
+          case "total_players":
+            console.log('setting total player count to: ', message.data.amount);
+            setTotalPlayerCount(message.data.amount);
+            break;
           default:
             break;
         }
@@ -320,7 +324,6 @@ export function GameManagerProvider({ children }) {
 
   function skip() {
     console.log("überspringe runde...");
-    setPlayerCount(totalPlayerCount); //this will trigger the useEffect to change the phase
     const message = JSON.stringify({
       type: "skip",
       data: {},
