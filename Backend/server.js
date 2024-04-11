@@ -178,9 +178,8 @@ export async function startExpress() {
     //place_offer answer_offer
     ws.on("close", function(msg) {
       if(ws == datenbank.Lobby.host_websocket){
-      app.delete("/lobby/create", (req, res) => {
-        req = lobbycode
-      })}
+      datenbank.Lobby.lobby_kennwort[lobbycode] = undefined
+      }
 
       if(ws != datenbank.Lobby.host_websocket[lobbycode]){
         let index = datenbank.Lobby.spieler_id[lobbycode].indexOf(spieler_id)
@@ -545,9 +544,7 @@ export async function startExpress() {
               type: "exit",
               data: {}
             }))}
-            app.delete("/lobby/create", (req, res) => {
-              req = lobbycode
-            })
+            datenbank.Lobby.lobby_kennwort[lobbycode] = undefined
           break
 
         
