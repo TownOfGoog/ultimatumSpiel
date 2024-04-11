@@ -149,7 +149,7 @@ export default function PlayingHost() {
             </MyButton>
           </>
           :
-            <MyButton sx={{width: 'auto', padding: '0.8em'}} onClick={() => {game.skip()}}>
+            <MyButton disabled={game.playerCount === 0} sx={{width: 'auto', padding: '0.8em'}} onClick={() => {game.skip()}}>
               Fortfahren
             </MyButton>
           }
