@@ -3,6 +3,7 @@ import MyButton from "../components/myButton";
 import MyChart from "../components/myChart";
 import MyText from "../components/myText";
 import useGameManager from "../service/useGameManager";
+import * as XLSX from 'xlsx';
 
 export default function PlayingHost() {
   const game = useGameManager();
@@ -14,26 +15,6 @@ export default function PlayingHost() {
       counter += element[obj]
     })
     return counter
-  }
-
-  function total_answered_offers(objarr) {
-    return aggregate_obj_in_arr(objarr, 'accepted') + aggregate_obj_in_arr(objarr, 'declined')
-  }
-
-  function calculate_percentage(objarr, amount, answer) {
-    return (objarr[amount][answer]) / total_answered_offers(objarr) * 100 || 0
-    // return (game.offerPerMoneyTotal[0].accepted) / total_answered_offers(game.offerPerMoneyTotal) * 100
-  }
-
-  function pa(amount) {
-    // to shorten the graph data
-    // p: percentage, a: accepted, d: declined
-    return calculate_percentage(game.offerPerMoneyTotal, amount, 'accepted')
-  }
-
-  function pd(amount) {
-    // to shorten the graph data
-    return calculate_percentage(game.offerPerMoneyTotal, amount, 'declined')
   }
 
   return (
@@ -48,26 +29,28 @@ export default function PlayingHost() {
       //if host clicks on 'total view', show the total view
       <MyChart 
       //players who have answered this offer / totalofferscount * 100
+        dataset={game.offerPerMoneyTotalPercent}
         yAxis={ [
           {
             label: 'Antworten in %',
-            // tickMinStep: 1,
+            // valueFormatter: (value) => `${value}%`,
           },
         ]}
         xAxis={[
           {
-            data: ['0:10', '1:9', '2:8', '3:7', '4:6', '5:5', '6:4', '7:3', '8:2', '9:1', '10:0'],
+            label: 'Angebote',
+            dataKey: 'amount',
             scaleType: 'band',
           }
         ]}
         series={[
           {
-            data: [ pa(0), pa(1), pa(2), pa(3), pa(4), pa(5), pa(6), pa(7), pa(8), pa(9), pa(10) ], 
-            label: 'Angenommene %', color: '#0afff7' //#5eec77 green
+            dataKey: 'accepted',
+            label: 'Angenommen', color: '#0afff7' //#5eec77 green
           },
           {
-            data: [pd(0), pd(1), pd(2), pd(3), pd(4), pd(5), pd(6), pd(7), pd(8), pd(9), pd(10)], 
-            label: 'Abgelehnt %', color: '#ff8113'
+            dataKey: 'declined',
+            label: 'Abgelehnt', color: '#ff8113'
           },
         ]}
       />
@@ -183,18 +166,22 @@ export default function PlayingHost() {
 
           {totalView && 
             // only when total view is active, show the download button
-            <MyButton disabled sx={{width: 'auto', padding: '0.8em'}} onClick={() => {
-                            // Acquire Data (reference to the HTML table)
-
-              // // Extract Data (create a workbook object from the table)
-              // var workbook = XLSX.utils.json_to_sheet({test: 1, test2: 3});
-
-              // // Process Data (add a new row)
-              // var ws = workbook.Sheets["Sheet1"];
-              // XLSX.utils.sheet_add_aoa(ws, [["Created "+new Date().toISOString()]], {origin:-1});
-
-              // // Package and Release Data (`writeFile` tries to write and save an XLSB file)
-              // XLSX.writeFile(workbook, "Report.xlsb");
+            <MyButton sx={{width: 'auto', padding: '0.8em'}} onClick={() => {
+              console.log('game.offerPerMoneyTotalPercent: ', game.offerPerMoneyTotalPercent);
+              const rows = game.offerPerMoneyTotal.map((row, index) => ({
+                Geld: row.amount,
+                Angenommen: row.accepted,
+                Abgelehnt: row.declined,
+                AbsolutAngenommen: game.offerPerMoneyTotalPercent[index].accepted,
+                AbsolutAbgelehnt: game.offerPerMoneyTotalPercent[index].declined,
+              }));
+              const worksheet = XLSX.utils.json_to_sheet(rows);
+              //set column width
+              worksheet["!cols"] = [ { width: 5 }, { width: 12 }, { width: 9 }, { width: 19 }, { width: 16 } ];
+              const workbook = XLSX.utils.book_new();
+              XLSX.utils.book_append_sheet(workbook, worksheet, game.topRight || 'Namenlose Lobby'); //topright is our class
+              
+              XLSX.writeFile(workbook, "Presidents.xlsx");
             }}>
               Herunterladen
             </MyButton>

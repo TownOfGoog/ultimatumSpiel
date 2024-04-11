@@ -33,9 +33,10 @@ export function GameManagerProvider({ children }) {
     
   //data for chart
   const [offerPerMoney, setOfferPerMoney] = useState(dfault.offerPerMoney)
-  
   //data for chart aggregated over the whole game (lobby)
   const [offerPerMoneyTotal, setOfferPerMoneyTotal] = useState(dfault.offerPerMoneyTotal)
+  //data for aggregated chart in percent
+  const [offerPerMoneyTotalPercent, setOfferPerMoneyTotalPercent] = useState(dfault.offerPerMoneyTotalPercent)
   
   useEffect(() => {
     console.log("nächste phase...", playerCount, totalPlayerCount);
@@ -168,10 +169,29 @@ export function GameManagerProvider({ children }) {
               const answer = message.data.accepted ? "accepted" : "declined";
               //set accepted or declined
               newData[parseInt(message.data.amount) / 10][answer]++;
-
+              
               return newData;
             });
-            //
+            //also update data for total chart in percent
+            setOfferPerMoneyTotalPercent((prev) => {
+              
+              //get total amount of accepted and declined offers
+              //if new offer is accepted, increase accepted
+              const totalAccepted = offerPerMoneyTotal[parseInt(message.data.amount) / 10].accepted
+              //if declined, increase declined
+              const totalDeclined = offerPerMoneyTotal[parseInt(message.data.amount) / 10].declined
+              
+              //calculate percentage
+              const acceptedPercent = totalAccepted / (totalAccepted + totalDeclined) * 100;
+              const declinedPercent = totalDeclined / (totalAccepted + totalDeclined) * 100;
+
+              //set percentage
+              const newData = [...prev];
+              newData[parseInt(message.data.amount) / 10].accepted = acceptedPercent;
+              newData[parseInt(message.data.amount) / 10].declined = declinedPercent;
+              newData[parseInt(message.data.amount) / 10].amount = prev[parseInt(message.data.amount) / 10].amount
+              return newData;
+            });
             break;
           case "new_round":
             console.log("neue runde: ", message.data);
@@ -324,6 +344,7 @@ export function GameManagerProvider({ children }) {
     offerPhase,
     offerPerMoney,
     offerPerMoneyTotal,
+    offerPerMoneyTotalPercent,
     change_page,
     create_lobby,
     join_lobby,
