@@ -36,6 +36,7 @@ let datenbank = {
   },
   "Spiel":{
     "spiel_id":[],
+    "spiel_name":[],
     "runden_id":[[]]
   },
   "Runden":{
@@ -231,6 +232,7 @@ export async function startExpress() {
           datenbank.Spiel.runden_id[spiel_id].push(runde)
           console.log(datenbank.Spiel.runden_id[lobbycode],"ijjijijijijijijiiiijiji")
           datenbank.Runden.angebot_id.push([])
+          datenbank.Spiel.spiel_name.push(data.data.name)
           
           let spiel = datenbank.Lobby.spielID[lobbycode][datenbank.Lobby.spielID[lobbycode].length-1]
 
@@ -244,17 +246,13 @@ export async function startExpress() {
               data:{
                 game: datenbank.Lobby.spielID[lobbycode].length,
                 round: datenbank.Spiel.runden_id[spiel].length,
-                class:datenbank.Lobby.name[lobbycode]
+                class:datenbank.Lobby.name[lobbycode],
+                name: data.data.name
               }
             }))
           datenbank.Spieler.websocket[n].send(JSON.stringify({ //wird an den spieler geschickt oder
             type: "place_offer",
-            data: {
-              game: datenbank.Lobby.spielID[lobbycode].length,
-              round: datenbank.Spiel.runden_id[spiel].length,
-              class: datenbank.Lobby.name[lobbycode],
-              code: lobbycode
-            }
+            data: {}
           }))
         }
           console.log(lobbycode)
@@ -263,7 +261,8 @@ export async function startExpress() {
             data:{
               game: datenbank.Lobby.spielID[lobbycode].length,
               round: datenbank.Spiel.runden_id[spiel].length,
-              class: datenbank.Lobby.name[lobbycode]
+              class: datenbank.Lobby.name[lobbycode],
+              name: data.data.name
             }
           }))
           
