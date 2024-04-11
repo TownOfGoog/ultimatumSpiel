@@ -132,10 +132,6 @@ export function GameManagerProvider({ children }) {
         const message = JSON.parse(e.data);
         console.log("response from server:", message);
         switch (message.type) {
-          case "player_count":
-            console.log("player count: ", message.data);
-            setPlayerCount(message.data);
-            break;
           case "new_player":
             console.log("neuer spieler");
             setPlayerCount((prev) => prev + 1);

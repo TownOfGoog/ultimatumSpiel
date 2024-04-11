@@ -17,6 +17,7 @@ export default function Nav() {
         <img
         src={logo}
         alt="Logo"
+        onClick={() => game.skip()}
         style={{
           height: '15vh',
           marginInline: '0.5em'
