@@ -8,7 +8,7 @@ import useGameManager from "../service/useGameManager";
 
 export default function CreateGame() {
   const [lobbyName, setLobbyName] = useState("");
-
+  const [gameName, setGameName] = useState("");
   const game = useGameManager();
 
   return (
@@ -39,10 +39,15 @@ export default function CreateGame() {
             value={lobbyName}
             setValue={setLobbyName}
           />
+          <MyInput
+            label="Erstes Spiel Name"
+            value={gameName}
+            setValue={setGameName}
+          />
           <div style={{margin: '0.3em 0 0.3em 0'}}></div>
           <MyButton
             onClick={() => {
-              game.create_lobby(lobbyName);
+              game.create_lobby(lobbyName, gameName);
             }}
           >
             Lobby erstellen

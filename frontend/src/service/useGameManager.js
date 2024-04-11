@@ -24,6 +24,7 @@ export function GameManagerProvider({ children }) {
 
   const [ws, setWs] = useState(dfault.ws); //websocket connection
   const [title, setTitle] = useState(dfault.title); //title to be displayed in the navbar
+  const [subTitle, setSubTitle] = useState(dfault.subTitle); //subtitle to be displayed in the navbar
   const [topRight, setTopRight] = useState(dfault.topRight) //top right corner of the page (login or current class)
   const [body, setBody] = useState(dfault.body); //content of the page
   const [code, setCode] = useState(dfault.code); //lobbycode
@@ -200,6 +201,7 @@ export function GameManagerProvider({ children }) {
             setTitle(
               `Spiel ${message.data.game} / Runde ${message.data.round}`
             );
+            setSubTitle(message.data.name);
             break;
           case "place_offer":
             console.log("Wähle dein Angebot");
@@ -233,21 +235,23 @@ export function GameManagerProvider({ children }) {
     setWs(ws);
   }
 
-  function create_lobby(name) {
+  function create_lobby(lobbyName, gameName) {
+    console.log('gameName: ', gameName);
     //when creating a lobby, save the code and join it's lobby
     fetch(`http://${process.env.REACT_APP_BACKEND_URL}/lobby/create`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
       },
-      body: JSON.stringify({ name: name }),
+      body: JSON.stringify({ name: lobbyName }),
     })
       .then((response) => response.json())
       .then((data) => {
         console.log("got code: ", data);
         const code = data;
         setCode(code);
-        setTopRight(name);
+        setTopRight(lobbyName);
+        setSubTitle(gameName);
         join_lobby(code);
       })
       .catch((error) => {
@@ -261,25 +265,20 @@ export function GameManagerProvider({ children }) {
     change_page("waiting_players_page_host");
     connect_websocket(code);
   }
-
-  function start_game() {
-    console.log("starte spiel...");
-    const message = JSON.stringify({
-      type: "start_game",
-      data: {},
-    });
-    ws.send(message);
-    setTotalPlayerCount(playerCount);
-    setPlayerCount(0);
-    change_page("playingHost");
-  }
   
-  function new_game() {
+  function new_game(game_name) {
     console.log("neues Spiel...");
-    setPlayerCount(totalPlayerCount); //this will trigger the useEffect to change the phase
+
+    if (totalPlayerCount === Infinity) {
+      setTotalPlayerCount(playerCount)
+    } else {
+      setPlayerCount(totalPlayerCount); //this will trigger the useEffect to change the phase
+    }
     const message = JSON.stringify({
       type: "start_game",
-      data: {},
+      data: {
+        name: game_name,
+      },
     });
     ws.send(message);
   }
@@ -333,9 +332,18 @@ export function GameManagerProvider({ children }) {
     ws.send(message);
   }
 
+  function stop() {
+    console.log("beende Spiel...");
+    const message = JSON.stringify({
+      type: "exit",
+      data: {},
+    });
+    ws.send(message);
+  }
   //all the variables and functions made global
   let publicVariables = {
     title,
+    subTitle,
     topRight,
     body,
     code,
@@ -348,13 +356,13 @@ export function GameManagerProvider({ children }) {
     change_page,
     create_lobby,
     join_lobby,
-    start_game,
     new_game,
     new_round,
     place_offer,
     accept_offer,
     decline_offer,
     skip,
+    stop,
   };
 
   return (

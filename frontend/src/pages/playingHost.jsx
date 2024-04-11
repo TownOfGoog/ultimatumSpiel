@@ -141,7 +141,7 @@ export default function PlayingHost() {
           {game.offerPhase === 'wait' ?
           //when everyone has given their answer, show buttons to continue game
           <>
-            <MyButton sx={{width: 'auto', padding: '0.8em'}} onClick={() => {game.new_game()}}>
+            <MyButton sx={{width: 'auto', padding: '0.8em'}} onClick={() => {game.new_game(prompt('Name des neuen Spieles'))}}>
               Neues Spiel
             </MyButton>
             <MyButton sx={{width: 'auto', padding: '0.8em'}} onClick={() => {game.new_round()}}>
@@ -159,7 +159,7 @@ export default function PlayingHost() {
         <div style={{width: '100%', display: 'flex', justifyContent: 'flex-end', gap: '0.5em'}}>
           {game.offerPhase === 'wait' &&
             //only when everyone has answered, show the close button
-            <MyButton disabled sx={{width: 'auto', padding: '0.8em'}} onClick={() => {game.skip()}}>
+            <MyButton sx={{width: 'auto', padding: '0.8em'}} onClick={() => {game.skip()}}>
               Beenden
             </MyButton>
           }

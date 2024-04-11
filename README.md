@@ -19,6 +19,7 @@ wenn der Lehrer das Spiel startet:
   backend schickt allen ein message.type = new_round
   message.data.game = z.B. 1
   message.data.round = z.B. 1
+  message.data.name = z.B. Du findest das Geld auf der Strasse
   backend schickt allen Spieler ein message.type = place_offer
 
 message.type = start_round
@@ -57,6 +58,10 @@ wenn ein Schüler sein erhaltenes Angebot ablent:
   backend schickt Lehrperson ein message.type = offer_response
   message.data.amount = z.B. 30
   message.data.accepted = false
+
+message.type = exit
+wenn der Lehrer das Spiel beenden will:
+  backend schickt allen message.type = exit
 
 ### backend schickt:
 message.type = place_offer

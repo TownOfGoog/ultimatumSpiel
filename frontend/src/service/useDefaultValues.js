@@ -2,6 +2,7 @@ export default function useDefaultValues() {
   return {
     ws: null,
     title: 'something went wrong',
+    subTitle: '',
     topRight: 'login',
     body: <p>something went wrong</p>,
     code: null,

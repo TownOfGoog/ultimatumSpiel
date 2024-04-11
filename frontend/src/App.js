@@ -13,7 +13,7 @@ function App() {
   return (
     <>
       <div className='nav'>
-        <Nav title={game.title}/>
+        <Nav/>
       </div>
       <div className='body'>
         {game.body}

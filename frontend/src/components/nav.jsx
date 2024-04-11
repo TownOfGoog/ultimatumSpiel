@@ -1,8 +1,9 @@
 import Grid from "@mui/joy/Grid";
 import logo from "../assets/logo.png"
 import useGameManager from "../service/useGameManager";
+import MyText from "./myText";
 
-export default function Nav({ title }) {
+export default function Nav() {
   const game = useGameManager();
   return (
     <Grid container columns={{ xs: 3 }} sx={{ flexGrow: 1, bgcolor: "black", color: "white", height: "100%", flexWrap: "nowrap" }}>
@@ -26,13 +27,15 @@ export default function Nav({ title }) {
  
       <Grid xs={1} sx={{
           display: "flex",
+          flexDirection: "column",
           alignItems: "center",
           justifyContent: "center",
           fontWeight: "bold",
           fontSize: 64,
           minWidth: '10em'
         }}>
-        <div>{title}</div>
+        <div>{game.title}</div>
+        <MyText isInNav>{game.subTitle}</MyText>
       </Grid>
  
       <Grid xs={1} sx={{
