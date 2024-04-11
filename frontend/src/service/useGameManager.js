@@ -217,6 +217,11 @@ export function GameManagerProvider({ children }) {
             console.log('setting total player count to: ', message.data.amount);
             setTotalPlayerCount(message.data.amount);
             break;
+          case "exit":
+            console.log("game over");
+            alert("Danke fürs Spielen!")
+            change_page("home_page");
+            break;
           default:
             break;
         }
@@ -331,7 +336,7 @@ export function GameManagerProvider({ children }) {
     ws.send(message);
   }
 
-  function stop() {
+  function exit() {
     console.log("beende Spiel...");
     const message = JSON.stringify({
       type: "exit",
@@ -361,7 +366,7 @@ export function GameManagerProvider({ children }) {
     accept_offer,
     decline_offer,
     skip,
-    stop,
+    exit,
   };
 
   return (
