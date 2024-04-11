@@ -167,7 +167,12 @@ export async function startExpress() {
       // Alle aus der Lobby erhalten Signal: "Spiel Startet"
       // nächste runde in die datenbank
     //place_offer answer_offer
-    
+    ws.on("close", function(msg) {
+      if(ws == datenbank.Lobby.host_websocket){
+      app.delete("/lobby/create", (req, res) => {
+        req = lobbycode
+      })}
+    })
     let items
     ws.on("message", function(msg) {
       runde = datenbank.Runden.runden_id.length
@@ -377,6 +382,11 @@ export async function startExpress() {
 
           break
           case "skip":
+
+
+
+
+
             switch(datenbank.Lobby.gamestate[lobbycode]){
               case "new_round":
 
@@ -449,8 +459,6 @@ export async function startExpress() {
               case "answer_offer":
                 console.log("rorororororororor")
 
-                
-
               
                 for (var i = 0; i < datenbank.Lobby.spieler_id; i++) {
                   var n = datenbank.Lobby.spieler_id[i];
@@ -465,6 +473,17 @@ export async function startExpress() {
               break
             }
 
+          break
+          case ("exit"):
+            for (var i = 0; i < datenbank.Lobby.spieler_id; i++) {
+              var n = datenbank.Lobby.spieler_id[i];
+              datenbank.Spieler.websocket[n].send(JSON.stringify({ //wird an den spieler geschickt oder
+              type: "exit",
+              data: {}
+            }))}
+            app.delete("/lobby/create", (req, res) => {
+              req = lobbycode
+            })
           break
 
         
