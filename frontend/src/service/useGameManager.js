@@ -35,7 +35,7 @@ export function GameManagerProvider({ children }) {
   const [offerPerMoney, setOfferPerMoney] = useState(dfault.offerPerMoney)
   
   //data for chart aggregated over the whole game (lobby)
-  const [offerPerMoneyTotal, setOfferPerMoneyTotal] = useState(dfault.offerPerMoney)
+  const [offerPerMoneyTotal, setOfferPerMoneyTotal] = useState(dfault.offerPerMoneyTotal)
   
   useEffect(() => {
     console.log("nächste phase...", playerCount, totalPlayerCount);
@@ -54,17 +54,9 @@ export function GameManagerProvider({ children }) {
         console.log('nun sind wir in der angebotsphase...');
         setOfferPhase('make_offer');
         setPlayerCount(0);
-        //append current data to total data
-        setOfferPerMoneyTotal((prev) => {
-          const newData = [...prev];
-          for (let i = 0; i < offerPerMoney.length; i++) {
-            newData[i].open += offerPerMoney[i].open;
-            newData[i].accepted += offerPerMoney[i].accepted;
-            newData[i].declined += offerPerMoney[i].declined;
-          }
-          return newData;
-        });
-        //reset current data
+        console.log('UPDATING TOTALS');
+        console.log('offerPerMoney: ', offerPerMoney);
+        //reset data for chart, but not data for total chart
         setOfferPerMoney(dfault.offerPerMoney)
       }
     }
@@ -159,7 +151,7 @@ export function GameManagerProvider({ children }) {
           case "offer_response":
             console.log("angebot wurde beantwortet: ", message.data);
             setPlayerCount((prev) => prev + 1);
-            //change data for chart 1 (offers per money)
+            //change data for chart (offers per money)
             setOfferPerMoney((prev) => {
               const newData = [...prev];
               const answer = message.data.accepted ? "accepted" : "declined";
@@ -170,6 +162,16 @@ export function GameManagerProvider({ children }) {
 
               return newData;
             })
+            //also update data for total chart
+            setOfferPerMoneyTotal((prev) => {
+              const newData = [...prev];
+              const answer = message.data.accepted ? "accepted" : "declined";
+              //set accepted or declined
+              newData[parseInt(message.data.amount) / 10][answer]++;
+
+              return newData;
+            });
+            //
             break;
           case "new_round":
             console.log("neue runde: ", message.data);
@@ -321,6 +323,7 @@ export function GameManagerProvider({ children }) {
     totalPlayerCount,
     offerPhase,
     offerPerMoney,
+    offerPerMoneyTotal,
     change_page,
     create_lobby,
     join_lobby,
