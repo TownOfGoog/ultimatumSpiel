@@ -177,8 +177,10 @@ export async function startExpress() {
       // nächste runde in die datenbank
     //place_offer answer_offer
     ws.on("close", function(msg) {
-      if(ws == datenbank.Lobby.host_websocket){
-      datenbank.Lobby.lobby_kennwort[lobbycode] = undefined
+      if(ws == datenbank.Lobby.host_websocket[lobbycode]){
+        console.log("moin")
+      datenbank.Lobby.lobby_kennwort[lobbycode] = 0
+
       }
 
       if(ws != datenbank.Lobby.host_websocket[lobbycode]){
@@ -549,12 +551,16 @@ export async function startExpress() {
 
           break
           case ("exit"):
-            for (var i = 0; i < datenbank.Lobby.spieler_id; i++) {
-              var n = datenbank.Lobby.spieler_id[i];
-              datenbank.Spieler.websocket[n].send(JSON.stringify({ //wird an den spieler geschickt oder
+            
+            for (var i = 0; i < datenbank.Lobby.spieler_id[lobbycode].length; i++) {
+              var g = datenbank.Lobby.spieler_id[lobbycode][i];
+              console.log(datenbank.Lobby.spieler_id[lobbycode][i])
+              console.log("W")
+              datenbank.Spieler.websocket[g].send(JSON.stringify({ //wird an den spieler geschickt oder
               type: "exit",
               data: {}
             }))}
+            console.log("jojojo")
             datenbank.Lobby.lobby_kennwort[lobbycode] = undefined
           break
 
