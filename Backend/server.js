@@ -186,7 +186,14 @@ export async function startExpress() {
         if (index !== -1) {
           datenbank.Lobby.spieler_id[lobbycode].splice(index, 1)
         }
+        datenbank.Lobby.host_websocket[lobbycode].send(JSON.stringify({ //wird an den spieler geschickt oder
+          type: "total_players",
+          data: {
+            amount: datenbank.Lobby.spieler_id[lobbycode].length
+          }
+        }))
       }
+
       console.log(datenbank.Lobby.spieler_id[lobbycode])
     })
     let items
@@ -222,7 +229,8 @@ export async function startExpress() {
               data:{
                 game: datenbank.Lobby.spielID[lobbycode].length,
                 round: datenbank.Spiel.runden_id[spiel2].length,
-                class:datenbank.Lobby.name[lobbycode]
+                class:datenbank.Lobby.name[lobbycode],
+                name: datenbank.Spiel.spiel_name[datenbank.Spiel.spiel_id.length-1]
               }
             }))
             datenbank.Spieler.websocket[n].send(JSON.stringify({
@@ -230,7 +238,8 @@ export async function startExpress() {
               data:{
                 game: datenbank.Lobby.spielID[lobbycode].length,
                 round: datenbank.Spiel.runden_id[spiel2].length,
-                class:datenbank.Lobby.name[lobbycode]
+                class:datenbank.Lobby.name[lobbycode],
+                name: datenbank.Spiel.spiel_name[datenbank.Spiel.spiel_id.length-1]
               }
             }))
             datenbank.Spieler.websocket[n].send(JSON.stringify({ //wird an den spieler geschickt oder
@@ -238,7 +247,9 @@ export async function startExpress() {
               data: {
                 game: datenbank.Lobby.spielID[lobbycode].length,
                 round: datenbank.Spiel.runden_id[spiel2].length,
-                class: datenbank.Lobby.name[lobbycode]
+                class: datenbank.Lobby.name[lobbycode],
+                name: datenbank.Spiel.spiel_name[datenbank.Spiel.spiel_id.length-1]
+
               }
             }))
         }
@@ -246,7 +257,7 @@ export async function startExpress() {
         datenbank.Lobby.host_websocket[lobbycode].send(JSON.stringify({ //wird an den spieler geschickt oder
           type: "total_players",
           data: {
-            amount: datenbank.Lobby.spieler_id[lobbycode]
+            amount: datenbank.Lobby.spieler_id[lobbycode].length
           }
         }))
         
@@ -255,8 +266,8 @@ export async function startExpress() {
           open = false
           //aktualisiert die Datenbank
           datenbank.Lobby.gamestate[lobbycode] = "new_round"
-          datenbank.Spiel.runden_id.push([])
           let spiel_id = datenbank.Spiel.spiel_id.length
+          datenbank.Spiel.runden_id.push([])
           datenbank.Spiel.spiel_id.push(spiel_id)
           datenbank.Lobby.spielID[lobbycode].push(spiel_id)
           datenbank.Runden.runden_id.push(runde)
@@ -278,7 +289,7 @@ export async function startExpress() {
                 game: datenbank.Lobby.spielID[lobbycode].length,
                 round: datenbank.Spiel.runden_id[spiel].length,
                 class:datenbank.Lobby.name[lobbycode],
-                name: message.data.name
+                name: datenbank.Spiel.spiel_name[spiel_id]
               }
             }))
           datenbank.Spieler.websocket[n].send(JSON.stringify({ //wird an den spieler geschickt oder
@@ -298,7 +309,7 @@ export async function startExpress() {
           datenbank.Lobby.host_websocket[lobbycode].send(JSON.stringify({ //wird an den spieler geschickt oder
             type: "total_players",
             data: {
-              amount: datenbank.Lobby.spieler_id[lobbycode]
+              amount: datenbank.Lobby.spieler_id[lobbycode].length
             }
           }))
           
