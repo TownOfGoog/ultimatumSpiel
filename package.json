@@ -1,0 +1,12 @@
+{
+  "name": "ultimatum-spiel",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "front": "cd ./frontend && npm run start",
+    "back": "cd ./Backend && node server.js",
+    "test": "cd ./Backend && node --experimental-vm-modules node_modules/jest/bin/jest.js",
+    "dev": "cd ./Backend && npm i && cd .. && docker-compose -f docker-compose.dev.yaml -p ultimatum-spiel-development up",
+    "prod": "docker-compose -p ultimatum-spiel-production up --build"
+  }
+}
