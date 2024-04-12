@@ -159,7 +159,7 @@ export default function PlayingHost() {
         <div style={{width: '100%', display: 'flex', justifyContent: 'flex-end', gap: '0.5em'}}>
           {game.offerPhase === 'wait' &&
             //only when everyone has answered, show the close button
-            <MyButton sx={{width: 'auto', padding: '0.8em'}} onClick={() => {game.skip()}}>
+            <MyButton sx={{width: 'auto', padding: '0.8em'}} onClick={() => {game.exit()}}>
               Beenden
             </MyButton>
           }
