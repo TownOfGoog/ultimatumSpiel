@@ -74,7 +74,18 @@ export async function startExpress() {
   //Login magie   /login
   app.post("/login", (req, res) =>{
     //test zum hochladen
+
     res.send(["Anita", "123456"])
+    
+  })
+
+  app.post("/register", (req, res) =>{
+    //test zum hochladen
+    if(datenbank.Lehrer.benutzername.includes(req.body.name)){res.send("Vergeben")}else{
+    datenbank.Lehrer.LehrerID.push(datenbank.Lehrer.LehrerID.length)
+    datenbank.Lehrer.benutzername.push(req.body.name)
+    datenbank.Lehrer.passwort.push(req.body.passwort)
+    datenbank.Lehrer.email.push(req.body.email)}
     
   })
   

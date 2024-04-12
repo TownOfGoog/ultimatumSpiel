@@ -5,6 +5,19 @@
 docker-compose -f docker-compose.dev.yaml up --build
 ```
 
+## Register Info
+req.body.name
+req.body.password
+req.body.email
+Wenn der Benutzername bereits existiert führt das Backend
+res.send("Vergeben")
+aus
+
+## Login Info
+req.body.id
+req.body.password
+
+
 
 ## message types:
 ### frontend schickt:
