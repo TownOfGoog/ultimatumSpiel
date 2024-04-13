@@ -7,7 +7,7 @@ export default function MyInput({label, title, value, setValue, password, style,
   function handleChange(event) {
     if (big) {
       const code = event.target.value; //string from the input
-      const sanitizedCode = code.replace(/[^\d]/g, '').slice(0, 5); //remove nondigits and limit length to 5
+      const sanitizedCode = parseInt(code.replace(/[^\d]/g, '').slice(0, 5)); //remove nondigits and limit length to 5
       setValue(sanitizedCode);//save the value
     } else {
       setValue(event.target.value)

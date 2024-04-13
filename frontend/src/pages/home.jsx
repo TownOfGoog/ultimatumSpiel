@@ -7,7 +7,7 @@ import MyButton from "../components/myButton";
 import useGameManager from "../service/useGameManager";
 
 export default function Home() {
-  const [codeValue, setCodeValue] = useState(""); //this value will be formatted to mostly avoid faulty inputs
+  const [lobby_code, setLobby_code] = useState(""); //this value will be formatted to mostly avoid faulty inputs
   const game = useGameManager();
   return (
     <Grid
@@ -47,8 +47,8 @@ export default function Home() {
           }}
         >
           <MyInput
-            value={codeValue}
-            setValue={setCodeValue}
+            value={lobby_code}
+            setValue={setLobby_code}
             big={true}
             title={"Code eingeben"}
           />
@@ -62,7 +62,7 @@ export default function Home() {
 
           <MyButton
             onClick={() => {
-              game.join_lobby(codeValue);
+              game.dispatch({type: 'connect_lobby', payload: { lobby_code }})
             }}
           >
             Lobby betreten
@@ -96,7 +96,7 @@ export default function Home() {
 
         <MyButton
           onClick={() => {
-            game.change_page("create_game");
+            game.dispatch({type: 'change_page', payload: 'create_game'})
           }}
         >
           Lobby erstellen

@@ -7,7 +7,7 @@ function App() {
   const game = useGameManager();
 
   useEffect(() => {
-    game.change_page("home_page");
+    game.dispatch({type: 'change_page', payload: 'home_page'})
   }, [])
 
   return (
@@ -16,7 +16,7 @@ function App() {
         <Nav/>
       </div>
       <div className='body'>
-        {game.body}
+        {game.state.body}
       </div>
     </>
   );

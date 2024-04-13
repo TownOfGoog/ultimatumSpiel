@@ -1,15 +1,18 @@
 export default function useDefaultValues() {
   return {
     ws: null,
+    current_game: 0,
+    current_round: 0,
     title: 'something went wrong',
-    subTitle: '',
-    topRight: 'login',
+    game_names: [''],
+    top_right: 'login',
     body: <p>something went wrong</p>,
     code: null,
-    playerCount: 0,
-    totalPlayerCount: Infinity,
-    offerPhase: 'make_offer',
-    offerPerMoney: [
+    exit: false,
+    player_count: 0,
+    total_player_count: Infinity,
+    offer_phase: 'make_offer',
+    offer_per_money: [
       {
         amount: 0,
         open: 0,
@@ -77,7 +80,7 @@ export default function useDefaultValues() {
         declined: 0
       }
     ],
-    offerPerMoneyTotal: [
+    offer_per_money_total: [[
       {
         amount: 0,
         accepted: 0,
@@ -133,63 +136,63 @@ export default function useDefaultValues() {
         accepted: 0,
         declined: 0
       }
-    ],
-    offerPerMoneyTotalPercent: [
+    ]],
+    offer_per_money_total_percent: [[
       {
-        amount: '0:100',
+        amount: 0,
         accepted: 0,
         declined: 0
       },
       {
-        amount: '10:90',
+        amount: 10,
         accepted: 0,
         declined: 0
       },
       {
-        amount: '20:80',
+        amount: 20,
         accepted: 0,
         declined: 0
       },
       {
-        amount: '30:70',
+        amount: 30,
         accepted: 0,
         declined: 0
       },
       {
-        amount: '40:60',
+        amount: 40,
         accepted: 0,
         declined: 0
       },
       {
-        amount: '50:50',
+        amount: 50,
         accepted: 0,
         declined: 0
       },
       {
-        amount: '60:40',
+        amount: 60,
         accepted: 0,
         declined: 0
       },
       {
-        amount: '70:30',
+        amount: 70,
         accepted: 0,
         declined: 0
       },
       {
-        amount: '80:20',
+        amount: 80,
         accepted: 0,
         declined: 0
       },
       {
-        amount: '90:10',
+        amount: 90,
         accepted: 0,
         declined: 0
       },
       {
-        amount: '100:0',
+        amount: 100,
         accepted: 0,
         declined: 0
       },
-    ]
+    ]]
   }
 }

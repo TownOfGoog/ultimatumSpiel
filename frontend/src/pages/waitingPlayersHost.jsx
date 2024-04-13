@@ -33,25 +33,25 @@ export default function WaitingPlayersHost() {
             Der Code:
           </MyText>
           <MyText level="h1" fontSize="5em">
-            {game.code}
+            {game.state.code}
           </MyText>
         </Grid>
 
         {/* right center part of the screen */}
         <Grid xs={1} sx={{ height: "40%", display: 'flex', justifyContent: 'center', alignItems: 'center' }} >
-          <QRCode value={window.location.href + 'lobby/' + game.code} size={200} />
+          <QRCode value={window.location.href + 'lobby/' + game.state.code} size={200} />
         </Grid>
 
         {/* bottom center part of the screen */}
         <Grid xs={2} sx={{ height: "40%", display: 'flex', justifyContent: 'center'}} >
           <MyText>
-            Spieler: {game.playerCount }
+            Spieler: {game.state.player_count }
           </MyText>
         </Grid>
       </Grid> 
 
       <Grid xs={1} sx={{ height: "100%", justifyContent: 'flex-end', alignContent: 'flex-end', flexWrap: 'wrap' }} >
-        <MyButton disabled={game.playerCount <= 0} sx={{width: 'auto', padding: '1em', margin: '0.5em'}} onClick={() => game.new_game(game.subTitle)}>
+        <MyButton disabled={game.state.player_count <= 0} sx={{width: 'auto', padding: '1em', margin: '0.5em'}} onClick={() => game.new_game(game.state.game_name)}>
           Starten
         </MyButton>
       </Grid>

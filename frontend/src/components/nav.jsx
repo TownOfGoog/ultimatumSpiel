@@ -35,8 +35,8 @@ export default function Nav() {
           fontSize: 64,
           minWidth: '10em'
         }}>
-        <div>{game.title}</div>
-        <MyText isInNav>{game.subTitle}</MyText>
+        <div>{game.state.title}</div>
+        <MyText isInNav>{game.state.game_name}</MyText>
       </Grid>
  
       <Grid xs={1} sx={{
@@ -46,7 +46,9 @@ export default function Nav() {
           fontWeight: "bold",
           fontSize: 64
         }}>
-        <div style={{marginInline: '0.5em'}}>{game.topRight}</div>
+          <button onClick={() => {console.log(game.state)}}>test</button>
+
+        <div style={{marginInline: '0.5em'}}>{game.state.top_right}</div>
       </Grid>
     </Grid>
   );

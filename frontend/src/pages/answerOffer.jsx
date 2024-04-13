@@ -51,7 +51,7 @@ export default function AnswerOffer({ amount }) {
             alignItems: "flex-start",
           }}
         >
-          <MyButton answer={'accept'} onClick={() => {game.accept_offer()}}>Annehmen</MyButton>
+          <MyButton answer={'accept'} onClick={() => {game.answer_offer(true)}}>Annehmen</MyButton>
         </MyGrid>
         <MyGrid
           xs={2}
@@ -61,7 +61,7 @@ export default function AnswerOffer({ amount }) {
             alignItems: "flex-start",
           }}
         >
-          <MyButton answer={'decline'} onClick={() => {game.decline_offer()}}>Ablehnen</MyButton>
+          <MyButton answer={'decline'} onClick={() => {game.answer_offer(false)}}>Ablehnen</MyButton>
         </MyGrid>
       </MyGrid>
 

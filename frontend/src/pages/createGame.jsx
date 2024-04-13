@@ -7,8 +7,8 @@ import { useState } from "react";
 import useGameManager from "../service/useGameManager";
 
 export default function CreateGame() {
-  const [lobbyName, setLobbyName] = useState("");
-  const [gameName, setGameName] = useState("");
+  const [lobby_name, setLobbyName] = useState("");
+  const [game_name, setGameName] = useState("");
   const game = useGameManager();
 
   return (
@@ -36,23 +36,43 @@ export default function CreateGame() {
         >
           <MyInput
             label={"Lobby Name"}
-            value={lobbyName}
+            value={lobby_name}
             setValue={setLobbyName}
           />
-          <MyInput
+        </FormControl>
+        
+        <MyInput
             label="Erstes Spiel Name"
-            value={gameName}
+            value={game_name}
             setValue={setGameName}
           />
           <div style={{margin: '0.3em 0 0.3em 0'}}></div>
           <MyButton
             onClick={() => {
-              game.create_lobby(lobbyName, gameName);
+              console.log('creating lobby...');
+              //when creating a lobby, save the code and join it's lobby
+              fetch(`http://${process.env.REACT_APP_BACKEND_URL}/lobby/create`, {
+                method: "POST",
+                headers: {
+                  "Content-Type": "application/json",
+                },
+                body: JSON.stringify({ name: lobby_name }),
+              })
+                .then((response) => response.json())
+                .then((data) => {
+                  console.log("lobbycode will be: ", data);
+                  const lobby_code = data;
+                  game.dispatch({ type: "connect_lobby", payload: {lobby_code, lobby_name, game_name } })
+                })
+                .catch((error) => {
+                  console.error("Error:", error);
+                });
+              // game.dispatch({type: 'create_lobby', payload: {lobby_name, game_name}})
+              // game.create_lobby(lobby_name, game_name);
             }}
           >
             Lobby erstellen
           </MyButton>
-        </FormControl>
       </Grid>
 
       <Grid xs={1} />

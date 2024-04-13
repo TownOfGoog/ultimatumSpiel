@@ -2,7 +2,6 @@ import Grid from "../components/myGrid";
 // import { Grid } from "@mui/joy";
 import ReactLoading from "react-loading";
 import MyText from "../components/myText";
-import useGameManager from "../service/useGameManager";
 
 export default function WaitingPlayers() {
   return (

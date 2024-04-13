@@ -1,6 +1,6 @@
 //service to handle game logic / events
 
-import { createContext, useContext, useEffect, useState } from "react";
+import { createContext, useContext, useEffect, useReducer, useRef } from "react";
 import Home from "../pages/home";
 import Loginpage from "../pages/login";
 import CreateGame from "../pages/createGame";
@@ -18,353 +18,388 @@ export default function useGameManager() {
   return useContext(GameManagerContext);
 }
 
-//here is the main logic of the game
 export function GameManagerProvider({ children }) {
   const dfault = useDefaultValues(); //default keyword doesnt work
-
-  const [ws, setWs] = useState(dfault.ws); //websocket connection
-  const [title, setTitle] = useState(dfault.title); //title to be displayed in the navbar
-  const [subTitle, setSubTitle] = useState(dfault.subTitle); //subtitle to be displayed in the navbar
-  const [topRight, setTopRight] = useState(dfault.topRight) //top right corner of the page (login or current class)
-  const [body, setBody] = useState(dfault.body); //content of the page
-  const [code, setCode] = useState(dfault.code); //lobbycode
-  const [playerCount, setPlayerCount] = useState(dfault.playerCount); //number of players in the lobby
-  const [totalPlayerCount, setTotalPlayerCount] = useState(dfault.totalPlayerCount); //number of players in the lobby, will be set once the game starts
-  const [offerPhase, setOfferPhase] = useState(dfault.offerPhase); //if true, the player is giving an offer, if false, the player is answering an offer
     
-  //data for chart
-  const [offerPerMoney, setOfferPerMoney] = useState(dfault.offerPerMoney)
-  //data for chart aggregated over the whole game (lobby)
-  const [offerPerMoneyTotal, setOfferPerMoneyTotal] = useState(dfault.offerPerMoneyTotal)
-  //data for aggregated chart in percent
-  const [offerPerMoneyTotalPercent, setOfferPerMoneyTotalPercent] = useState(dfault.offerPerMoneyTotalPercent)
-  
-  useEffect(() => {
-    console.log("nächste phase...", playerCount, totalPlayerCount);
-    if (playerCount === totalPlayerCount) {
-      console.log('offerPhase: ', offerPhase);
-      
-      if (offerPhase === 'make_offer') {
-        console.log('nun sind wir in der antwortphase...');
-        setOfferPhase('answer_offer');
-        setPlayerCount(0);
-      } else if (offerPhase === 'answer_offer') {
-        console.log('nun sind wir in der warte-phase...');
-        setOfferPhase('wait');
-        setPlayerCount(0);
-      } else {
-        console.log('nun sind wir in der angebotsphase...');
-        setOfferPhase('make_offer');
-        setPlayerCount(0);
-        console.log('UPDATING TOTALS');
-        console.log('offerPerMoney: ', offerPerMoney);
-        //reset data for chart, but not data for total chart
-        setOfferPerMoney(dfault.offerPerMoney)
-      }
-    }
-    //eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [playerCount, totalPlayerCount]);
-  //we dont need to rerun this effect when title changes, because this effect changes the title
-
-  //central function to control what is on the page
-  function change_page(page) {
-    switch (page) {
-      case "home_page":
-        console.log("going to home page...");
-        setTitle("Willkommen!");
-        setBody(<Home />);
-        break;
-      case "login_page":
-        console.log("going to login page...");
-        setTitle("Anmelden");
-        setBody(<Loginpage />);
-        break;
-      case "create_game":
-        console.log("going to create game page...");
-        setTitle("Spiel erstellen");
-        setBody(<CreateGame />);
-        break;
-      case "waiting_players_page_host":
-        console.log("going to waiting players page...");
-        setTitle("Warte auf Spieler");
-        setBody(<WaitingPlayersHost />);
-        break;
-      case "waiting_players_page":
-        console.log("going to waiting players page...");
-        setBody(<WaitingPlayers />);
-        break;
-      case "playingHost":
-        console.log("going to playingHost page...");
-        setBody(<PlayingHost />);
-        break;
-      default:
-        console.log("function change_page: unknown page: ", page);
-        setTitle("something went wrong, how did you get here?");
-        break;
-    }
-  }
-
-  function connect_websocket(code) {
-    console.log(`connecting to websocket with code: ${code}...`);
-
-    const ws = new WebSocket(
-      `ws://${process.env.REACT_APP_BACKEND_URL}/lobby/${code}`
-    );
-
-    ws.onopen = () => {
-      console.log("connected");
-      ws.send(JSON.stringify({ msg: "hello" }));
-    };
-
-    ws.onmessage = (e) => {
-      // a message from the server could look like this:
-      // message = {
-      //   type: "play_round",
-      //   data: {
-      //     game: 1,
-      //     round: 1,
-      //     class: "I3a"
-      //     amount: 100,
-      //     action: "place_offer" //or "answer_offer"
-      //   }
-      // }
-      try {
-        const message = JSON.parse(e.data);
-        console.log("response from server:", message);
-        switch (message.type) {
-          case "new_player":
-            console.log("neuer spieler");
-            setPlayerCount((prev) => prev + 1);
-            break;
-          case "new_offer":
-            console.log("neues angebot: ", message.data.amount);
-            setPlayerCount((prev) => prev + 1);
-            //change data for chart 1 (offers per money)
-            setOfferPerMoney((prev) => {
-              const newData = [...prev];
-              newData[parseInt(message.data.amount) / 10].open++;
-              return newData;
-            })
-            break;
-          case "offer_response":
-            console.log("angebot wurde beantwortet: ", message.data);
-            setPlayerCount((prev) => prev + 1);
-            //change data for chart (offers per money)
-            setOfferPerMoney((prev) => {
-              const newData = [...prev];
-              const answer = message.data.accepted ? "accepted" : "declined";
-              //set accepted or declined
-              newData[parseInt(message.data.amount) / 10][answer]++;
-              //decrease open offers for that money
-              newData[parseInt(message.data.amount) / 10].open--;
-
-              return newData;
-            })
-            //also update data for total chart
-            setOfferPerMoneyTotal((prev) => {
-              const newData = [...prev];
-              const answer = message.data.accepted ? "accepted" : "declined";
-              //set accepted or declined
-              newData[parseInt(message.data.amount) / 10][answer]++;
-              
-              return newData;
-            });
-            //also update data for total chart in percent
-            setOfferPerMoneyTotalPercent((prev) => {
-              
-              //get total amount of accepted and declined offers
-              //if new offer is accepted, increase accepted
-              const totalAccepted = offerPerMoneyTotal[parseInt(message.data.amount) / 10].accepted
-              //if declined, increase declined
-              const totalDeclined = offerPerMoneyTotal[parseInt(message.data.amount) / 10].declined
-              
-              //calculate percentage
-              const acceptedPercent = totalAccepted / (totalAccepted + totalDeclined) * 100;
-              const declinedPercent = totalDeclined / (totalAccepted + totalDeclined) * 100;
-
-              //set percentage
-              const newData = [...prev];
-              newData[parseInt(message.data.amount) / 10].accepted = acceptedPercent;
-              newData[parseInt(message.data.amount) / 10].declined = declinedPercent;
-              newData[parseInt(message.data.amount) / 10].amount = prev[parseInt(message.data.amount) / 10].amount
-              return newData;
-            });
-            break;
-          case "new_round":
-            console.log("neue runde: ", message.data);
-            change_page("playingHost");
-            setOfferPhase('make_offer');
-            setTitle(
-              `Spiel ${message.data.game} / Runde ${message.data.round}`
-            );
-            setSubTitle(message.data.name);
-            break;
-          case "place_offer":
-            console.log("Wähle dein Angebot");
-            setBody(<PlaceOffer />);
-            break;
-          case "answer_offer":
-            console.log("Antworte auf das Angebot");
-            setBody(<AnswerOffer amount={message.data.amount} />);
-            break;
-          case "wait":
-            console.log("request accepted, waiting for other players...");
-            change_page("waiting_players_page");
-            if (message.data && message.data.class)
-              setTopRight(message.data.class);
-            break;
-          case "total_players":
-            console.log('setting total player count to: ', message.data.amount);
-            setTotalPlayerCount(message.data.amount);
-            break;
-          case "exit":
-            console.log("game over");
-            alert("Danke fürs Spielen!")
-            change_page("home_page");
-            break;
+  //#region Reducer
+  //here is the main logic of the game, a reducer to handle state changes
+  function reducer(state, action) {
+    switch (action.type) {
+      case 'change_page':
+        switch (action.payload) {
+          case "home_page":
+            console.log("going to home page...");
+            return { ...state, title: "Willkommen!", body: <Home /> };
+          case "login_page":
+            console.log("going to login page...");
+            return { ...state, title: "Anmelden", body: <Loginpage /> };
+          case "create_game":
+            console.log("going to create game page...");
+            return { ...state, title: "Spiel erstellen", body: <CreateGame /> };
+          case "waiting_players_page_host":
+            console.log("going to waiting players page...");
+            return { ...state, title: "Warte auf Spieler", body: <WaitingPlayersHost /> };
+          case "waiting_players_page":
+            console.log("going to waiting players page...");
+            return { ...state, body: <WaitingPlayers /> };
+          case "playingHost":
+            console.log("going to playingHost page...");
+            return { ...state, body: <PlayingHost /> };
           default:
-            break;
+            console.log("function change_page: unknown page: ", action.payload);
+            return { ...state, title: "something went wrong, how did you get here?" };
         }
-      } catch (error) {
-        console.warn("response from server (but not json): ", e.data, error);
-      }
-    };
-    ws.onclose = () => {
-      setPlayerCount(0);
-      setTotalPlayerCount(Infinity);
-      change_page("home_page");
-      window.location.reload();
-      console.log("disconnected");
-    };
 
-    setWs(ws);
-  }
+      case 'connect_lobby':
+        if (!Number.isInteger(action.payload.lobby_code)) return state
+        console.log("connecting to lobby with code:", action.payload.lobby_code);
+        //only through the lobby creator, the lobby name is known, this stops the jitter
+        const body = action.payload.lobby_name !== undefined ? <WaitingPlayersHost /> : <WaitingPlayers />;
+        return { ...state,
+          code: action.payload.lobby_code, //updating this will cause the useEffect to connect to the websocket
+          body: body,
+          top_right: action.payload.lobby_name || '', //initially, so the host sees it immediately 
+          game_name: action.payload.game_name || '',
+        }
+      //#region Messages from Server
+      case 'server_message':
+        try {
+          const message = JSON.parse(action.payload);
+          console.log('message from server: ', message);
+          switch (message.type) {
+            case "new_player":
+              console.log("new player joined");
+              return { ...state, 
+                player_count: state.player_count + 1 
+              };
+            case "wait":
+              console.log('request accepted, waiting for other players...');
+              return { ...state, 
+                top_right: message.data ? message.data.class : state.class,
+                body: <WaitingPlayers /> 
+              };
+            case 'new_round':
+              console.log('starting new round...');
+              const current_game = message.data.game;
+              const current_round = message.data.round;
 
-  function create_lobby(lobbyName, gameName) {
-    console.log('gameName: ', gameName);
-    //when creating a lobby, save the code and join it's lobby
-    fetch(`http://${process.env.REACT_APP_BACKEND_URL}/lobby/create`, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({ name: lobbyName }),
-    })
-      .then((response) => response.json())
-      .then((data) => {
-        console.log("got code: ", data);
-        const code = data;
-        setCode(code);
-        setTopRight(lobbyName);
-        setSubTitle(gameName);
-        join_lobby(code);
-      })
-      .catch((error) => {
-        console.error("Error:", error);
-      });
-  }
+              return { ...state,
+                current_game,
+                current_round,
+                title: `Spiel ${current_game} / Runde ${current_round}`,
+                game_name: message.data.name,
+                body: <PlayingHost />,
+              };
+            case 'place_offer':
+              console.log('you should place an offer now...');
+              return { ...state,
+                body: <PlaceOffer />,
+              }; 
+            case 'answer_offer':
+              console.log('somebody gives you', message.data.amount + '. would you accept it or not?');
+              return { ...state,
+                body: <AnswerOffer amount={message.data.amount} />,
+              };
+            case 'total_players':
+              console.log('setting total player count to: ', message.data.amount);
+              return { ...state,
+                total_player_count: message.data.amount,
+              };
+            case 'new_offer':
+              console.log('new offer: ', message.data.amount);
+              return { ...state,
+                //save data for chart in this round
+                offer_per_money: state.offer_per_money.map(
+                  item => item.amount === message.data.amount 
+                  ? {...item, open: item.open + 1} 
+                  : item
+                ),
+                player_count: state.player_count + 1,
+              };
+            case 'offer_response':
+              console.log('offer was answered: ', message.data.accepted ? 'accepted' : 'declined');
+              const new_offer_per_money = state.offer_per_money.map(
+                item => item.amount === message.data.amount
+                ? {
+                  ...item, 
+                  [message.data.accepted ? 'accepted' : 'declined']: item[message.data.accepted ? 'accepted' : 'declined'] + 1, 
+                  open: item['open'] - 1
+                }
+                : item
+              )
 
-  function join_lobby(code) {
-    console.log("joining lobby with code:", code);
-    setTitle("Warte auf Spieler");
-    change_page("waiting_players_page_host");
-    connect_websocket(code);
-  }
-  
-  function new_game(game_name) {
-    console.log("neues Spiel...");
+              const new_offer_per_money_total = state.offer_per_money_total.map(
+                //append data to the first element (total)
+                (offer_per_money, index) => index === 0 ?
+                offer_per_money.map( 
+                  item => item.amount === message.data.amount ? {
+                    ...item, 
+                    //increment accepted or declined
+                    [message.data.accepted ? 'accepted' : 'declined']: item[message.data.accepted ? 'accepted' : 'declined'] + 1, 
+                  }
+                  : item
+                )
 
-    if (totalPlayerCount === Infinity) {
-      setTotalPlayerCount(playerCount)
-    } else {
-      setPlayerCount(totalPlayerCount); //this will trigger the useEffect to change the phase
+                //append data to the last element (current game)
+                : index === state.offer_per_money_total.length - 1 ?
+                offer_per_money.map( 
+                  item => item.amount === message.data.amount ? {
+                    ...item, 
+                    //increment accepted or declined
+                    [message.data.accepted ? 'accepted' : 'declined']: item[message.data.accepted ? 'accepted' : 'declined'] + 1, 
+                  }
+                  : item
+                ) 
+                : offer_per_money
+              )
+
+              const offer_total = new_offer_per_money_total[0][parseInt(message.data.amount) / 10]
+              const offer_current_round = new_offer_per_money_total[new_offer_per_money_total.length-1][parseInt(message.data.amount) / 10]
+
+              const new_offer_per_money_percent = state.offer_per_money_total_percent.map(
+                //append data to the first element (total)
+                (offer_per_money_percent, index) => index === 0 ?
+                offer_per_money_percent.map(
+                  item => item.amount === message.data.amount ? {
+                    amount: item.amount,
+                    //recalculate percentage of accepted offer
+                    accepted: offer_total.accepted / (offer_total.declined + offer_total.accepted) * 100,
+                    declined: offer_total.declined / (offer_total.declined + offer_total.accepted) * 100,
+                  }
+                  : item
+                )
+
+                //append data to the last element (current game)
+                : index === state.offer_per_money_total_percent.length - 1 ?
+                offer_per_money_percent.map(
+                  item => item.amount === message.data.amount ? {
+                    amount: item.amount,
+                    //recalculate percentage of accepted offer
+                    accepted: offer_current_round.accepted / (offer_current_round.declined + offer_current_round.accepted) * 100,
+                    declined: offer_current_round.declined / (offer_current_round.declined + offer_current_round.accepted) * 100,
+                  }
+                  : item
+                )
+                : offer_per_money_percent
+              )
+              
+              return { ...state, 
+                //increment specifc offer and decrement specific open offer
+                offer_per_money: new_offer_per_money,
+                //safe data for chart in total
+                offer_per_money_total: new_offer_per_money_total,
+                //safe data for chart in total in percent
+                offer_per_money_total_percent: new_offer_per_money_percent,
+
+                player_count: state.player_count + 1,
+              };
+            case 'exit':
+              console.log('the lobby is closed, thank you for playing!')
+              alert('Danke fürs Spielen!')
+              return { ...state,
+                player_count: 0,
+                total_player_count: Infinity,
+                body: <Home />,
+              }
+            default:
+              console.warn("error: unknown message from server: ", message);
+              return state;
+          }
+        } catch (error) {
+          console.warn("response from server (but not json): ", action.payload, error);
+          return state;
+        }
+
+      //#region Messages to Server
+      //manage website when sending data to the server
+      case 'sent_message':
+        console.log('sent message to server: ', action.payload);
+        switch (action.payload.type) {
+          case 'start_game':
+            const reset_offer_per_money = [...state.offer_per_money].map(
+              ({open, ...item}) => ({ //remove open offers
+                ...item, accepted: 0, declined: 0 //reset accepted and declined offers
+              })
+            )
+
+            return { ...state,
+              //reset data for chart for current round
+              offer_phase: 'make_offer',
+              offer_per_money: dfault.offer_per_money,
+
+              //make space for chart data for our new game
+              offer_per_money_total: [
+                ...state.offer_per_money_total, [...reset_offer_per_money]
+              ],
+              offer_per_money_total_percent: [
+                ...state.offer_per_money_total_percent, [...reset_offer_per_money]
+              ],
+              title: action.payload.data.name,
+              game_names: [...state.game_names, action.payload.data.name],
+              body: <WaitingPlayersHost />,
+
+              player_count: 0,
+            }
+          case 'answer_offer':
+            console.log('offer was answered: ', action.payload.data.accepted ? 'accepted' : 'declined');
+            return state;
+          case 'start_round':
+            console.log('starting a new round...');
+            return { ...state,
+              //fix player count
+              player_count: state.total_player_count,
+            };
+          case 'skip':
+            console.log('skipping round...');
+            return state
+          case 'exit':
+            console.log('kicking every player out...');
+            return { ...state,
+              exit: true,
+            }
+          default:
+            return state;
+        }
+      case 'server_close':
+        console.log('server closed connection');
+        return { ...state,
+          player_count: 0,
+          total_player_count: Infinity,
+          body: <Home />,
+        }
+      
+      case 'phase_change':
+        if (state.total_player_count === Infinity) return state
+        console.log('going to next phase...');
+        if (state.player_count === state.total_player_count) {
+          console.log('everyone has answered, current offer_phase: ', state.offer_phase);
+          
+          if (state.offer_phase === 'make_offer') {
+            console.log('we were in the makingoffer phase.');
+            return { ...state,
+              offer_phase: 'answer_offer',
+              player_count: 0,
+            };
+          } else if (state.offer_phase === 'answer_offer') {
+            console.log('we were in the answering offer phase.');
+            return { ...state,
+              offer_phase: 'wait',
+              player_count: 0,
+            };
+          } else {
+            console.log('we were in the waiting phase.');
+            return { ...state,
+              offer_phase: 'make_offer',
+              player_count: 0,
+              offer_per_money: dfault.offer_per_money,
+            };
+          }
+        }
+        return state;
+      default:
+        console.warn("sent something unknown to server: ", action);
+        return state
     }
-    const message = JSON.stringify({
+  }
+
+  const [state, dispatch] = useReducer(reducer, useDefaultValues())
+
+  //#region Websocket
+  const ws = useRef(null); //websocket connection
+
+  useEffect(() => {
+    if (!state.code) return
+
+    ws.current = new WebSocket(`ws://${process.env.REACT_APP_BACKEND_URL}/lobby/${state.code}`);
+
+    ws.current.onopen = () => console.log("websocket connected")
+
+    ws.current.onmessage = (e) => dispatch({type: 'server_message', payload: e.data})
+
+    ws.current.onclose = () => dispatch({type: 'server_close'})
+  }, [state.code])
+
+  useEffect(() => {
+    console.log('player count changed.');
+    dispatch({type: 'phase_change'})
+  }, [state.player_count, state.total_player_count])
+
+  //#region Functions
+  function new_game(game_name) {
+    console.log('starting new game...')
+    let name = game_name || ''
+    const message = {
       type: "start_game",
       data: {
-        name: game_name,
-      },
-    });
-    ws.send(message);
+        name: name,
+      }
+    }
+    ws.current.send(JSON.stringify(message))
+    dispatch({type: 'sent_message', payload: message})
   }
-
+  
   function new_round() {
-    console.log("neue Runde...");
-    setPlayerCount(totalPlayerCount); //this will trigger the useEffect to change the phase
-    const message = JSON.stringify({
+    console.log("new round...");
+    // setPlayerCount(totalPlayerCount); //this will trigger the useEffect to change the phase
+    const message = {
       type: "start_round",
       data: {},
-    });
-    ws.send(message);
+    };
+    ws.current.send(JSON.stringify(message));
+    dispatch({type: 'sent_message', payload: message})
   }
 
   function place_offer(amount) {
-    console.log(`vergebe ${amount} geld...`);
-    const message = JSON.stringify({
+    console.log(`giving ${amount} money...`);
+    const message = {
       type: "offer",
       data: {
         amount: amount,
       },
-    });
-    ws.send(message);
+    };
+    ws.current.send(JSON.stringify(message));
+    dispatch({type: 'sent_message', payload: message})
   }
 
-  function accept_offer() {
-    console.log("akzeptiere angebot...");
-    const message = JSON.stringify({
-      type: "accept_offer",
+  function answer_offer(accepted) {
+    console.log('offer', accepted ? 'accepted.' : 'declined.');
+    const message = {
+      type: accepted ? 'accept_offer' : 'decline_offer',
       data: {},
-    });
-    ws.send(message);
+    };
+    ws.current.send(JSON.stringify(message));
+    dispatch({type: 'sent_message', payload: message})
   }
-
-  function decline_offer() {
-    console.log("lehne angebot ab...");
-    const message = JSON.stringify({
-      type: "decline_offer",
-      data: {},
-    });
-    ws.send(message);
-  }
-
+    
   function skip() {
-    console.log("überspringe runde...");
-    const message = JSON.stringify({
+    console.log("skipping round...");
+    const message = {
       type: "skip",
       data: {},
-    });
-    ws.send(message);
+    };
+    ws.current.send(JSON.stringify(message));
+    dispatch({type: 'sent_message', payload: message})
   }
 
   function exit() {
-    console.log("beende Spiel...");
-    const message = JSON.stringify({
+    console.log("closing game...");
+    const message = {
       type: "exit",
       data: {},
-    });
-    ws.send(message);
+    };
+    ws.current.send(JSON.stringify(message));
+    dispatch({type: 'sent_message', payload: message})
   }
+
+  //#region Return
   //all the variables and functions made global
   let publicVariables = {
-    title,
-    subTitle,
-    topRight,
-    body,
-    code,
-    playerCount,
-    totalPlayerCount,
-    offerPhase,
-    offerPerMoney,
-    offerPerMoneyTotal,
-    offerPerMoneyTotalPercent,
-    change_page,
-    create_lobby,
-    join_lobby,
+    state,
+    dispatch,
     new_game,
     new_round,
     place_offer,
-    accept_offer,
-    decline_offer,
+    answer_offer,
     skip,
     exit,
   };
