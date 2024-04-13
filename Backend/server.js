@@ -74,7 +74,18 @@ export async function startExpress() {
   //Login magie   /login
   app.post("/login", (req, res) =>{
     //test zum hochladen
+
     res.send(["Anita", "123456"])
+    
+  })
+
+  app.post("/register", (req, res) =>{
+    //test zum hochladen
+    if(datenbank.Lehrer.benutzername.includes(req.body.name)){res.send("Vergeben")}else{
+    datenbank.Lehrer.LehrerID.push(datenbank.Lehrer.LehrerID.length)
+    datenbank.Lehrer.benutzername.push(req.body.name)
+    datenbank.Lehrer.passwort.push(req.body.passwort)
+    datenbank.Lehrer.email.push(req.body.email)}
     
   })
   
@@ -177,8 +188,10 @@ export async function startExpress() {
       // nächste runde in die datenbank
     //place_offer answer_offer
     ws.on("close", function(msg) {
-      if(ws == datenbank.Lobby.host_websocket){
-      datenbank.Lobby.lobby_kennwort[lobbycode] = undefined
+      if(ws == datenbank.Lobby.host_websocket[lobbycode]){
+        console.log("moin")
+      datenbank.Lobby.lobby_kennwort[lobbycode] = 0
+
       }
 
       if(ws != datenbank.Lobby.host_websocket[lobbycode]){
@@ -186,7 +199,14 @@ export async function startExpress() {
         if (index !== -1) {
           datenbank.Lobby.spieler_id[lobbycode].splice(index, 1)
         }
+        datenbank.Lobby.host_websocket[lobbycode].send(JSON.stringify({ //wird an den spieler geschickt oder
+          type: "total_players",
+          data: {
+            amount: datenbank.Lobby.spieler_id[lobbycode].length
+          }
+        }))
       }
+
       console.log(datenbank.Lobby.spieler_id[lobbycode])
     })
     let items
@@ -222,7 +242,8 @@ export async function startExpress() {
               data:{
                 game: datenbank.Lobby.spielID[lobbycode].length,
                 round: datenbank.Spiel.runden_id[spiel2].length,
-                class:datenbank.Lobby.name[lobbycode]
+                class:datenbank.Lobby.name[lobbycode],
+                name: datenbank.Spiel.spiel_name[datenbank.Spiel.spiel_id.length-1]
               }
             }))
             datenbank.Spieler.websocket[n].send(JSON.stringify({
@@ -230,7 +251,8 @@ export async function startExpress() {
               data:{
                 game: datenbank.Lobby.spielID[lobbycode].length,
                 round: datenbank.Spiel.runden_id[spiel2].length,
-                class:datenbank.Lobby.name[lobbycode]
+                class:datenbank.Lobby.name[lobbycode],
+                name: datenbank.Spiel.spiel_name[datenbank.Spiel.spiel_id.length-1]
               }
             }))
             datenbank.Spieler.websocket[n].send(JSON.stringify({ //wird an den spieler geschickt oder
@@ -238,7 +260,9 @@ export async function startExpress() {
               data: {
                 game: datenbank.Lobby.spielID[lobbycode].length,
                 round: datenbank.Spiel.runden_id[spiel2].length,
-                class: datenbank.Lobby.name[lobbycode]
+                class: datenbank.Lobby.name[lobbycode],
+                name: datenbank.Spiel.spiel_name[datenbank.Spiel.spiel_id.length-1]
+
               }
             }))
         }
@@ -246,7 +270,7 @@ export async function startExpress() {
         datenbank.Lobby.host_websocket[lobbycode].send(JSON.stringify({ //wird an den spieler geschickt oder
           type: "total_players",
           data: {
-            amount: datenbank.Lobby.spieler_id[lobbycode]
+            amount: datenbank.Lobby.spieler_id[lobbycode].length
           }
         }))
         
@@ -255,8 +279,8 @@ export async function startExpress() {
           open = false
           //aktualisiert die Datenbank
           datenbank.Lobby.gamestate[lobbycode] = "new_round"
-          datenbank.Spiel.runden_id.push([])
           let spiel_id = datenbank.Spiel.spiel_id.length
+          datenbank.Spiel.runden_id.push([])
           datenbank.Spiel.spiel_id.push(spiel_id)
           datenbank.Lobby.spielID[lobbycode].push(spiel_id)
           datenbank.Runden.runden_id.push(runde)
@@ -278,7 +302,7 @@ export async function startExpress() {
                 game: datenbank.Lobby.spielID[lobbycode].length,
                 round: datenbank.Spiel.runden_id[spiel].length,
                 class:datenbank.Lobby.name[lobbycode],
-                name: message.data.name
+                name: datenbank.Spiel.spiel_name[spiel_id]
               }
             }))
           datenbank.Spieler.websocket[n].send(JSON.stringify({ //wird an den spieler geschickt oder
@@ -298,7 +322,7 @@ export async function startExpress() {
           datenbank.Lobby.host_websocket[lobbycode].send(JSON.stringify({ //wird an den spieler geschickt oder
             type: "total_players",
             data: {
-              amount: datenbank.Lobby.spieler_id[lobbycode]
+              amount: datenbank.Lobby.spieler_id[lobbycode].length
             }
           }))
           
@@ -538,12 +562,16 @@ export async function startExpress() {
 
           break
           case ("exit"):
-            for (var i = 0; i < datenbank.Lobby.spieler_id; i++) {
-              var n = datenbank.Lobby.spieler_id[i];
-              datenbank.Spieler.websocket[n].send(JSON.stringify({ //wird an den spieler geschickt oder
+            
+            for (var i = 0; i < datenbank.Lobby.spieler_id[lobbycode].length; i++) {
+              var g = datenbank.Lobby.spieler_id[lobbycode][i];
+              console.log(datenbank.Lobby.spieler_id[lobbycode][i])
+              console.log("W")
+              datenbank.Spieler.websocket[g].send(JSON.stringify({ //wird an den spieler geschickt oder
               type: "exit",
               data: {}
             }))}
+            console.log("jojojo")
             datenbank.Lobby.lobby_kennwort[lobbycode] = undefined
           break
 
