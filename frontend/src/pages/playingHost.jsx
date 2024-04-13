@@ -236,12 +236,15 @@ export default function PlayingHost() {
                 XLSX.utils.book_append_sheet(
                   workbook, 
                   worksheet, 
-                  i === 0 ? 'Alle Spiele Total' : element || `Spiel ${i}`
+                  i === 0 ? 'Alle Spiele Total' : `Spiel ${i}`
                 ); //topright is our class
+
+                //add scenario to the end of the sheet
+                XLSX.utils.sheet_add_aoa(worksheet, [[i === 0 ? "Alle Spiele Total" : "Szenario: " + element || 'Keins.']], {origin: -1});
               })
 
               //write file with name of the lobby + current date
-              XLSX.writeFile(workbook, `${game.topRight} ${new Date().toISOString().slice(0, 10)}.xlsx`.trim());
+              XLSX.writeFile(workbook, `${game.state.top_right} ${new Date().toISOString().slice(0, 10)}.xlsx`.trim());
             }}>
               Herunterladen
             </MyButton>

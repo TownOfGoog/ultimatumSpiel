@@ -67,8 +67,6 @@ export default function CreateGame() {
                 .catch((error) => {
                   console.error("Error:", error);
                 });
-              // game.dispatch({type: 'create_lobby', payload: {lobby_name, game_name}})
-              // game.create_lobby(lobby_name, game_name);
             }}
           >
             Lobby erstellen
