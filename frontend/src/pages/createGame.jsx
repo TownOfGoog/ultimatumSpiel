@@ -62,7 +62,12 @@ export default function CreateGame() {
                 .then((data) => {
                   console.log("lobbycode will be: ", data);
                   const lobby_code = data;
-                  game.dispatch({ type: "connect_lobby", payload: {lobby_code, lobby_name, game_name } })
+                  // game.join_lobby(lobby_code, lobby_name, game_name);
+                  //this will set is_teacher to true
+                  game.dispatch({ type: "connect_lobby_host", payload: { lobby_code, lobby_name, game_name }})
+                  //navigation now will set the view for host
+                  game.navigate(`/lobby/${lobby_code}`);
+                  // game.dispatch({ type: 'connect_lobby', payload: {lobby_code}}   )
                 })
                 .catch((error) => {
                   console.error("Error:", error);

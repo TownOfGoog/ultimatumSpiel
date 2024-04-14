@@ -1,6 +1,7 @@
 //service to handle game logic / events
 
 import { createContext, useContext, useEffect, useReducer, useRef } from "react";
+import { useNavigate, useLocation } from 'react-router-dom';
 import Home from "../pages/home";
 import Loginpage from "../pages/login";
 import CreateGame from "../pages/createGame";
@@ -20,7 +21,8 @@ export default function useGameManager() {
 
 export function GameManagerProvider({ children }) {
   const dfault = useDefaultValues(); //default keyword doesnt work
-    
+  const navigate = useNavigate();
+  // const location = useLocation();
   //#region Reducer
   //here is the main logic of the game, a reducer to handle state changes
   function reducer(state, action) {
@@ -29,11 +31,12 @@ export function GameManagerProvider({ children }) {
         switch (action.payload) {
           case "home_page":
             console.log("going to home page...");
-            return { ...state, title: "Willkommen!", body: <Home /> };
+            return { ...dfault }; //reset everything
           case "login_page":
             console.log("going to login page...");
             return { ...state, title: "Anmelden", body: <Loginpage /> };
           case "create_game":
+            // navigate('/create')
             console.log("going to create game page...");
             return { ...state, title: "Spiel erstellen", body: <CreateGame /> };
           case "waiting_players_page_host":
@@ -53,13 +56,25 @@ export function GameManagerProvider({ children }) {
       case 'connect_lobby':
         if (!Number.isInteger(action.payload.lobby_code)) return state
         console.log("connecting to lobby with code:", action.payload.lobby_code);
+        console.log('action.payload: ', action.payload);
+        if (state.is_host) return state; //do nothing if its the teacher trying to connect
         //only through the lobby creator, the lobby name is known, this stops the jitter
-        const body = action.payload.lobby_name !== undefined ? <WaitingPlayersHost /> : <WaitingPlayers />;
         return { ...state,
           code: action.payload.lobby_code, //updating this will cause the useEffect to connect to the websocket
-          body: body,
-          top_right: action.payload.lobby_name || '', //initially, so the host sees it immediately 
-          game_name: action.payload.game_name || '',
+          // body: <WaitingPlayers />,
+          top_right: '',
+          game_name: '',
+        }
+      case 'connect_lobby_host':
+        if (!Number.isInteger(action.payload.lobby_code)) return state
+        console.log("connecting to lobby as host...", action.payload);
+        console.log('action.payload: ', action.payload);
+        return { ...state,
+          code: action.payload.lobby_code, //updating this will cause the useEffect to connect to the websocket
+          body: <WaitingPlayersHost />,
+          is_host: true,
+          top_right: action.payload.lobby_name,
+          game_name: action.payload.game_name,
         }
       //#region Messages from Server
       case 'server_message':
@@ -197,9 +212,7 @@ export function GameManagerProvider({ children }) {
               console.log('the lobby is closed, thank you for playing!')
               alert('Danke fürs Spielen!')
               return { ...state,
-                player_count: 0,
-                total_player_count: Infinity,
-                body: <Home />,
+                exit_player: true,
               }
             default:
               console.warn("error: unknown message from server: ", message);
@@ -260,13 +273,6 @@ export function GameManagerProvider({ children }) {
           default:
             return state;
         }
-      case 'server_close':
-        console.log('server closed connection');
-        return { ...state,
-          player_count: 0,
-          total_player_count: Infinity,
-          body: <Home />,
-        }
       
       case 'phase_change':
         if (state.total_player_count === Infinity) return state
@@ -288,7 +294,8 @@ export function GameManagerProvider({ children }) {
             };
           } else {
             console.log('we were in the waiting phase.');
-            return { ...state,
+            
+            return {...state,
               offer_phase: 'make_offer',
               player_count: 0,
               offer_per_money: dfault.offer_per_money,
@@ -296,6 +303,11 @@ export function GameManagerProvider({ children }) {
           }
         }
         return state;
+      case 'server_close':
+        console.log('server closed connection');
+        return { ...state,
+          code: null,
+        }
       default:
         console.warn("sent something unknown to server: ", action);
         return state
@@ -316,7 +328,7 @@ export function GameManagerProvider({ children }) {
 
     ws.current.onmessage = (e) => dispatch({type: 'server_message', payload: e.data})
 
-    ws.current.onclose = () => dispatch({type: 'server_close'})
+    ws.current.onclose = () => {dispatch({type: 'server_close'}); navigate('/')}
   }, [state.code])
 
   useEffect(() => {
@@ -324,6 +336,14 @@ export function GameManagerProvider({ children }) {
     dispatch({type: 'phase_change'})
   }, [state.player_count, state.total_player_count])
 
+  useEffect(() => {
+    if (state.exit_player) {
+      console.log('exiting game...');
+      alert('Danke fürs Spielen!')
+      navigate('/')
+    }
+  }, [navigate, state.exit_player])
+  
   //#region Functions
   function new_game(game_name) {
     console.log('starting new game...')
@@ -396,6 +416,7 @@ export function GameManagerProvider({ children }) {
   let publicVariables = {
     state,
     dispatch,
+    navigate,
     new_game,
     new_round,
     place_offer,

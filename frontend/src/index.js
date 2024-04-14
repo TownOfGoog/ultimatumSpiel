@@ -1,5 +1,6 @@
 import React from "react";
 import ReactDOM from "react-dom/client";
+import { BrowserRouter as Router, Routes, Route  } from 'react-router-dom';
 import "@fontsource/inter";
 import "./index.css";
 import App from "./App";
@@ -9,9 +10,16 @@ import { GameManagerProvider } from "./service/useGameManager";
 const root = ReactDOM.createRoot(document.getElementById("root"));
 root.render(
   <React.StrictMode>
-    <GameManagerProvider>
-      <App />
-    </GameManagerProvider>
+    <Router>
+      <GameManagerProvider>
+        <Routes>
+          <Route path="/" element={<App />} />
+          <Route path="/create" element={<App />} />
+          <Route path="/lobby/:lobby_code" element={<App />} />
+          <Route path="*"element={<App />} />
+        </Routes>
+      </GameManagerProvider>
+    </Router>
   </React.StrictMode>
 );
 

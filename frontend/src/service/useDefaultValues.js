@@ -1,14 +1,19 @@
+import Home from "../pages/home";
+
 export default function useDefaultValues() {
   return {
     ws: null,
     current_game: 0,
     current_round: 0,
-    title: 'something went wrong',
+    title: 'Willkommen!',
+    game_name: '',
     game_names: [''],
     top_right: 'login',
-    body: <p>something went wrong</p>,
+    body: <Home />,
+    is_host: false,
     code: null,
     exit: false,
+    exit_player: false,
     player_count: 0,
     total_player_count: Infinity,
     offer_phase: 'make_offer',

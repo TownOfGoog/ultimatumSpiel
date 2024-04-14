@@ -5,10 +5,12 @@ import { useState } from "react";
 import MyInput from "../components/myInput";
 import MyButton from "../components/myButton";
 import useGameManager from "../service/useGameManager";
+import { useNavigate } from "react-router-dom";
 
 export default function Home() {
   const [lobby_code, setLobby_code] = useState(""); //this value will be formatted to mostly avoid faulty inputs
   const game = useGameManager();
+  const navigate = useNavigate();
   return (
     <Grid
       container
@@ -62,7 +64,8 @@ export default function Home() {
 
           <MyButton
             onClick={() => {
-              game.dispatch({type: 'connect_lobby', payload: { lobby_code }})
+              navigate(`/lobby/${lobby_code || 1}`)
+              // game.join_lobby(lobby_code || 1)
             }}
           >
             Lobby betreten
@@ -96,7 +99,7 @@ export default function Home() {
 
         <MyButton
           onClick={() => {
-            game.dispatch({type: 'change_page', payload: 'create_game'})
+            navigate('/create')
           }}
         >
           Lobby erstellen

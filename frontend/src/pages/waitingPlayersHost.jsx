@@ -5,6 +5,7 @@ import QRCode from 'react-qr-code';
 import useGameManager from '../service/useGameManager';
 import MyText from '../components/myText';
 import MyButton from '../components/myButton';
+import { Link } from 'react-router-dom';
 
 export default function WaitingPlayersHost() {
   const game = useGameManager();
@@ -22,8 +23,8 @@ export default function WaitingPlayersHost() {
 
         {/* top center part of the screen */}
         <Grid xs={2} sx={{ height: "20%", display: 'flex', alignItems: 'center', justifyContent: 'center' }} >
-          <MyText level="h1" fontSize="3em" sx={{textDecoration: 'underline'}} >
-            {window.location.href}
+          <MyText level="h1" fontSize="3em" >
+            <Link style={{color:'black'}} target="_blank" to={window.location.href}>{window.location.href}</Link>
           </MyText>
         </Grid>
 
@@ -39,7 +40,7 @@ export default function WaitingPlayersHost() {
 
         {/* right center part of the screen */}
         <Grid xs={1} sx={{ height: "40%", display: 'flex', justifyContent: 'center', alignItems: 'center' }} >
-          <QRCode value={window.location.href + 'lobby/' + game.state.code} size={200} />
+          <QRCode value={window.location.href} size={200} />
         </Grid>
 
         {/* bottom center part of the screen */}
