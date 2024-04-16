@@ -48,8 +48,9 @@ export default function Register() {
               },
               body: JSON.stringify({ name: username, email: email, password: password }),
             })
-            .then((res) => {return res.status})
-            .then((status) => {status === 200 ? console.log('registriert') : console.log('login failed')})
+            .then((res) => {return res.text()})
+            .then((message) => {console.log(message)})
+            // .then((status) => {status === 200 ? console.log('registriert') : console.log('login failed')})
           
           }}>Konto eröffnen</MyButton>
         </div>

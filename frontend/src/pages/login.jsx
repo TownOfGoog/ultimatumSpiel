@@ -34,8 +34,9 @@ export default function Loginpage() {
               },
               body: JSON.stringify({ name: email, password: password }),
             })
-            .then((res) => {return res.status})
-            .then((status) => {status === 200 ? console.log('logged in') : console.log('login failed')})
+            .then((res) => {return res.text()})
+            .then((msg) => {console.log(msg)})
+            // .then((status) => {status === 200 ? console.log('logged in') : console.log('login failed')})
           }}>Anmelden</MyButton>
         </div>
       </div>
