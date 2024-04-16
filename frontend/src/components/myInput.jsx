@@ -2,7 +2,7 @@ import Input from '@mui/joy/Input';
 import './workaround.css'
 import FormLabel from '@mui/joy/FormLabel';
 import { CssVarsProvider } from '@mui/joy/styles';
-export default function MyInput({label, title, value, setValue, password, style, sx, big,}) {
+export default function MyInput({label, title, value, setValue, password=false, style, sx, big,}) {
   //if a title is given, make the label bigger, thats the only difference
   function handleChange(event) {
     if (big) {
@@ -50,8 +50,8 @@ export default function MyInput({label, title, value, setValue, password, style,
           {title}{label}
         </FormLabel> 
       </div>
-      <CssVarsProvider defaultMode="dark">
-        <Input variant='plain' onChange={handleChange} sx={defaultStyle} className={workaround} value={value}/>
+      <CssVarsProvider defaultMode="system">
+        <Input variant='plain' type={password ? 'password' : undefined} onChange={handleChange} sx={defaultStyle} className={workaround} value={value}/>
       </CssVarsProvider>
     </div>
   )

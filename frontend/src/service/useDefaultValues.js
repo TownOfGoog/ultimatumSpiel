@@ -1,14 +1,16 @@
+import { useNavigate } from "react-router-dom";
+import MyButton from "../components/myButton";
 import Home from "../pages/home";
 
 export default function useDefaultValues() {
+  const navigate = useNavigate();
   return {
-    ws: null,
     current_game: 0,
     current_round: 0,
     title: 'Willkommen!',
     game_name: '',
     game_names: [''],
-    top_right: 'login',
+    top_right: <MyButton sx={{width: 'auto', paddingInline: '0.8em'}} onClick={() => navigate('/login')}>Login</MyButton>,
     body: <Home />,
     is_host: false,
     code: null,

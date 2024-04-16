@@ -43,12 +43,9 @@ export default function Nav() {
           display: "flex",
           alignItems: "center",
           justifyContent: "flex-end",
-          fontWeight: "bold",
-          fontSize: 64
         }}>
-          <button onClick={() => {console.log(game.state)}}>test</button>
 
-        <div style={{marginInline: '0.5em'}}>{game.state.top_right}</div>
+        <div style={{marginInline: '0.8em'}}>{game.state.top_right}</div>
       </Grid>
     </Grid>
   );

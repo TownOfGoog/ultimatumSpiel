@@ -1,8 +1,7 @@
 //service to handle game logic / events
 
 import { createContext, useContext, useEffect, useReducer, useRef } from "react";
-import { useNavigate, useLocation } from 'react-router-dom';
-import Home from "../pages/home";
+import { useNavigate } from 'react-router-dom';
 import Loginpage from "../pages/login";
 import CreateGame from "../pages/createGame";
 import WaitingPlayersHost from "../pages/waitingPlayersHost";
@@ -11,6 +10,8 @@ import PlaceOffer from "../pages/placeOffer";
 import AnswerOffer from "../pages/answerOffer";
 import PlayingHost from "../pages/playingHost";
 import useDefaultValues from "./useDefaultValues";
+import MyButton from "../components/myButton";
+import Register from "../pages/register";
 
 const GameManagerContext = createContext();
 
@@ -22,7 +23,6 @@ export default function useGameManager() {
 export function GameManagerProvider({ children }) {
   const dfault = useDefaultValues(); //default keyword doesnt work
   const navigate = useNavigate();
-  // const location = useLocation();
   //#region Reducer
   //here is the main logic of the game, a reducer to handle state changes
   function reducer(state, action) {
@@ -34,9 +34,11 @@ export function GameManagerProvider({ children }) {
             return { ...dfault }; //reset everything
           case "login_page":
             console.log("going to login page...");
-            return { ...state, title: "Anmelden", body: <Loginpage /> };
+            return { ...state, title: "Anmelden", body: <Loginpage />, top_right: <MyButton sx={{width: 'auto', paddingInline: '0.8em'}} onClick={() => navigate('/register')}>Registrieren</MyButton> };
+          case "register_page":
+            console.log("going to register page...");
+            return { ...state, title: "Registrieren", body: <Register />, top_right: dfault.top_right };
           case "create_game":
-            // navigate('/create')
             console.log("going to create game page...");
             return { ...state, title: "Spiel erstellen", body: <CreateGame /> };
           case "waiting_players_page_host":
@@ -61,7 +63,6 @@ export function GameManagerProvider({ children }) {
         //only through the lobby creator, the lobby name is known, this stops the jitter
         return { ...state,
           code: action.payload.lobby_code, //updating this will cause the useEffect to connect to the websocket
-          // body: <WaitingPlayers />,
           top_right: '',
           game_name: '',
         }

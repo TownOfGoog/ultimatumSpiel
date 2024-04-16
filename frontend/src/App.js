@@ -25,8 +25,14 @@ function App() {
         break;
       case location.pathname.includes('/lobby/'):
         console.log('joining lobby')
-        //dispatch logic is handled by the join_lobby function, because it needs parameters
         game.dispatch({type: 'connect_lobby', payload: { lobby_code: parseInt(params.lobby_code) }})
+        break;
+      case location.pathname === '/login':
+        game.dispatch({type: 'change_page', payload: 'login_page'})
+        break;
+        
+      case location.pathname === '/register':
+        game.dispatch({type: 'change_page', payload: 'register_page'})
         break;
       default:
         console.log('going home')
