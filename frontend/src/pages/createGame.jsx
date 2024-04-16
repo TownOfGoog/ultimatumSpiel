@@ -56,9 +56,13 @@ export default function CreateGame() {
                 headers: {
                   "Content-Type": "application/json",
                 },
+                credentials: 'include',
                 body: JSON.stringify({ name: lobby_name }),
               })
-                .then((response) => response.json())
+                .then((response) => {
+                  console.log(response.status)
+                  return response.json()
+                })
                 .then((data) => {
                   console.log("lobbycode will be: ", data);
                   const lobby_code = data;

@@ -46,6 +46,7 @@ export default function Register() {
               headers: {
                 "Content-Type": "application/json",
               },
+              credentials: 'include',
               body: JSON.stringify({ name: username, email: email, password: password }),
             })
             .then((res) => {return res.text()})

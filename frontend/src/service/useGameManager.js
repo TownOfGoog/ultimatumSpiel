@@ -69,7 +69,6 @@ export function GameManagerProvider({ children }) {
       case 'connect_lobby_host':
         if (!Number.isInteger(action.payload.lobby_code)) return state
         console.log("connecting to lobby as host...", action.payload);
-        console.log('action.payload: ', action.payload);
         return { ...state,
           code: action.payload.lobby_code, //updating this will cause the useEffect to connect to the websocket
           body: <WaitingPlayersHost />,
