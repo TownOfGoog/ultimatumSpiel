@@ -28,6 +28,7 @@ export function GameManagerProvider({ children }) {
   function reducer(state, action) {
     switch (action.type) {
       case 'change_page':
+        state.error = dfault.error //reset error message
         switch (action.payload) {
           case "home_page":
             console.log("going to home page...");
@@ -54,13 +55,21 @@ export function GameManagerProvider({ children }) {
             console.log("function change_page: unknown page: ", action.payload);
             return { ...state, title: "something went wrong, how did you get here?" };
         }
+      case 'logged_in':
+        console.log('logged in...');
+        return { ...state, 
+          is_logged_in: true,
+          top_right: action.payload.username
+        }
+      case 'error':
+        console.log('error: ', action.payload);
+        return { ...state, error: action.payload }
 
       case 'connect_lobby':
         if (!Number.isInteger(action.payload.lobby_code)) return state
         console.log("connecting to lobby with code:", action.payload.lobby_code);
         console.log('action.payload: ', action.payload);
         if (state.is_host) return state; //do nothing if its the teacher trying to connect
-        //only through the lobby creator, the lobby name is known, this stops the jitter
         return { ...state,
           code: action.payload.lobby_code, //updating this will cause the useEffect to connect to the websocket
           top_right: '',

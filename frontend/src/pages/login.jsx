@@ -1,11 +1,12 @@
 import { useState } from "react"
 import MyInput from "../components/myInput"
 import MyButton from "../components/myButton"
+import useGameManager from "../service/useGameManager";
 
 export default function Loginpage() {
   const [email, setEmail] = useState('') 
   const [password, setPassword] = useState('')
-
+  const game = useGameManager()
   return (
     <div  style={{width: '100%', display: 'flex', alignItems: 'center', height: '100%', justifyContent: 'center'}}>
       <div style={{width: '50%', display: 'flex', alignItems: 'center', flexDirection: 'column'}}>
@@ -24,6 +25,12 @@ export default function Loginpage() {
 
         <div style={{margin: '0.3em 0 0.3em 0'}}></div>
 
+        {game.state.error && (
+          <>
+            <div style={{color: 'red'}}>{game.state.error}</div>
+            <div style={{margin: '0.3em 0 0.3em 0'}}></div>
+          </>
+        )}
         {/* due to the programming of MyButton, i need this width: 100% div */}
         <div style={{width: '100%'}}> 
           <MyButton onClick={() => {
@@ -35,9 +42,15 @@ export default function Loginpage() {
               credentials: 'include',
               body: JSON.stringify({ name: email, password: password }),
             })
-            .then((res) => {return res.text()})
-            .then((msg) => {console.log(msg)})
-            // .then((status) => {status === 200 ? console.log('logged in') : console.log('login failed')})
+            .then((res) => {
+              if (res.status !== 200) {
+                res.json().then((msg) => game.dispatch({type: 'error', payload: msg}))
+              } else {
+                return res.json()
+              }
+            })
+            .then((msg) => {if (msg)  game.navigate('/')})
+            .catch((err) => {console.log(err)} )
           }}>Anmelden</MyButton>
         </div>
       </div>

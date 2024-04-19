@@ -1,13 +1,14 @@
 import { useState } from "react";
 import MyButton from "../components/myButton";
 import MyInput from "../components/myInput";
+import useGameManager from "../service/useGameManager";
 
 export default function Register() {
   const [email, setEmail] = useState('')
   const [username, setUsername] = useState('')
   const [password, setPassword] = useState('')
   const [passwordRepeat, setPasswordRepeat] = useState('')
-
+  const game = useGameManager()
   return (
     <div  style={{width: '100%', display: 'flex', alignItems: 'center', height: '100%', justifyContent: 'center'}}>
       <div style={{width: '50%', display: 'flex', alignItems: 'center', flexDirection: 'column'}}>
@@ -38,6 +39,13 @@ export default function Register() {
 
         <div style={{margin: '0.3em 0 0.3em 0'}}></div>
 
+        {game.state.error && (
+          <>
+            <div style={{color: 'red'}}>{game.state.error}</div>
+            <div style={{margin: '0.3em 0 0.3em 0'}}></div>
+          </>
+        )}
+
         {/* due to the programming of MyButton, i need this width: 100% div */}
         <div style={{width: '100%'}}> 
           <MyButton onClick={() => {
@@ -49,9 +57,15 @@ export default function Register() {
               credentials: 'include',
               body: JSON.stringify({ name: username, email: email, password: password }),
             })
-            .then((res) => {return res.text()})
-            .then((message) => {console.log(message)})
-            // .then((status) => {status === 200 ? console.log('registriert') : console.log('login failed')})
+            .then((res) => {
+              if (res.status !== 200) {
+                res.json().then((msg) => game.dispatch({type: 'error', payload: msg}))
+              } else {
+                game.dispatch({type: 'logged_in', payload: {username: username}})
+                return res.json()
+              }
+            })
+            .then((msg) => {if (msg) game.navigate('/')})
           
           }}>Konto eröffnen</MyButton>
         </div>

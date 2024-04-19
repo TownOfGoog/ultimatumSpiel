@@ -47,6 +47,14 @@ export default function CreateGame() {
             setValue={setGameName}
           />
           <div style={{margin: '0.3em 0 0.3em 0'}}></div>
+          
+        {game.state.error && (
+          <>
+            <div style={{color: 'red', display: 'flex', justifyContent: 'center'}}>{game.state.error}</div>
+            <div style={{margin: '0.3em 0 0.3em 0'}}></div>
+          </>
+        )}
+        
           <MyButton
             onClick={() => {
               console.log('creating lobby...');
@@ -60,10 +68,14 @@ export default function CreateGame() {
                 body: JSON.stringify({ name: lobby_name }),
               })
                 .then((response) => {
-                  console.log(response.status)
+                  if (response.status !== 200) {
+                    response.json().then((msg) => game.dispatch({type: 'error', payload: msg}))
+                    return
+                  }
                   return response.json()
                 })
                 .then((data) => {
+                  if (!data) return
                   console.log("lobbycode will be: ", data);
                   const lobby_code = data;
                   // game.join_lobby(lobby_code, lobby_name, game_name);

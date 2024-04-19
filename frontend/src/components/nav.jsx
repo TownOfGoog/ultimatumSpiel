@@ -44,7 +44,21 @@ export default function Nav() {
           alignItems: "center",
           justifyContent: "flex-end",
         }}>
-
+          <button onClick={() => {
+            fetch('http://localhost:8080/test', {
+              method: 'GET',
+              headers: {
+                'Content-Type': 'application/json'
+              },
+              credentials: 'include',
+            }).then(
+              res => res.text()
+            ).then(
+              text => console.log(text)
+            )
+          }}>text</button>
+          <button onClick={() => {console.log(game.state.is_host)}}>is_host</button>
+          <div>{game.state.username}</div>
         <div style={{marginInline: '0.8em'}}>{game.state.top_right}</div>
       </Grid>
     </Grid>

@@ -12,7 +12,9 @@ export default function useDefaultValues() {
     game_names: [''],
     top_right: <MyButton sx={{width: 'auto', paddingInline: '0.8em'}} onClick={() => navigate('/login')}>Login</MyButton>,
     body: <Home />,
+    error: '',
     is_host: false,
+    is_logged_in: false, //is_host has a specific usecase
     code: null,
     exit: false,
     exit_player: false,

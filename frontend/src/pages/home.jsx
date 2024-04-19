@@ -1,6 +1,5 @@
 import Grid from "../components/myGrid";
 import FormControl from "@mui/joy/FormControl";
-// import FormHelperText from "@mui/joy/FormHelperText";
 import { useState } from "react";
 import MyInput from "../components/myInput";
 import MyButton from "../components/myButton";
@@ -55,17 +54,15 @@ export default function Home() {
             title={"Code eingeben"}
           />
           {/* error handling for another day */}
-          {/* <FormHelperText> 
+          {/* 
                 Dieser Code muss 5-stellig sein.
-              </FormHelperText> */}
+              */}
         </FormControl>
         
         <div style={{margin: '0.3em 0 0.3em 0'}}></div>
-
           <MyButton
             onClick={() => {
               navigate(`/lobby/${lobby_code || 1}`)
-              // game.join_lobby(lobby_code || 1)
             }}
           >
             Lobby betreten
