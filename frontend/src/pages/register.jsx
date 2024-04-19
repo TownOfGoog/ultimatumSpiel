@@ -54,11 +54,13 @@ export default function Register() {
               if (res.status !== 200) {
                 res.json().then((msg) => game.dispatch({type: 'error', payload: msg}))
               } else {
-                game.dispatch({type: 'logged_in', payload: {username: username}})
                 return res.json()
               }
             })
-            .then((msg) => {if (msg) game.navigate('/')})
+            .then((msg) => {if (msg) {
+              game.dispatch({type: 'logged_in', payload: {username: msg}})
+              game.navigate('/')
+            }})
           
           }}>Konto eröffnen</MyButton>
         </div>
