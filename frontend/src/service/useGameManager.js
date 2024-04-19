@@ -62,6 +62,7 @@ export function GameManagerProvider({ children }) {
         return { ...state, 
           is_logged_in: true,
           username: action.payload.username,
+          top_right: '',
         }
       case 'logout':
         console.log('logged out...');
@@ -150,16 +151,28 @@ export function GameManagerProvider({ children }) {
                 player_count: state.player_count + 1,
               };
             case 'undo_offer': 
+            console.log('state.phase: ', state.offer_phase);
               console.log('offer was undone: ', message.data.amount);
+              
+              
+              
+              
               return { ...state,
+                player_count: 
+                // state.offer_phase === 'answer_offer' ? state.player_count : 
+                state.player_count - 1,
+                
                 //save data for chart in this round
                 offer_per_money: state.offer_per_money.map(
                   item => item.amount === message.data.amount 
                   ? {...item, open: item.open - 1} 
                   : item
                 ),
-                player_count: state.player_count - 1,
               };
+
+
+
+
             case 'offer_response':
               console.log('offer was answered: ', message.data.accepted ? 'accepted' : 'declined');
               const new_offer_per_money = state.offer_per_money.map(

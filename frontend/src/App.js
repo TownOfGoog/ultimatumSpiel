@@ -9,6 +9,7 @@ function App() {
   const location = useLocation();
   const params = useParams();
   useEffect(() => {
+    console.log("HALLLOOOOOOOOOOOOOOOO")
     //check if user is logged in
     fetch(`http://${process.env.REACT_APP_BACKEND_URL}/check_login`, {
       method: 'GET',
@@ -17,10 +18,10 @@ function App() {
       },
       credentials: 'include',
     }).then((res) => {
+      console.log('NACHRICHT BEKOMENNNNNNNNNNNNNNNNNNNNNNN');
       if (res.status === 200) {
         res.json().then((msg) => {
           game.dispatch({type: 'logged_in', payload: {username: msg}})
-          game.dispatch({type: 'change_page', payload: 'home_page'})
         })
       }
     }).catch((err) => {})
