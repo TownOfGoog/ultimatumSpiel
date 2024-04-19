@@ -32,7 +32,8 @@ export function GameManagerProvider({ children }) {
         switch (action.payload) {
           case "home_page":
             console.log("going to home page...");
-            return { ...dfault }; //reset everything
+            let reset = { ...dfault, top_right: state.top_right, is_logged_in: state.is_logged_in };
+            return reset; //reset everything
           case "login_page":
             console.log("going to login page...");
             return { ...state, title: "Anmelden", body: <Loginpage />, top_right: <MyButton sx={{width: 'auto', paddingInline: '0.8em'}} onClick={() => navigate('/register')}>Registrieren</MyButton> };
@@ -139,6 +140,17 @@ export function GameManagerProvider({ children }) {
                   : item
                 ),
                 player_count: state.player_count + 1,
+              };
+            case 'undo_offer': 
+              console.log('offer was undone: ', message.data.amount);
+              return { ...state,
+                //save data for chart in this round
+                offer_per_money: state.offer_per_money.map(
+                  item => item.amount === message.data.amount 
+                  ? {...item, open: item.open - 1} 
+                  : item
+                ),
+                player_count: state.player_count - 1,
               };
             case 'offer_response':
               console.log('offer was answered: ', message.data.accepted ? 'accepted' : 'declined');
