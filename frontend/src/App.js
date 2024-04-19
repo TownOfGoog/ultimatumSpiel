@@ -8,9 +8,23 @@ function App() {
   const game = useGameManager();
   const location = useLocation();
   const params = useParams();
-  // useEffect(() => {
-  //   game.dispatch({type: 'change_page', payload: 'home_page'})
-  // }, [])
+  useEffect(() => {
+    //check if user is logged in
+    fetch(`http://${process.env.REACT_APP_BACKEND_URL}/check_login`, {
+      method: 'GET',
+      headers: {
+        "Content-Type": "application/json",
+      },
+      credentials: 'include',
+    }).then((res) => {
+      if (res.status === 200) {
+        res.json().then((msg) => {
+          game.dispatch({type: 'logged_in', payload: {username: msg}})
+          game.dispatch({type: 'change_page', payload: 'home_page'})
+        })
+      }
+    }).catch((err) => {})
+  }, [])
 
   useEffect(() => {
     console.log('new location: ', location.pathname)
