@@ -32,7 +32,8 @@ export function GameManagerProvider({ children }) {
         switch (action.payload) {
           case "home_page":
             console.log("going to home page...");
-            let reset = { ...dfault, username: state.username, is_logged_in: state.is_logged_in, top_right: state.top_right};
+            console.log('state.is_logged_in: ', state.is_logged_in);
+            let reset = { ...dfault, username: state.username, is_logged_in: state.is_logged_in, top_right: state.is_logged_in ? "" : dfault.top_right};
             return reset; //reset everything
           case "login_page":
             console.log("going to login page...");
@@ -61,12 +62,7 @@ export function GameManagerProvider({ children }) {
         return { ...state, 
           is_logged_in: true,
           username: action.payload.username,
-          top_right: <div style={{display: 'flex', gap: '0.5em'}}>
-            <MyButton sx={{width: 'auto', paddingInline: '0.8em'}} disabled>{action.payload.username}</MyButton>
-            <MyButton sx={{width: 'auto', paddingInline: '0.8em'}} onClick={() => navigate('/logout')}>logout</MyButton>
-          </div>
         }
-
       case 'logout':
         console.log('logged out...');
         return { ...state,

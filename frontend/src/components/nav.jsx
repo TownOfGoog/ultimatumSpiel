@@ -59,7 +59,12 @@ export default function Nav() {
             )
           }}>text</button>
           <button onClick={() => {console.log(game.state)}}>is_logged_in</button>
-
+          {game.state.is_logged_in && !game.state.is_host &&
+            <div style={{display: 'flex', gap: '0.5em'}}>
+              <MyButton sx={{width: 'auto', paddingInline: '0.8em'}} disabled>{game.state.username}</MyButton>
+              <MyButton sx={{width: 'auto', paddingInline: '0.8em'}} onClick={() => game.navigate('/logout')}>logout</MyButton>
+            </div>
+          }
         <div style={{marginInline: '0.8em'}}>{game.state.top_right}</div>
       </Grid>
     </Grid>

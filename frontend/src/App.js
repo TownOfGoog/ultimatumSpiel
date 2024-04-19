@@ -31,8 +31,20 @@ function App() {
         game.dispatch({type: 'change_page', payload: 'login_page'})
         break;
       case location.pathname === '/logout':
-        game.dispatch({type: 'logout'})
-        game.dispatch({type: 'change_page', payload: 'home_page'})
+        fetch(`http://${process.env.REACT_APP_BACKEND_URL}/logout`, {
+          method: 'GET',
+          headers: {
+            "Content-Type": "application/json",
+          },
+          credentials: 'include',
+        }).then((res) => {
+          if (res.status !== 200) {
+            res.json().then((msg) => game.dispatch({type: 'error', payload: msg}))
+          } else {
+            game.dispatch({type: 'logout'})
+            game.navigate('/')
+          }
+        })
         break;
       case location.pathname === '/register':
         game.dispatch({type: 'change_page', payload: 'register_page'})
