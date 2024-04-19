@@ -30,7 +30,10 @@ function App() {
       case location.pathname === '/login':
         game.dispatch({type: 'change_page', payload: 'login_page'})
         break;
-        
+      case location.pathname === '/logout':
+        game.dispatch({type: 'logout'})
+        game.dispatch({type: 'change_page', payload: 'home_page'})
+        break;
       case location.pathname === '/register':
         game.dispatch({type: 'change_page', payload: 'register_page'})
         break;

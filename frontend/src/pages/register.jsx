@@ -4,7 +4,6 @@ import MyInput from "../components/myInput";
 import useGameManager from "../service/useGameManager";
 
 export default function Register() {
-  const [email, setEmail] = useState('')
   const [username, setUsername] = useState('')
   const [password, setPassword] = useState('')
   const [passwordRepeat, setPasswordRepeat] = useState('')
@@ -16,12 +15,6 @@ export default function Register() {
           label={"Benutzername"}
           value={username}
           setValue={setUsername}
-        />
-
-        <MyInput
-          label={"Email"}
-          value={email}
-          setValue={setEmail}
         />
         
         <MyInput
@@ -55,7 +48,7 @@ export default function Register() {
                 "Content-Type": "application/json",
               },
               credentials: 'include',
-              body: JSON.stringify({ name: username, email: email, password: password }),
+              body: JSON.stringify({ name: username, password: password }),
             })
             .then((res) => {
               if (res.status !== 200) {

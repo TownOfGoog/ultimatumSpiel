@@ -2,6 +2,7 @@ import Grid from "@mui/joy/Grid";
 import logo from "../assets/logo.png"
 import useGameManager from "../service/useGameManager";
 import MyText from "./myText";
+import MyButton from "./myButton";
 
 export default function Nav() {
   const game = useGameManager();
@@ -57,8 +58,8 @@ export default function Nav() {
               text => console.log(text)
             )
           }}>text</button>
-          <button onClick={() => {console.log(game.state.is_host)}}>is_host</button>
-          <div>{game.state.username}</div>
+          <button onClick={() => {console.log(game.state)}}>is_logged_in</button>
+
         <div style={{marginInline: '0.8em'}}>{game.state.top_right}</div>
       </Grid>
     </Grid>

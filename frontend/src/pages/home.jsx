@@ -94,13 +94,25 @@ export default function Home() {
           Spiel erstellen
         </div>
 
-        <MyButton
-          onClick={() => {
-            navigate('/create')
-          }}
-        >
-          Lobby erstellen
-        </MyButton>
+        {
+          game.state.is_logged_in ?
+          <MyButton
+            onClick={() => {
+              navigate('/create')
+            }}
+          >
+            Lobby erstellen
+          </MyButton>
+          :
+          <MyButton
+            onClick={() => {
+              navigate('/login')
+            }}
+          >
+            Anmelden
+          </MyButton>
+
+        }
       </Grid>
     </Grid>
   );
