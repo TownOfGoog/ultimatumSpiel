@@ -69,7 +69,7 @@ export default function PlayingHost() {
           ]}
           xAxis={[
             {
-              label: `Totale Angebote vom Spiel ${game.state.current_game}`,
+              label: `Totale Angebote von Spiel ${game.state.current_game}`,
               dataKey: 'amount',
               scaleType: 'band',
             }
