@@ -163,6 +163,13 @@ let user_id
   } 
   
   })
+
+  app.get("/logout", (req, res) =>{
+
+    req.session.destroy()
+    res.status(200).json("abgemolden")
+    
+    })
   
   // Hier werden Daten aus der Datenbank exportiert (heruntergeladen) /lobby/:00000/export   -----
   // Speichere den Code der Anfrage in eine Variabel  
