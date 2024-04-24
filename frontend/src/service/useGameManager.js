@@ -55,7 +55,7 @@ export function GameManagerProvider({ children }) {
             return { ...state, body: <PlayingHost /> };
           case "thanks4playing_page":
             console.log("going to thanks4playing page...");
-            return { ...state, title: "Danke fürs Spielen!", body: <Thanks4Playing/> };
+            return { ...state, title: "Danke fürs Spielen!", game_name: '', body: <Thanks4Playing/> };
           default:
             console.log("function change_page: unknown page: ", action.payload);
             return { ...state, title: "something went wrong, how did you get here?" };
@@ -317,7 +317,6 @@ export function GameManagerProvider({ children }) {
       
       case 'phase_change':
         if (state.total_player_count === Infinity || state.total_player_count === 0) return state
-        console.log('going to next phase...');
         if (state.player_count === state.total_player_count) {
           console.log('everyone has answered, current offer_phase: ', state.offer_phase);
           
