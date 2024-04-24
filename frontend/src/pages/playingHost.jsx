@@ -4,11 +4,13 @@ import MyChart from "../components/myChart";
 import MyText from "../components/myText";
 import useGameManager from "../service/useGameManager";
 import * as XLSX from 'xlsx';
+import { BsFillArrowLeftCircleFill, BsFillArrowRightCircleFill } from "react-icons/bs";
 
 export default function PlayingHost() {
   const game = useGameManager();
   const [totalView, setTotalView] = useState(false)
-
+  const [indexLeft, setIndexLeft] = useState(0)
+  const [indexRight, setIndexRight] = useState(game.state.offer_per_money_total_percent.length - 1)
   function aggregate_obj_in_arr(arr, obj) {
     let counter = 0
     arr.forEach((element) => {
@@ -23,15 +25,22 @@ export default function PlayingHost() {
       display: 'flex',
       flexWrap: 'wrap',
       alignItems: 'flex-end',
+      justifyContent: 'space-evenly',
+      userSelect: 'none'
     }}>
       {/* top part - graphs */}
       {totalView ?
       //#region Total Chart 
       //if host clicks on 'total view', show the total view
       <>
+      <div style={{display: 'flex', alignItems: 'center'}}>
+        <BsFillArrowLeftCircleFill color="#555e68" style={{ cursor: 'pointer' }}
+        onClick={() => setIndexLeft((prev) => game.state.offer_per_money_total_percent[prev - 1] ? prev - 1 : prev)}>{'<'}
+        </BsFillArrowLeftCircleFill>
+
         <MyChart 
         //players who have answered this offer / totalofferscount * 100
-        dataset={game.state.offer_per_money_total_percent[0]}
+        dataset={game.state.offer_per_money_total_percent[indexLeft]}
         label={'test'}
         yAxis={ [
           {
@@ -41,7 +50,7 @@ export default function PlayingHost() {
         ]}
         xAxis={[
           {
-            label: 'Totale Angebote',
+            label: `Totale Angebote${indexLeft === 0 ? '' : ` von Spiel ${indexLeft}`}`,
             dataKey: 'amount',
             scaleType: 'band',
           }
@@ -57,9 +66,18 @@ export default function PlayingHost() {
           },
         ]}
         />
+        <BsFillArrowRightCircleFill  color="#555e68" style={{ cursor: 'pointer' }}
+        onClick={() => setIndexLeft((prev) => game.state.offer_per_money_total_percent[prev + 1] ? prev + 1 : prev)}>{'>'}
+        </BsFillArrowRightCircleFill>
+      </div>
+      <div style={{display: 'flex', alignItems: 'center'}}>
+
+        <BsFillArrowLeftCircleFill color="#555e68" style={{ cursor: 'pointer' }}
+        onClick={() => setIndexRight((prev) => game.state.offer_per_money_total_percent[prev - 1] ? prev - 1 : prev)}>{'<'}
+        </BsFillArrowLeftCircleFill>
         <MyChart 
         //players who have answered this offer / totalofferscount * 100
-          dataset={game.state.offer_per_money_total_percent[game.state.offer_per_money_total_percent.length - 1]}
+          dataset={game.state.offer_per_money_total_percent[indexRight]}
           label={'test'}
           yAxis={ [
             {
@@ -69,7 +87,7 @@ export default function PlayingHost() {
           ]}
           xAxis={[
             {
-              label: `Totale Angebote von Spiel ${game.state.current_game}`,
+              label: `Totale Angebote${indexRight === 0 ? '' : ` von Spiel ${indexRight}`}`,
               dataKey: 'amount',
               scaleType: 'band',
             }
@@ -85,6 +103,11 @@ export default function PlayingHost() {
             },
           ]}
         />
+        <BsFillArrowRightCircleFill color="#555e68" style={{ cursor: 'pointer' }}
+        onClick={() => setIndexRight((prev) => game.state.offer_per_money_total_percent[prev + 1] ? prev + 1 : prev)}>{'>'}
+        </BsFillArrowRightCircleFill>
+      </div>
+
       </>
     :
     //#region Relative Chart
