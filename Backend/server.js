@@ -440,6 +440,9 @@ let user_id
         }))
         
           break
+        case "crash":
+          console.log(hallo)
+          break
         case "start_game":
           runde = datenbank.Runden.runden_id.length
           datenbank.Lobby.temp[lobbycode] == undefined
@@ -632,11 +635,13 @@ let user_id
           break
           case "skip":
 
+
           
             if(ws === datenbank.Lobby.host_websocket){
 
               return
             }
+
 
 
             switch(datenbank.Lobby.gamestate[lobbycode]){
@@ -748,6 +753,7 @@ let user_id
             console.log("jojojo")
             datenbank.Lobby.lobby_kennwort[lobbycode] = undefined
           break
+      
 
         
 
