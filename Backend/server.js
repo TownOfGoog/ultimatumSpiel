@@ -370,8 +370,10 @@ let user_id
 
 
     ws.on("message", function(msg) {
-      runde = datenbank.Lobby.spielID[datenbank.Lobby.spielID.length - 1]
-      runde = datenbank.Spiel.runden_id[datenbank.Spiel.runden_id.length - 1]+1
+      console.log(datenbank.Spiel.runden_id)
+      if(datenbank.Spiel.runden_id[datenbank.Lobby.spielID[lobbycode][datenbank.Lobby.spielID[lobbycode].length - 1]]!== undefined){
+      runde = datenbank.Lobby.spielID[lobbycode][datenbank.Lobby.spielID[lobbycode].length - 1]
+      runde = datenbank.Spiel.runden_id[runde][datenbank.Spiel.runden_id[runde].length - 1]+1}
 
       let message = JSON.parse(msg)
 
