@@ -46,13 +46,13 @@ export default function WaitingPlayersHost() {
         {/* bottom center part of the screen */}
         <Grid xs={2} sx={{ height: "40%", display: 'flex', justifyContent: 'center'}} >
           <MyText>
-            Spieler: {game.state.player_count }
+            Spieler: {game.state.total_player_count }
           </MyText>
         </Grid>
       </Grid> 
 
       <Grid xs={1} sx={{ height: "100%", justifyContent: 'flex-end', alignContent: 'flex-end', flexWrap: 'wrap' }} >
-        <MyButton disabled={game.state.player_count <= 0} sx={{width: 'auto', padding: '1em', margin: '0.5em'}} onClick={() => game.new_game(game.state.game_name)}>
+        <MyButton disabled={game.state.total_player_count <= 0} sx={{width: 'auto', padding: '1em', margin: '0.5em'}} onClick={() => game.new_game(game.state.game_name)}>
           Starten
         </MyButton>
       </Grid>

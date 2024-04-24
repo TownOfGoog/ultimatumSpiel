@@ -19,7 +19,7 @@ export default function useDefaultValues() {
     exit: false,
     exit_player: false,
     player_count: 0,
-    total_player_count: Infinity,
+    total_player_count: 0,
     offer_phase: 'make_offer',
     offer_per_money: [
       {

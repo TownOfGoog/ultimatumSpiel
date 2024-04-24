@@ -33,7 +33,6 @@ export function GameManagerProvider({ children }) {
         switch (action.payload) {
           case "home_page":
             console.log("going to home page...");
-            console.log('state.is_logged_in: ', state.is_logged_in);
             let reset = { ...dfault, username: state.username, is_logged_in: state.is_logged_in, top_right: state.is_logged_in ? "" : dfault.top_right};
             return reset; //reset everything
           case "login_page":
@@ -108,7 +107,7 @@ export function GameManagerProvider({ children }) {
             case "new_player":
               console.log("new player joined");
               return { ...state, 
-                player_count: state.player_count + 1 
+                total_player_count: state.total_player_count + 1 
               };
             case "wait":
               console.log('request accepted, waiting for other players...');
@@ -157,10 +156,6 @@ export function GameManagerProvider({ children }) {
             case 'undo_offer': 
             console.log('state.phase: ', state.offer_phase);
               console.log('offer was undone: ', message.data.amount);
-              
-              
-              
-              
               return { ...state,
                 player_count: 
                 // state.offer_phase === 'answer_offer' ? state.player_count : 
@@ -296,7 +291,7 @@ export function GameManagerProvider({ children }) {
               game_names: [...state.game_names, action.payload.data.name],
               body: <WaitingPlayersHost />,
 
-              player_count: 0,
+              // player_count: 0,
             }
           case 'answer_offer':
             console.log('offer was answered: ', action.payload.data.accepted ? 'accepted' : 'declined');
@@ -321,7 +316,7 @@ export function GameManagerProvider({ children }) {
         }
       
       case 'phase_change':
-        if (state.total_player_count === Infinity) return state
+        if (state.total_player_count === Infinity || state.total_player_count === 0) return state
         console.log('going to next phase...');
         if (state.player_count === state.total_player_count) {
           console.log('everyone has answered, current offer_phase: ', state.offer_phase);
