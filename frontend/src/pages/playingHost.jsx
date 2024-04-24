@@ -206,7 +206,7 @@ export default function PlayingHost() {
           }
           {game.state.exit &&
             //only when the game is finished, show the new game button
-            <MyButton sx={{width: 'auto', padding: '0.8em'}} onClick={() => {game.navigate('/')}}>
+            <MyButton sx={{width: 'auto', padding: '0.8em'}} onClick={() => {game.return_to_menu()}}>
               Zurück zum Menü
             </MyButton>
           }

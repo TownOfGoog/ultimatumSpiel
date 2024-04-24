@@ -12,6 +12,7 @@ import PlayingHost from "../pages/playingHost";
 import useDefaultValues from "./useDefaultValues";
 import MyButton from "../components/myButton";
 import Register from "../pages/register";
+import Thanks4Playing from "../pages/thanks4Playing";
 
 const GameManagerContext = createContext();
 
@@ -53,6 +54,9 @@ export function GameManagerProvider({ children }) {
           case "playingHost":
             console.log("going to playingHost page...");
             return { ...state, body: <PlayingHost /> };
+          case "thanks4playing_page":
+            console.log("going to thanks4playing page...");
+            return { ...state, title: "Danke fürs Spielen!", body: <Thanks4Playing/> };
           default:
             console.log("function change_page: unknown page: ", action.payload);
             return { ...state, title: "something went wrong, how did you get here?" };
@@ -252,7 +256,6 @@ export function GameManagerProvider({ children }) {
               };
             case 'exit':
               console.log('the lobby is closed, thank you for playing!')
-              alert('Danke fürs Spielen!')
               return { ...state,
                 exit_player: true,
               }
@@ -309,6 +312,7 @@ export function GameManagerProvider({ children }) {
             return state
           case 'exit':
             console.log('kicking every player out...');
+
             return { ...state,
               exit: true,
             }
@@ -347,8 +351,10 @@ export function GameManagerProvider({ children }) {
         return state;
       case 'server_close':
         console.log('server closed connection');
+        action.payload.current = null
         return { ...state,
           code: null,
+          exit_player: false,
         }
       default:
         console.warn("sent something unknown to server: ", action);
@@ -370,7 +376,7 @@ export function GameManagerProvider({ children }) {
 
     ws.current.onmessage = (e) => dispatch({type: 'server_message', payload: e.data})
 
-    ws.current.onclose = () => {dispatch({type: 'server_close'}); navigate('/')}
+    ws.current.onclose = () => {dispatch({type: 'server_close', payload: ws}); navigate('/')}
   }, [state.code])
 
   useEffect(() => {
@@ -381,8 +387,8 @@ export function GameManagerProvider({ children }) {
   useEffect(() => {
     if (state.exit_player) {
       console.log('exiting game...');
-      alert('Danke fürs Spielen!')
-      navigate('/')
+      dispatch({type: 'server_close', payload: ws})
+      navigate('/thanks4playing')
     }
   }, [navigate, state.exit_player])
   
@@ -453,6 +459,14 @@ export function GameManagerProvider({ children }) {
     dispatch({type: 'sent_message', payload: message})
   }
 
+  function return_to_menu() {
+    console.log("returning to menu...");
+    ws.current.close()
+  }
+
+  function test() {
+    console.log(ws.current)
+  }
   //#region Return
   //all the variables and functions made global
   let publicVariables = {
@@ -465,6 +479,8 @@ export function GameManagerProvider({ children }) {
     answer_offer,
     skip,
     exit,
+    return_to_menu,
+    test
   };
 
   return (
