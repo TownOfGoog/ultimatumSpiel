@@ -58,8 +58,9 @@ export default function Nav() {
               text => console.log(text)
             )
           }}>text</button>
-          <button onClick={() => {console.log(game.state)}}>is_logged_in</button>
-          <button onClick={game.test}>ws</button> */}
+        */}
+        <button onClick={() => {console.log(game.state)}}>state</button>
+        <button onClick={game.test}>crash</button> 
           {game.state.is_logged_in && !game.state.is_host &&
             <div style={{display: 'flex', gap: '0.5em'}}>
               <MyButton sx={{width: 'auto', paddingInline: '0.8em'}} disabled>{game.state.username}</MyButton>

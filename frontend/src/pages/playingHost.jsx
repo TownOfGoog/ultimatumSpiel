@@ -172,12 +172,12 @@ export default function PlayingHost() {
               
               : game.state.exit ? 
               'Spiel beendet.'
-              : 'Alle haben geantwortet.'
+              : game.state.total_player_count === 0 ? 'Niemand ist mehr hier.' : 'Alle haben geantwortet.'
             }
           </MyText>
           {!game.state.exit && 
             <>
-            {game.state.offer_phase === 'wait' ?
+            {game.state.offer_phase === 'wait' && game.state.total_player_count !== 0 ?
               //when everyone has given their answer, show buttons to continue game
               <>
                 <MyButton sx={{width: 'auto', padding: '0.8em'}} onClick={() => {game.new_game(prompt('Name des neuen Spieles'))}}>

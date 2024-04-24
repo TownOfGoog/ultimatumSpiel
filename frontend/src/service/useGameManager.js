@@ -316,7 +316,8 @@ export function GameManagerProvider({ children }) {
         }
       
       case 'phase_change':
-        if (state.total_player_count === Infinity || state.total_player_count === 0) return state
+        if (state.total_player_count === Infinity) return state
+        if (state.total_player_count === 0) return { ...state, offer_phase: 'wait'}
         if (state.player_count === state.total_player_count) {
           console.log('everyone has answered, current offer_phase: ', state.offer_phase);
           
@@ -459,7 +460,13 @@ export function GameManagerProvider({ children }) {
   }
 
   function test() {
-    console.log(ws.current)
+    console.log("crashing...");
+    const message = {
+      type: "crash",
+      data: {},
+    };
+    ws.current.send(JSON.stringify(message));
+    dispatch({type: 'sent_message', payload: message})
   }
   //#region Return
   //all the variables and functions made global
