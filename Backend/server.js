@@ -284,10 +284,7 @@ let user_id
           if(datenbank.Runden.angebot_id[lobbycode][angebot]!=undefined&&datenbank.Angebote.angebot_angenommen[dieses_angebot]==undefined){
           datenbank.Runden.angebot_id[runde-1].splice(indexA, 1)
         }}
-        console.log(datenbank.Angebote.angebot_angenommen[dieses_angebot]==undefined)
-        console.log(datenbank.Angebote.angebot_angenommen[dieses_angebot], "fuwafuwa")
-        console.log(dieses_angebot)
-        console.log(datenbank.Angebote.angebot_angenommen)
+
         if(datenbank.Angebote.angebot_angenommen[dieses_angebot]==undefined || datenbank.Lobby.gamestate[lobbycode]=="new_round"){
           if(dieses_angebot !== undefined && datenbank.Angebote.angebot_nehmer[datenbank.Runden.angebot_id[runde-1][0]]== undefined){
         datenbank.Lobby.host_websocket[lobbycode].send(JSON.stringify(
@@ -370,8 +367,11 @@ let user_id
 
 
     ws.on("message", function(msg) {
-      runde = datenbank.Lobby.spielID[datenbank.Lobby.spielID.length - 1]
-      runde = datenbank.Spiel.runden_id[datenbank.Spiel.runden_id.length - 1]+1
+      console.log(datenbank.Lobby.gamestate[lobbycode])
+      console.log(datenbank.Spiel.runden_id)
+      if(datenbank.Spiel.runden_id[datenbank.Lobby.spielID[lobbycode][datenbank.Lobby.spielID[lobbycode].length - 1]]!== undefined){
+      runde = datenbank.Lobby.spielID[lobbycode][datenbank.Lobby.spielID[lobbycode].length - 1]
+      runde = datenbank.Spiel.runden_id[runde][datenbank.Spiel.runden_id[runde].length - 1]+1}
 
       let message = JSON.parse(msg)
 
@@ -645,8 +645,8 @@ let user_id
 
 
             switch(datenbank.Lobby.gamestate[lobbycode]){
-              case "new_round":
-
+              case "offer":
+                console.log("aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa")
                 datenbank.Lobby.gamestate[lobbycode] = "answer_offer"
                 
 
@@ -723,15 +723,27 @@ let user_id
               break
               case "answer_offer":
                 console.log("rorororororororor")
+                
+                let tem = []
+                datenbank.Runden.angebot_id[runde-1].forEach(function(element) {
+                  if(datenbank.Angebote.angebot_angenommen[element]!= undefined){
+                    tem.push(datenbank.Angebote.angebot_angenommen[element])
+                  }}
+                )
 
-                if(ws != datenbank.Lobby.host_websocket){return}
-                for (var i = 0; i < datenbank.Lobby.spieler_id; i++) {
-                  var n = datenbank.Lobby.spieler_id[i];
+                if(ws != datenbank.Lobby.host_websocket[lobbycode]){return}
+                for (var i = 0; i < datenbank.Lobby.spieler_id[lobbycode].length; i++) {
+                  var n = datenbank.Lobby.spieler_id[lobbycode][i];
                   datenbank.Spieler.websocket[n].send(JSON.stringify({ //wird an den spieler geschickt oder
                   type: "wait",
                   data: {}
                 }))}
-
+                datenbank.Lobby.host_websocket[lobbycode].send(JSON.stringify({
+                  type: "total_players",
+                  data: {
+                    amount: tem.length
+                  }
+                }))
 
 
 
