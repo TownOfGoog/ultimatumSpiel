@@ -41,11 +41,9 @@ export default function PlayingHost() {
         <MyChart 
         //players who have answered this offer / totalofferscount * 100
         dataset={game.state.offer_per_money_total_percent[indexLeft]}
-        label={'test'}
         yAxis={ [
           {
-            label: 'Antworten in %',
-            // valueFormatter: (value) => `${value}%`,
+            label: 'Antworten'
           },
         ]}
         xAxis={[
@@ -58,11 +56,11 @@ export default function PlayingHost() {
         series={[
           {
             dataKey: 'accepted',
-            label: 'Angenommen', stack: 'a', color: '#0afff7' //#5eec77 green
+            label: 'Angenommen', stack: 'a', color: '#0afff7' , valueFormatter: (v) => `${v}% (${game.state.offer_per_money_total[indexLeft][game.state.offer_per_money_total_percent[indexLeft].findIndex(o => o.accepted === v)].accepted})`
           },
           {
             dataKey: 'declined',
-            label: 'Abgelehnt', stack: 'a', color: '#ff8113'
+            label: 'Abgelehnt', stack: 'a', color: '#ff8113', valueFormatter: (v) => `${v}% (${game.state.offer_per_money_total[indexLeft][game.state.offer_per_money_total_percent[indexLeft].findIndex(o => o.declined === v)].declined})`
           },
         ]}
         />
@@ -78,11 +76,9 @@ export default function PlayingHost() {
         <MyChart 
         //players who have answered this offer / totalofferscount * 100
           dataset={game.state.offer_per_money_total_percent[indexRight]}
-          label={'test'}
           yAxis={ [
             {
-              label: 'Antworten in %',
-              // valueFormatter: (value) => `${value}%`,
+              label: 'Antworten',
             },
           ]}
           xAxis={[
@@ -95,11 +91,11 @@ export default function PlayingHost() {
           series={[
             {
               dataKey: 'accepted',
-              label: 'Angenommen', stack: 'a', color: '#0afff7' //#5eec77 green
+              label: 'Angenommen', stack: 'a', color: '#0afff7', valueFormatter: (v) => `${v}% (${game.state.offer_per_money_total[indexRight][game.state.offer_per_money_total_percent[indexRight].findIndex(o => o.accepted === v)].accepted})`
             },
             {
               dataKey: 'declined',
-              label: 'Abgelehnt', stack: 'a', color: '#ff8113'
+              label: 'Abgelehnt', stack: 'a', color: '#ff8113', valueFormatter: (v) => `${v}% (${game.state.offer_per_money_total[indexRight][game.state.offer_per_money_total_percent[indexRight].findIndex(o => o.declined === v)].declined})`
             },
           ]}
         />
@@ -167,9 +163,10 @@ export default function PlayingHost() {
                 data: [0, 0, game.state.total_player_count - aggregate_obj_in_arr(game.state.offer_per_money, 'open') ], stack: 'a', label: 'Spieler', color: 'black'
               },
               {
-                data: [0, 0, aggregate_obj_in_arr(game.state.offer_per_money, 'open')], stack: 'a', label: 'Angeboten', color: '#555E68'
+                data: [0, 0, aggregate_obj_in_arr(game.state.offer_per_money, 'open')], stack: 'a', label: 'Angebote', color: '#555E68'
               },
             ]}
+            tooltip={{ trigger: 'item' }}
           />
         }
       </>
