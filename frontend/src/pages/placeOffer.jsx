@@ -36,7 +36,7 @@ export default function PlaceOffer() {
             <MyGrid xs={5}>
               <MySlider
                 value={amountToGiveAway}
-                setValue={setAmountToGiveAway}
+                setValue={(num) => {setAmountToGiveAway(num); game.dispatch({type: 'error', payload: ''})}}
               />
             </MyGrid>
           </MyGrid>
@@ -44,9 +44,12 @@ export default function PlaceOffer() {
             <MyButton shouldFillAll onClick={() => {game.place_offer(amountToGiveAway)}}>okay</MyButton>
           </MyGrid>
         </MyGrid>
-
+          {game.state.error && (
+            <div style={{color: 'red', width: '100%'}}>{game.state.error}</div>
+          )}
         {/* bottom center */}
         <MyGrid xs={5}>
+
           <MyText>
             Du bietest: <MyText bold color='red'>{amountToGiveAway}</MyText> <br/>
             Du behälst: <MyText bold color='lightGreen'>{100 - amountToGiveAway}</MyText> 

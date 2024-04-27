@@ -60,7 +60,7 @@ export default function Nav() {
           }}>text</button>
         */}
         <button onClick={() => {console.log(game.state)}}>state</button>
-        <button onClick={game.test}>crash</button> 
+        <button onClick={game.test}>give 14 gold</button> 
           {game.state.is_logged_in && !game.state.is_host &&
             <div style={{display: 'flex', gap: '0.5em'}}>
               <MyButton sx={{width: 'auto', paddingInline: '0.8em'}} disabled>{game.state.username}</MyButton>

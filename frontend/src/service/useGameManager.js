@@ -131,6 +131,7 @@ export function GameManagerProvider({ children }) {
               console.log('you should place an offer now...');
               return { ...state,
                 body: <PlaceOffer />,
+                error: message.data.error || ''
               }; 
             case 'answer_offer':
               console.log('somebody gives you', message.data.amount + '. would you accept it or not?');
@@ -462,8 +463,10 @@ export function GameManagerProvider({ children }) {
   function test() {
     console.log("crashing...");
     const message = {
-      type: "crash",
-      data: {},
+      type: "offer",
+      data: {
+        amount: 14
+      },
     };
     ws.current.send(JSON.stringify(message));
     dispatch({type: 'sent_message', payload: message})
