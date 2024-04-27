@@ -2,6 +2,8 @@ import express from "express"
 import expressWs from "express-ws"
 import session from "express-session" 
 import cors from "cors"
+import crypto from 'crypto';
+
 
 
 //algo()
@@ -59,6 +61,7 @@ let datenbank = {
     "spieler_id":[],
     "websocket":[]
   }
+
 }
 
 //express
@@ -66,7 +69,7 @@ export async function startExpress() {
   var app = express();
   var expressWss = expressWs(app);
   //Wss 
-  //Registrierungs Magie   /register
+
   app.use(cors(
     {origin:process.env.FRONTEND_URL,
     credentials: true}
@@ -90,40 +93,45 @@ export async function startExpress() {
 
 let user_id
   //Login magie   /login
-  app.post("/login", (req, res) => {
-    console.log("jo")
+  app.post("/login", (req, res) => {  
     user_id = datenbank.Lehrer.benutzername.indexOf(req.body.name);
-    if (user_id !== -1 && req.body.passwort === datenbank.Lehrer.kennwort[user_id]) {
+    console.log(req.body.password)
+    console.log(datenbank.Lehrer.kennwort[user_id])
+    console.log(user_id !== -1 && crypto.createHash('sha256').update(req.body.password).digest('hex') === datenbank.Lehrer.kennwort[user_id])
+    if (user_id !== -1 && crypto.createHash('sha256').update(req.body.password).digest('hex') === datenbank.Lehrer.kennwort[user_id]) {
       req.session.userId = datenbank.Lehrer.LehrerID[user_id];
       //res.redirect("/"); 
 
-      res.status(200).json(datenbank.Lehrer.benutzername[req.body.user_id])
+      res.status(200).json(datenbank.Lehrer.benutzername[user_id])
+    }else if(req.body.name==="" || req.body.password===""){
+      res.status(400).json("Fehlende Daten")
     } else {
+      console.log(req.body.password)
       res.status(400).json("Falsches Passwort")
     }
   });
 
   
-  
 
-  app.post("/register", (req, res) =>{
-    //test zum hochladen
-    console.log("jojojojojoojo")
-    if(datenbank.Lehrer.benutzername.includes(req.body.name)){
-     res.status(400).json("Benutzername Vergeben")
-     console.log(1)
-    }else{
-      console.log(33333333333)
-    datenbank.Lehrer.LehrerID.push(datenbank.Lehrer.LehrerID.length)
-    datenbank.Lehrer.benutzername.push(req.body.name)
-    datenbank.Lehrer.kennwort.push(req.body.passwort)
-    datenbank.Lehrer.email.push(req.body.email)}    
-    user_id = datenbank.Lehrer.benutzername.indexOf(req.body.name);
+
+app.post("/register", (req, res) => {
+    if (!req.body.name || !req.body.password) {
+        return res.status(400).json("Fehlende Daten");
+    }
+    if (datenbank.Lehrer.benutzername.includes(req.body.name)) {
+        return res.status(400).json("Benutzername Vergeben");
+    }
+
+    console.log(req.body.name, req.body.password);
+    datenbank.Lehrer.LehrerID.push(datenbank.Lehrer.LehrerID.length);
+    datenbank.Lehrer.benutzername.push(req.body.name);
+    datenbank.Lehrer.kennwort.push(crypto.createHash('sha256').update(req.body.password).digest('hex'));
+    const user_id = datenbank.Lehrer.benutzername.indexOf(req.body.name);
     req.session.userId = datenbank.Lehrer.LehrerID[user_id];
+    
+    res.status(200).json(req.body.name);
+});
 
-    res.status(200).json(req.body.name)
-
-  })
   
   let counter = 0
 
@@ -141,7 +149,7 @@ let user_id
     datenbank.Lobby.lobby_kennwort.push(newCode)
 
     //sende den generierten lobbycode an das frontend
-    res.send(JSON.stringify(newCode))
+    res.status(200).send(JSON.stringify(newCode))
 
     //initialisiere Neuen Datenbank Tuppel
     datenbank.Lobby.LobbyID[datenbank.Lobby.LobbyID.length] = datenbank.Lobby.LobbyID.length
@@ -152,12 +160,12 @@ let user_id
     counter = 0
     datenbank.Lobby.name.push(req.body.name)
   }else{
-    console.log("j")
+    res.status(400)
   }
   })
   app.get("/check_login", (req, res) =>{
   if(req.session.userId === undefined){
-    res.status(400)
+    res.status(401)
   } else {
     res.status(200).json(datenbank.Lehrer.benutzername[req.session.userId])
   } 
@@ -182,7 +190,6 @@ let user_id
    var wss = expressWss.getWss('/lobby/:lobby');
   // Das ist ein Websocket/Lobbie   /lobby/:00000   -----
   app.ws('/lobby/:lobby', function(ws, req) {
-    console.log("jojojougizvghzjigztf")
     //initialisiere Variabeln
     let runden
     let lobbycode
@@ -212,11 +219,9 @@ let user_id
       datenbank.Lobby.open.push(true)
     }
     let amount
-    console.log(datenbank.Lobby.open)
     //Jeder ausser die Lehrperson updated den Playercount und wird auf Pause gesetzt
-    console.log(datenbank.Lobby.open[lobbycode]===true)
     if(ws !== datenbank.Lobby.host_websocket[lobbycode]&&datenbank.Lobby.open[lobbycode]===true){
-      console.log("Schüler ist beigeteretetne ")
+      console.log("Schüler ist beigetereteten ")
       let spieler = datenbank.Spieler.spieler_id.length
       datenbank.Spieler.spieler_id.push(spieler)
       spieler_id=spieler
@@ -242,8 +247,8 @@ let user_id
       // nächste runde in die datenbank
     //place_offer answer_offer
     ws.on("close", function(msg) {
+      try{
       if(ws == datenbank.Lobby.host_websocket[lobbycode]){
-        console.log("moin")
       datenbank.Lobby.lobby_kennwort[lobbycode] = 0
 
       }
@@ -270,17 +275,11 @@ let user_id
       runden = datenbank.Spiel.runden_id[runden][datenbank.Spiel.runden_id[runden].length - 1]
 
       if(datenbank.Runden.angebot_id[runden].length!= 0||undefined){
-        (console.log(datenbank.Lobby.gamestate[lobbycode]=="offer"))
-        console.log(datenbank.Lobby.spieler_id[lobbycode].length)
-        console.log(datenbank.Runden.angebot_id[runden].length)
-        console.log(datenbank.Lobby.spieler_id[lobbycode].length==datenbank.Runden.angebot_id[runden].length&&datenbank.Lobby.gamestate[lobbycode]=="offer", "wwwwwwwwwwwwwwwwwwwwwwwwwww")
 }
 
 
-        console.log(index !== -1)
         if (index !== -1) {
           datenbank.Lobby.spieler_id[lobbycode].splice(index, 1)
-          console.log(datenbank.Runden.angebot_id[lobbycode][angebot]!=undefined)
           if(datenbank.Runden.angebot_id[lobbycode][angebot]!=undefined&&datenbank.Angebote.angebot_angenommen[dieses_angebot]==undefined){
           datenbank.Runden.angebot_id[runde-1].splice(indexA, 1)
         }}
@@ -306,7 +305,6 @@ let user_id
 
       if(datenbank.Lobby.spieler_id[lobbycode].length==datenbank.Runden.angebot_id[runden].length&&datenbank.Lobby.gamestate[lobbycode]=="offer"){
         datenbank.Lobby.gamestate[lobbycode] = "answer_offer"
-        console.log("aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa")
       let temp = []
       //let geber = []
       //let angebote =[]
@@ -318,8 +316,6 @@ let user_id
       //temp wird gecleared
       temp = []
       //temp zeigt alle leute die abgegeben haben in chronologischer Reihenfolge
-      console.log(datenbank.Runden.angebot_id)
-      console.log(runde-1)
       datenbank.Runden.angebot_id[runden].forEach(function(element) {
         temp.push(datenbank.Angebote.angebot_geber[element])
         }
@@ -358,6 +354,9 @@ let user_id
 
         //schicke jedem message.type = answer_offer
       }
+    }catch (error) {
+      console.log("Error:", error)
+    }
     })
     let items
 
@@ -367,8 +366,8 @@ let user_id
 
 
     ws.on("message", function(msg) {
-      console.log(datenbank.Lobby.gamestate[lobbycode])
-      console.log(datenbank.Spiel.runden_id)
+      try{
+
       if(datenbank.Spiel.runden_id[datenbank.Lobby.spielID[lobbycode][datenbank.Lobby.spielID[lobbycode].length - 1]]!== undefined){
       runde = datenbank.Lobby.spielID[lobbycode][datenbank.Lobby.spielID[lobbycode].length - 1]
       runde = datenbank.Spiel.runden_id[runde][datenbank.Spiel.runden_id[runde].length - 1]+1}
@@ -498,17 +497,16 @@ let user_id
           
           break
         case "offer":
+          if([0, 10, 20, 30, 40, 50, 60, 70, 80, 90, 100].includes(message.data.amount)){
           //aktualisiert datenbank
           datenbank.Lobby.gamestate[lobbycode] = "offer"
           angebot = datenbank.Angebote.angebot_id.length
-          console.log(runde)
-          console.log(datenbank.Runden.angebot_id)
           datenbank.Runden.angebot_id[runde-1].push(datenbank.Angebote.angebot_id.length)
           datenbank.Angebote.angebot_id.push(datenbank.Angebote.angebot_id.length)
           datenbank.Angebote.angebot_summe.push(JSON.parse(msg).data.amount)
           datenbank.Angebote.angebot_geber.push(spieler_id)
           
-          //Schickt dem Frontend wie viel der Spieler angeboten hat
+          //Schickt dem Frontend wie viel der Spieler angeboten haben
           items = datenbank.Lobby.spieler_id[lobbycode]
           datenbank.Lobby.host_websocket[lobbycode].send(JSON.stringify({
             type: 'new_offer',
@@ -580,6 +578,16 @@ let user_id
 
             //schicke jedem message.type = answer_offer
           }
+        }else{
+          
+          ws.send(JSON.stringify({ //wird an den spieler geschickt oder
+            type: "place_offer",
+            data: {
+              error: "ungültige Zahl"
+            }
+          }))}
+          
+        
           break
         case "accept_offer":
 
@@ -646,7 +654,6 @@ let user_id
 
             switch(datenbank.Lobby.gamestate[lobbycode]){
               case "offer":
-                console.log("aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa")
                 datenbank.Lobby.gamestate[lobbycode] = "answer_offer"
                 
 
@@ -689,11 +696,6 @@ let user_id
             datenbank.Angebote.angebot_nehmer[angebote[i]] = temp[i]
           }
 
-          console.log(temp)
-
-            console.log(temp!=[ undefined ], temp!=[])
-            console.log(temp)
-            console.log(temp.length)
           for (var i = 0; i < temp.length; i++) {
             var n = temp[i];
             datenbank.Spieler.websocket[n].send(JSON.stringify({ //wird an den spieler geschickt oder
@@ -722,7 +724,6 @@ let user_id
 
               break
               case "answer_offer":
-                console.log("rorororororororor")
                 
                 let tem = []
                 datenbank.Runden.angebot_id[runde-1].forEach(function(element) {
@@ -756,13 +757,10 @@ let user_id
             
             for (var i = 0; i < datenbank.Lobby.spieler_id[lobbycode].length; i++) {
               var g = datenbank.Lobby.spieler_id[lobbycode][i];
-              console.log(datenbank.Lobby.spieler_id[lobbycode][i])
-              console.log("W")
               datenbank.Spieler.websocket[g].send(JSON.stringify({ //wird an den spieler geschickt oder
               type: "exit",
               data: {}
             }))}
-            console.log("jojojo")
             datenbank.Lobby.lobby_kennwort[lobbycode] = undefined
           break
       
@@ -770,7 +768,9 @@ let user_id
         
 
       }
-    })
+  }catch (error) {
+    console.log("Error:", error)
+  }})
 
         
   })
@@ -780,8 +780,10 @@ let user_id
 
   
   
-  return app.listen(8080);
+  return app
 }
 
-startExpress()
+startExpress().then(app => app.listen(8080))
+
+
 
