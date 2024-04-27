@@ -354,6 +354,13 @@ app.post("/register", (req, res) => {
 
         //schicke jedem message.type = answer_offer
       }
+
+      datenbank.Lobby.host_websocket[lobbycode].send(JSON.stringify({ //wird an den spieler geschickt oder
+        type: "total_players",
+        data: {
+          amount: datenbank.Lobby.spieler_id[lobbycode].length
+        }
+      }))
     }catch (error) {
       console.log("Error:", error)
     }
