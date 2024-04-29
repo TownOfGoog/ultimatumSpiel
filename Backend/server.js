@@ -249,9 +249,19 @@ app.post("/register", (req, res) => {
     ws.on("close", function(msg) {
       try{
       if(ws == datenbank.Lobby.host_websocket[lobbycode]){
-      datenbank.Lobby.lobby_kennwort[lobbycode] = 0
+      datenbank.Lobby.lobby_kennwort[lobbycode] = 99999999999
 
       }
+
+      if(datenbank.Lobby.gamestate[lobbycode] === undefined)
+      datenbank.Lobby.spieler_id[lobbycode].splice(datenbank.Lobby.spieler_id[lobbycode].indexOf(spieler_id), 1);
+      datenbank.Lobby.host_websocket[lobbycode].send(JSON.stringify({ //wird an den spieler geschickt oder
+        type: "total_players",
+        data: {
+          amount: datenbank.Lobby.spieler_id[lobbycode].length
+        }
+      }))
+
 
       if(ws != datenbank.Lobby.host_websocket[lobbycode]){
         let index = datenbank.Lobby.spieler_id[lobbycode].indexOf(spieler_id)
@@ -355,12 +365,7 @@ app.post("/register", (req, res) => {
         //schicke jedem message.type = answer_offer
       }
 
-      datenbank.Lobby.host_websocket[lobbycode].send(JSON.stringify({ //wird an den spieler geschickt oder
-        type: "total_players",
-        data: {
-          amount: datenbank.Lobby.spieler_id[lobbycode].length
-        }
-      }))
+
     }catch (error) {
       console.log("Error:", error)
     }
