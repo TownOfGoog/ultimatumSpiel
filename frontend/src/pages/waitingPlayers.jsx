@@ -1,9 +1,10 @@
 import Grid from "../components/myGrid";
-// import { Grid } from "@mui/joy";
 import ReactLoading from "react-loading";
 import MyText from "../components/myText";
+import useGameManager from "../service/useGameManager";
 
 export default function WaitingPlayers() {
+  const game = useGameManager();
   return (
     <Grid container columns={3} sx={{ height: "100%", flexWrap: "nowrap" }}>
       {/* left margin */}
@@ -11,13 +12,17 @@ export default function WaitingPlayers() {
 
       {/* center */}
       <Grid container xs={1} columns={3} sx={{ height: "100%", justifyContent: 'center' }}>
-        <Grid xs={3} sx={{ height: "40%" }}></Grid>
+        <Grid xs={3} sx={{ height: "40%", justifyContent: "center", alignItems: 'center' }}>
+
+        {game.state.is_previous_offer_accepted && (
+          <MyText title>Dein vorheriges Angebot wurde <MyText bold>{game.state.is_previous_offer_accepted ? 'Akzeptiert' : 'Abgelehnt'}</MyText>.</MyText>
+        )}
+        </Grid>
         {/* square in the middle */}
         <Grid
           xs={1}
           sx={{ width: '16vh', height: "16vh", display: "flex", justifyContent: "center" }}
         >
-          {/* <div style={{ backgroundColor: "red" }}>test</div> */}
           <ReactLoading
             type={"spinningBubbles"}
             color={"black"}
