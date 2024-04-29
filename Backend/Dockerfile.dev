@@ -6,4 +6,4 @@ COPY . .
 
 EXPOSE 8080
 
-CMD ["npx", "nodemon", "-L", "server.js"]
+CMD ["npx", "nodemon", "-L", "start_server.js"]

@@ -6,12 +6,6 @@ import crypto from 'crypto';
 
 
 
-//algo()
-// speichere gemischte Angebotsnehmer in die Datenbank
-
-//sendeAllenDasGleiche()
-
-//sendeAllenEtwasSpezifischesAusDerDatenBank(infoJeNachDem)
 
 function shuffle(array) {
   let n = array[0]
@@ -65,7 +59,7 @@ let datenbank = {
 }
 
 //express
-export async function startExpress() {
+export function startExpress() {
   var app = express();
   var expressWss = expressWs(app);
   //Wss 
@@ -95,19 +89,15 @@ let user_id
   //Login magie   /login
   app.post("/login", (req, res) => {  
     user_id = datenbank.Lehrer.benutzername.indexOf(req.body.name);
-    console.log(req.body.password)
-    console.log(datenbank.Lehrer.kennwort[user_id])
-    console.log(user_id !== -1 && crypto.createHash('sha256').update(req.body.password).digest('hex') === datenbank.Lehrer.kennwort[user_id])
     if (user_id !== -1 && crypto.createHash('sha256').update(req.body.password).digest('hex') === datenbank.Lehrer.kennwort[user_id]) {
       req.session.userId = datenbank.Lehrer.LehrerID[user_id];
       //res.redirect("/"); 
 
       res.status(200).json(datenbank.Lehrer.benutzername[user_id])
     }else if(req.body.name==="" || req.body.password===""){
-      res.status(400).json("Fehlende Daten")
+      res.status(400).json("Fehlende Anmeldedaten")
     } else {
-      console.log(req.body.password)
-      res.status(400).json("Falsches Passwort")
+      res.status(400).json("Falsche Anmeldedaten")
     }
   });
 
@@ -119,7 +109,7 @@ app.post("/register", (req, res) => {
         return res.status(400).json("Fehlende Daten");
     }
     if (datenbank.Lehrer.benutzername.includes(req.body.name)) {
-        return res.status(400).json("Benutzername Vergeben");
+        return res.status(409).json("Benutzername bereits Vergeben");
     }
 
     console.log(req.body.name, req.body.password);
@@ -172,12 +162,10 @@ app.post("/register", (req, res) => {
   
   })
 
-  app.get("/logout", (req, res) =>{
-
-    req.session.destroy()
-    res.status(200).json("abgemolden")
-    
-    })
+  app.get('/logout', (req, res) => {
+    delete req.session.LehrerID
+    res.status(200).json('Abgemeldet')
+  })
   
   // Hier werden Daten aus der Datenbank exportiert (heruntergeladen) /lobby/:00000/export   -----
   // Speichere den Code der Anfrage in eine Variabel  
@@ -203,6 +191,7 @@ app.post("/register", (req, res) => {
       //Setzt lobbycode(wichtigste Variabel)
       lobbycode = datenbank.Lobby.lobby_kennwort.indexOf(parseInt(req.params.lobby))
       datenbank.Lobby.open[lobbycode] == true
+      console.log(datenbank.Lehrer, "jeeeeeee")
 
     } else {
       
@@ -217,6 +206,8 @@ app.post("/register", (req, res) => {
       datenbank.Lehrer.websocket.push(ws)
       datenbank.Lobby.host_websocket.push(ws)
       datenbank.Lobby.open.push(true)
+      console.log(datenbank.Lehrer, "jeeeeeee")
+
     }
     let amount
     //Jeder ausser die Lehrperson updated den Playercount und wird auf Pause gesetzt
@@ -239,6 +230,7 @@ app.post("/register", (req, res) => {
       }))
       
     }
+    console.log(datenbank.Lehrer, "jeeeeeee")
     
     ;
     let angebot
@@ -795,7 +787,7 @@ app.post("/register", (req, res) => {
   return app
 }
 
-startExpress().then(app => app.listen(8080))
+startExpress()
 
 
 
