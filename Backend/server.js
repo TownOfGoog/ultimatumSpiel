@@ -111,6 +111,9 @@ app.post("/register", (req, res) => {
     if (datenbank.Lehrer.benutzername.includes(req.body.name)) {
         return res.status(409).json("Benutzername bereits Vergeben");
     }
+    if (req.body.password.length < 7){
+      return res.status(400).json("Passwort muss mindestens 7 Zeichen lang sein")
+    }
 
     console.log(req.body.name, req.body.password);
     datenbank.Lehrer.LehrerID.push(datenbank.Lehrer.LehrerID.length);
@@ -618,6 +621,35 @@ app.post("/register", (req, res) => {
                 accepted: true,
               }            }))
 
+              let angebote2 = datenbank.Runden.angebot_id[runde-1]
+              let antworten2 = []
+              for (var i = 0; i < angebote2.length; i++) {
+                var n = angebote2[i];
+                antworten2.push(datenbank.Angebote.angebot_angenommen[n])
+              }
+              console.log(antworten2)
+              console.log(!antworten2.includes(undefined))
+              if(!antworten2.includes(undefined)){
+                let geber = []
+                let akzeptiert = []
+                datenbank.Runden.angebot_id[runde-1].forEach(function(element) {
+                  geber.push(datenbank.Angebote.angebot_geber[element])
+                  akzeptiert.push(datenbank.Angebote.angebot_angenommen[element])
+                  })
+                  console.log(geber, akzeptiert)
+                  for (var i = 0; i < akzeptiert.length; i++) {
+                    var n = geber[i];
+                    datenbank.Spieler.websocket[n].send(JSON.stringify({ //wird an den spieler geschickt oder
+                    type: "final",
+                    data: {
+                      accepted:akzeptiert[i]                  
+                    }
+                  }))}
+    
+                
+    
+              }
+
           break
           case "decline_offer":
             //sihe accept_offer
@@ -642,7 +674,36 @@ app.post("/register", (req, res) => {
               accepted: false
             }
           }))
+          let angebote = datenbank.Runden.angebot_id[runde-1]
+          console.log(angebote)
+          let antworten = []
+          for (var i = 0; i < angebote.length; i++) {
+            var n = angebote[i];
+            antworten.push(datenbank.Angebote.angebot_angenommen[n])
+          }
+          console.log(antworten)
+          console.log(!antworten.includes(undefined))
+          if(!antworten.includes(undefined)){
+            let geber = []
+            let akzeptiert = []
+            datenbank.Runden.angebot_id[runde-1].forEach(function(element) {
+              geber.push(datenbank.Angebote.angebot_geber[element])
+              akzeptiert.push(datenbank.Angebote.angebot_angenommen[element])
+              })
+              console.log(geber, akzeptiert)
 
+              for (var i = 0; i < akzeptiert.length; i++) {
+                var n = geber[i];
+                datenbank.Spieler.websocket[n].send(JSON.stringify({ //wird an den spieler geschickt oder
+                type: "final",
+                data: {
+                  accepted:akzeptiert[i]                  
+                }
+              }))}
+
+            
+
+          }
 
           break
           case "skip":
