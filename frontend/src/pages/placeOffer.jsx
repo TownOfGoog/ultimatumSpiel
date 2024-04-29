@@ -49,7 +49,9 @@ export default function PlaceOffer() {
           )}
         {/* bottom center */}
         <MyGrid xs={5}>
-
+          {process.env.NODE_ENV === 'development' && (
+            <button onClick={() => {game.place_offer(999)}}>gebe 999 geld</button>
+          )}
           <MyText>
             Du bietest: <MyText bold color='red'>{amountToGiveAway}</MyText> <br/>
             Du behälst: <MyText bold color='lightGreen'>{100 - amountToGiveAway}</MyText> 
