@@ -86,20 +86,55 @@ export function startExpress() {
   }));
 
 let user_id
-  //Login magie   /login
-  app.post("/login", (req, res) => {  
-    user_id = datenbank.Lehrer.benutzername.indexOf(req.body.name);
-    if (user_id !== -1 && crypto.createHash('sha256').update(req.body.password).digest('hex') === datenbank.Lehrer.kennwort[user_id]) {
-      req.session.userId = datenbank.Lehrer.LehrerID[user_id];
-      //res.redirect("/"); 
-
-      res.status(200).json(datenbank.Lehrer.benutzername[user_id])
-    }else if(req.body.name==="" || req.body.password===""){
-      res.status(400).json("Fehlende Anmeldedaten")
-    } else {
-      res.status(400).json("Falsche Anmeldedaten")
+  //login
+  function checkLoginAttempts(req, res, next) {
+    const MAX_LOGIN_ATTEMPTS = 3;
+    const BUFFER_PERIOD_DURATION = 5 * 60 * 1000; // 5 min
+  
+    if (!req.session.failedLoginAttempts) {
+      req.session.failedLoginAttempts = 0;
     }
-  });
+  
+    if (req.session.bufferPeriod && req.session.bufferPeriod > Date.now()) {
+      const remainingTime = Math.ceil((req.session.bufferPeriod - Date.now()) / 1000); // Remaining time in seconds
+      return res.status(400).json(`Sie haben die maximalen Anmeldeversuche erreicht. Bitte versuchen Sie es in ${remainingTime} Sekunden erneut.`);
+    }
+  
+    next();
+  }
+  
+  app.post("/login", checkLoginAttempts, (req, res) => {
+    const MAX_LOGIN_ATTEMPTS = 3;
+    const BUFFER_PERIOD_DURATION = 5 * 60 * 1000; // 5 min
+
+    if (!req.body.name || !req.body.password) {
+        return res.status(400).json("Fehlende Anmeldedaten");
+    }
+
+    const user_id = datenbank.Lehrer.benutzername.indexOf(req.body.name);
+
+    if (user_id !== -1 && crypto.createHash('sha256').update(req.body.password).digest('hex') === datenbank.Lehrer.kennwort[user_id]) {
+        req.session.failedLoginAttempts = 0;
+
+        req.session.userId = datenbank.Lehrer.LehrerID[user_id];
+
+        return res.status(200).json(datenbank.Lehrer.benutzername[user_id]);
+    } else {
+        if (!req.session.failedLoginAttempts) {
+            req.session.failedLoginAttempts = 1;
+        } else {
+            req.session.failedLoginAttempts++;
+        }
+
+        if (req.session.failedLoginAttempts >= MAX_LOGIN_ATTEMPTS) {
+            req.session.bufferPeriod = Date.now() + BUFFER_PERIOD_DURATION;
+            return res.status(401).json("Sie haben die maximalen Anmeldeversuche erreicht. Bitte versuchen Sie es in 5 Minuten erneut.");
+        }
+
+        return res.status(401).json("Falsche Anmeldedaten");
+    }
+});
+
 
   
 
