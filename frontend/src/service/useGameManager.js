@@ -343,8 +343,9 @@ export function GameManagerProvider({ children }) {
               offer_per_money: dfault.offer_per_money,
             };
           }
+        } else {
+          return state;
         }
-        return state;
       case 'server_close':
         console.log('server closed connection');
         action.payload.current = null
@@ -465,7 +466,7 @@ export function GameManagerProvider({ children }) {
     const message = {
       type: "offer",
       data: {
-        amount: 14
+        amount: true
       },
     };
     ws.current.send(JSON.stringify(message));
