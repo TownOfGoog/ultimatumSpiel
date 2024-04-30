@@ -310,14 +310,15 @@ app.post("/register", (req, res) => {
       }}
 
 
-      runden = datenbank.Lobby.spielID[lobbycode][datenbank.Lobby.spielID[lobbycode].length - 1]
-      runden = datenbank.Spiel.runden_id[runden][datenbank.Spiel.runden_id[runden].length - 1]
-
+      
       if(datenbank.Runden.angebot_id[runden].length!= 0||undefined){
-}
-
-
-        if (index !== -1) {
+      }
+      
+      
+      if (index !== -1) {
+          runden = datenbank.Lobby.spielID[lobbycode][datenbank.Lobby.spielID[lobbycode].length - 1]
+          runden = datenbank.Spiel.runden_id[runden][datenbank.Spiel.runden_id[runden].length - 1]
+          
           datenbank.Lobby.spieler_id[lobbycode].splice(index, 1)
           if(datenbank.Runden.angebot_id[lobbycode][angebot]!=undefined&&datenbank.Angebote.angebot_angenommen[dieses_angebot]==undefined){
           datenbank.Runden.angebot_id[runde-1].splice(indexA, 1)
