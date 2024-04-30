@@ -318,7 +318,7 @@ app.post("/register", (req, res) => {
       if (index !== -1) {
           runden = datenbank.Lobby.spielID[lobbycode][datenbank.Lobby.spielID[lobbycode].length - 1]
           runden = datenbank.Spiel.runden_id[runden][datenbank.Spiel.runden_id[runden].length - 1]
-          
+
           datenbank.Lobby.spieler_id[lobbycode].splice(index, 1)
           if(datenbank.Runden.angebot_id[lobbycode][angebot]!=undefined&&datenbank.Angebote.angebot_angenommen[dieses_angebot]==undefined){
           datenbank.Runden.angebot_id[runde-1].splice(indexA, 1)
@@ -501,7 +501,6 @@ app.post("/register", (req, res) => {
               data:{
                 game: datenbank.Lobby.spielID[lobbycode].length,
                 round: datenbank.Spiel.runden_id[spiel2].length,
-                class:datenbank.Lobby.name[lobbycode],
                 name: datenbank.Spiel.spiel_name[datenbank.Spiel.spiel_id.length-1]
               }
             }))
