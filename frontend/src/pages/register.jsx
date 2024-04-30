@@ -43,14 +43,19 @@ export default function Register() {
         {/* due to the programming of MyButton, i need this width: 100% div */}
         <div style={{width: '100%'}}> 
           <MyButton onClick={() => {
-            console.log('password: ', password);
-            console.log('passwordRepeat: ', passwordRepeat);
+
+            // check if all fields are filled
+            if ( !password || !passwordRepeat || !username ) {
+              game.dispatch({type: 'error', payload: 'Bitte füllen Sie alle Felder aus'})
+              return
+            }
 
             // check if password and passwordRepeat are the same
-            if (password !== passwordRepeat || !password || !passwordRepeat) {
+            if (password !== passwordRepeat) {
               game.dispatch({type: 'error', payload: 'Passwörter stimmen nicht überein'})
               return
             }
+
 
             fetch(`http://${process.env.REACT_APP_BACKEND_URL}/register`, {
               method: 'POST',
