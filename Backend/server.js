@@ -81,7 +81,7 @@ export function startExpress() {
     cookie: {
       maxAge: 86400000+Date.now(),  // 24 stunden
       httpOnly: true,
-      secure: process.env.NODE_ENV === 'production'  // Use secure cookies in production
+      secure: process.env.NODE_ENV === 'production' 
   }
   }));
 
@@ -90,25 +90,26 @@ let user_id
   function checkLoginAttempts(req, res, next) {
     const MAX_LOGIN_ATTEMPTS = 3;
     const BUFFER_PERIOD_DURATION = 5 * 60 * 1000; // 5 min
-  
+
     if (!req.session.failedLoginAttempts) {
-      req.session.failedLoginAttempts = 0;
+        req.session.failedLoginAttempts = 0;
     }
-  
+
     if (req.session.bufferPeriod && req.session.bufferPeriod > Date.now()) {
-      const remainingTime = Math.ceil((req.session.bufferPeriod - Date.now()) / 1000); // Remaining time in seconds
-      return res.status(400).json(`Sie haben die maximalen Anmeldeversuche erreicht. Bitte versuchen Sie es in ${remainingTime} Sekunden erneut.`);
+        const remainingTime = Math.ceil((req.session.bufferPeriod - Date.now()) / 1000);
+        return res.status(400).json(`Sie haben die maximalen Anmeldeversuche erreicht. Bitte versuchen Sie es in ${remainingTime} Sekunden erneut.`);
     }
-  
+
     next();
-  }
-  
-  app.post("/login", checkLoginAttempts, (req, res) => {
+}
+
+app.post("/login", checkLoginAttempts, (req, res) => {
     const MAX_LOGIN_ATTEMPTS = 3;
     const BUFFER_PERIOD_DURATION = 5 * 60 * 1000; // 5 min
 
     if (!req.body.name || !req.body.password) {
-        return res.status(400).json("Fehlende Anmeldedaten");
+        const remainingAttempts = MAX_LOGIN_ATTEMPTS - req.session.failedLoginAttempts;
+        return res.status(400).json(`Fehlende Anmeldedaten, übrige Versuche: ${remainingAttempts}`);
     }
 
     const user_id = datenbank.Lehrer.benutzername.indexOf(req.body.name);
@@ -126,14 +127,16 @@ let user_id
             req.session.failedLoginAttempts++;
         }
 
+        const remainingAttempts = MAX_LOGIN_ATTEMPTS - req.session.failedLoginAttempts;
         if (req.session.failedLoginAttempts >= MAX_LOGIN_ATTEMPTS) {
             req.session.bufferPeriod = Date.now() + BUFFER_PERIOD_DURATION;
-            return res.status(401).json("Sie haben die maximalen Anmeldeversuche erreicht. Bitte versuchen Sie es in 5 Minuten erneut.");
+            return res.status(401).json(`Sie haben die maximalen Anmeldeversuche erreicht. Bitte versuchen Sie es in 5 Minuten erneut.`);
         }
 
-        return res.status(401).json("Falsche Anmeldedaten");
+        return res.status(401).json(`Falsche Anmeldedaten, übrige Versuche: ${remainingAttempts}`);
     }
 });
+
 
 
   
@@ -185,6 +188,7 @@ app.post("/register", (req, res) => {
     datenbank.Lobby.spieler_id.push([])
     datenbank.Lobby.spielID.push([])
     datenbank.Spiel.runden_id.push([])
+    datenbank.Lobby.open.push(true)
     counter = 0
     datenbank.Lobby.name.push(req.body.name)
   }else{
@@ -243,12 +247,13 @@ app.post("/register", (req, res) => {
       //Füllt den Lehrer Table
       datenbank.Lehrer.websocket.push(ws)
       datenbank.Lobby.host_websocket.push(ws)
-      datenbank.Lobby.open.push(true)
       console.log(datenbank.Lehrer, "jeeeeeee")
 
     }
     let amount
     //Jeder ausser die Lehrperson updated den Playercount und wird auf Pause gesetzt
+    console.log(ws !== datenbank.Lobby.host_websocket[lobbycode]&&datenbank.Lobby.open[lobbycode]===true)
+    console.log(datenbank.Lobby.open[lobbycode])
     if(ws !== datenbank.Lobby.host_websocket[lobbycode]&&datenbank.Lobby.open[lobbycode]===true){
       console.log("Schüler ist beigetereteten ")
       let spieler = datenbank.Spieler.spieler_id.length
@@ -282,15 +287,6 @@ app.post("/register", (req, res) => {
       datenbank.Lobby.lobby_kennwort[lobbycode] = 99999999999
 
       }
-
-      if(datenbank.Lobby.gamestate[lobbycode] === undefined)
-      datenbank.Lobby.spieler_id[lobbycode].splice(datenbank.Lobby.spieler_id[lobbycode].indexOf(spieler_id), 1);
-      datenbank.Lobby.host_websocket[lobbycode].send(JSON.stringify({ //wird an den spieler geschickt oder
-        type: "total_players",
-        data: {
-          amount: datenbank.Lobby.spieler_id[lobbycode].length
-        }
-      }))
 
 
       if(ws != datenbank.Lobby.host_websocket[lobbycode]){
@@ -421,8 +417,8 @@ app.post("/register", (req, res) => {
         
         case "start_round":
           runde = datenbank.Runden.runden_id.length
-          datenbank.Lobby.temp[lobbycode] == undefined
-          datenbank.Lobby.open[lobbycode] == false
+          datenbank.Lobby.temp[lobbycode] = undefined
+          datenbank.Lobby.open[lobbycode] = false
 
           //findet Heraus in welchem Spiel wir uns Befinden
           let spiel2 = datenbank.Lobby.spielID[lobbycode][datenbank.Lobby.spielID[lobbycode].length-1]
@@ -486,8 +482,9 @@ app.post("/register", (req, res) => {
           break
         case "start_game":
           runde = datenbank.Runden.runden_id.length
-          datenbank.Lobby.temp[lobbycode] == undefined
-          datenbank.Lobby.open[lobbycode] == false
+          datenbank.Lobby.temp[lobbycode] = undefined
+          datenbank.Lobby.open[lobbycode] = false
+          console.log(datenbank.Lobby.open[lobbycode])
           //aktualisiert die Datenbank
           datenbank.Lobby.gamestate[lobbycode] = "new_round"
           let spiel_id = datenbank.Spiel.spiel_id.length
@@ -798,7 +795,7 @@ app.post("/register", (req, res) => {
 
           for (var i = 0; i < temp.length; i++) {
             var n = temp[i];
-            datenbank.Spieler.websocket[n].send(JSON.stringify({ //wird an den spieler geschickt oder
+            datenbank.Spieler.websocket[n].send(JSON.stringify({
             type: "answer_offer",
             data: {
               game:datenbank.Lobby.spielID[lobbycode].length,
@@ -809,11 +806,11 @@ app.post("/register", (req, res) => {
           }))}
           for (var i = 0; i < enten.length; i++) {
             var n = enten[i];
-            datenbank.Spieler.websocket[n].send(JSON.stringify({ //wird an den spieler geschickt oder
+            datenbank.Spieler.websocket[n].send(JSON.stringify({ 
             type: "wait",
             data: {}
           }))}
-          datenbank.Lobby.host_websocket[lobbycode].send(JSON.stringify({ //wird an den spieler geschickt oder
+          datenbank.Lobby.host_websocket[lobbycode].send(JSON.stringify({ 
             type: "total_players",
             data: {
               amount: temp.length
@@ -825,26 +822,34 @@ app.post("/register", (req, res) => {
               break
               case "answer_offer":
                 
-                let tem = []
+              let antworten = []
+              for (var i = 0; i < angebote.length; i++) {
+                var n = angebote[i];
+                antworten.push(datenbank.Angebote.angebot_angenommen[n])
+              }
+              console.log(antworten)
+              console.log(!antworten.includes(undefined))
+              if(!antworten.includes(undefined)){
+                let geber = []
+                let akzeptiert = []
                 datenbank.Runden.angebot_id[runde-1].forEach(function(element) {
-                  if(datenbank.Angebote.angebot_angenommen[element]!= undefined){
-                    tem.push(datenbank.Angebote.angebot_angenommen[element])
-                  }}
-                )
-
-                if(ws != datenbank.Lobby.host_websocket[lobbycode]){return}
-                for (var i = 0; i < datenbank.Lobby.spieler_id[lobbycode].length; i++) {
-                  var n = datenbank.Lobby.spieler_id[lobbycode][i];
-                  datenbank.Spieler.websocket[n].send(JSON.stringify({ //wird an den spieler geschickt oder
-                  type: "wait",
-                  data: {}
-                }))}
-                datenbank.Lobby.host_websocket[lobbycode].send(JSON.stringify({
-                  type: "total_players",
-                  data: {
-                    amount: tem.length
-                  }
-                }))
+                  geber.push(datenbank.Angebote.angebot_geber[element])
+                  akzeptiert.push(datenbank.Angebote.angebot_angenommen[element])
+                  })
+                  console.log(geber, akzeptiert)
+    
+                  for (var i = 0; i < akzeptiert.length; i++) {
+                    var n = geber[i];
+                    datenbank.Spieler.websocket[n].send(JSON.stringify({ 
+                    type: "final",
+                    data: {
+                      accepted:akzeptiert[i]                  
+                    }
+                  }))}
+    
+                
+    
+              }
 
 
 
@@ -857,7 +862,7 @@ app.post("/register", (req, res) => {
             
             for (var i = 0; i < datenbank.Lobby.spieler_id[lobbycode].length; i++) {
               var g = datenbank.Lobby.spieler_id[lobbycode][i];
-              datenbank.Spieler.websocket[g].send(JSON.stringify({ //wird an den spieler geschickt oder
+              datenbank.Spieler.websocket[g].send(JSON.stringify({ 
               type: "exit",
               data: {}
             }))}
