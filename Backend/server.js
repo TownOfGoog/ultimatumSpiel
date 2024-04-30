@@ -2,7 +2,7 @@ import express from "express"
 import expressWs from "express-ws"
 import session from "express-session" 
 import cors from "cors"
-import crypto from 'crypto';
+import crypto from 'crypto'
 
 
 
@@ -144,10 +144,10 @@ app.post("/login", checkLoginAttempts, (req, res) => {
 
 app.post("/register", (req, res) => {
     if (!req.body.name || !req.body.password) {
-        return res.status(400).json("Fehlende Daten");
+        return res.status(400).json("Fehlende Anmeldedaten");
     }
     if (datenbank.Lehrer.benutzername.includes(req.body.name)) {
-        return res.status(409).json("Benutzername bereits Vergeben");
+        return res.status(409).json("Benutzername bereits vergeben");
     }
     if (req.body.password.length < 7){
       return res.status(400).json("Passwort muss mindestens 7 Zeichen lang sein")
