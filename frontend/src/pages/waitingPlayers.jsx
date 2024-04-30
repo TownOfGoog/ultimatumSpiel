@@ -14,7 +14,7 @@ export default function WaitingPlayers() {
       <Grid container xs={1} columns={3} sx={{ height: "100%", justifyContent: 'center' }}>
         <Grid xs={3} sx={{ height: "40%", justifyContent: "center", alignItems: 'center' }}>
 
-        {game.state.is_previous_offer_accepted && (
+        {game.state.is_previous_offer_accepted !== undefined && (
           <MyText title>Dein vorheriges Angebot wurde <MyText bold>{game.state.is_previous_offer_accepted ? 'Akzeptiert' : 'Abgelehnt'}</MyText>.</MyText>
         )}
         </Grid>
