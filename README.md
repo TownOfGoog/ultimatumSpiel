@@ -10,8 +10,12 @@ req.body.name
 req.body.password
 req.body.email
 Wenn der Benutzername bereits existiert führt das Backend
-res.send("Vergeben")
+  res.send("Vergeben")
 aus
+Wenn die email vergeben ist führt das Backend
+  res.send("email Vergeben")
+aus
+
 
 ## Login Info
 req.body.id

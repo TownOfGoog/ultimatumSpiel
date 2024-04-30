@@ -180,7 +180,7 @@ app.post("/register", (req, res) => {
     datenbank.Lobby.lobby_kennwort.push(newCode)
 
     //sende den generierten lobbycode an das frontend
-    res.status(200).send(JSON.stringify(newCode))
+    res.status(200).json(newCode)
 
     //initialisiere Neuen Datenbank Tuppel
     datenbank.Lobby.LobbyID[datenbank.Lobby.LobbyID.length] = datenbank.Lobby.LobbyID.length
@@ -192,12 +192,12 @@ app.post("/register", (req, res) => {
     counter = 0
     datenbank.Lobby.name.push(req.body.name)
   }else{
-    res.status(400)
+    res.status(401).json("Nicht angemeldet")
   }
   })
   app.get("/check_login", (req, res) =>{
   if(req.session.userId === undefined){
-    res.status(401)
+    res.status(401).json("Nicht angemeldet")
   } else {
     res.status(200).json(datenbank.Lehrer.benutzername[req.session.userId])
   } 
@@ -205,7 +205,7 @@ app.post("/register", (req, res) => {
   })
 
   app.get('/logout', (req, res) => {
-    delete req.session.LehrerID
+    delete req.session.userId
     res.status(200).json('Abgemeldet')
   })
   
@@ -411,9 +411,6 @@ app.post("/register", (req, res) => {
         datenbank.Spieler.websocket[n].send(JSON.stringify({ //wird an den spieler geschickt oder
         type: "answer_offer",
         data: {
-          game:datenbank.Lobby.spielID[lobbycode].length,
-          round: datenbank.Spiel.runden_id[datenbank.Lobby.spielID[lobbycode].length-1].length,
-          class: datenbank.Lobby.name,
           amount: datenbank.Angebote.angebot_summe[angebote[i]]
         }
       }))}
@@ -618,9 +615,7 @@ app.post("/register", (req, res) => {
           if(datenbank.Lobby.spieler_id[lobbycode].length!=datenbank.Runden.angebot_id[runde-1].length){
             
             ws.send(JSON.stringify({
-              type: "wait",
-              data: {}
-              
+              type: "wait"
               
             }))
             dieses_angebot = "a"
@@ -668,7 +663,6 @@ app.post("/register", (req, res) => {
             data: {
               game:datenbank.Lobby.spielID[lobbycode].length,
               round: datenbank.Spiel.runden_id[datenbank.Lobby.spielID[lobbycode].length-1].length,
-              class: datenbank.Lobby.name,
               amount: datenbank.Angebote.angebot_summe[angebote[i]]
             }
           }))}
@@ -681,9 +675,10 @@ app.post("/register", (req, res) => {
           ws.send(JSON.stringify({ //wird an den spieler geschickt oder
             type: "place_offer",
             data: {
-              error: "ungültige Zahl"
+              error: "Ungültiges Angebot"
             }
           }))}
+
           
         
           break
@@ -702,8 +697,7 @@ app.post("/register", (req, res) => {
           
             //sendet dem Spieler "wait" und dem Lehrer die Daten
             ws.send(JSON.stringify({
-              type: "wait",
-              data: {}
+              type: "wait"
             }))
             datenbank.Lobby.host_websocket[lobbycode].send(JSON.stringify({
               type:"offer_response",
@@ -728,8 +722,7 @@ app.post("/register", (req, res) => {
           })
 
           ws.send(JSON.stringify({
-            type: "wait",
-            data: {}
+            type: "wait"
           }))
           datenbank.Lobby.host_websocket[lobbycode].send(JSON.stringify({
             type:"offer_response",
@@ -832,15 +825,13 @@ app.post("/register", (req, res) => {
             data: {
               game:datenbank.Lobby.spielID[lobbycode].length,
               round: datenbank.Spiel.runden_id[datenbank.Lobby.spielID[lobbycode].length-1].length,
-              class: datenbank.Lobby.name,
               amount: datenbank.Angebote.angebot_summe[angebote[i]]
             }
           }))}
           for (var i = 0; i < enten.length; i++) {
             var n = enten[i];
             datenbank.Spieler.websocket[n].send(JSON.stringify({ 
-            type: "wait",
-            data: {}
+            type: "wait"
           }))}
           datenbank.Lobby.host_websocket[lobbycode].send(JSON.stringify({ 
             type: "total_players",

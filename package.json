@@ -8,5 +8,14 @@
     "test": "cd ./Backend && node --experimental-vm-modules node_modules/jest/bin/jest.js",
     "dev": "cd ./Backend && npm i && cd .. && docker-compose -f docker-compose.dev.yaml -p ultimatum-spiel-development up --build",
     "prod": "docker-compose -p ultimatum-spiel-production up --build"
+  },
+  "devDependencies": {
+    "@babel/core": "^7.24.4",
+    "@babel/preset-env": "^7.24.4",
+    "chai": "^5.1.0",
+    "jest": "^29.7.0",
+    "mocha": "^10.4.0",
+    "supertest": "^7.0.0",
+    "ws": "^8.16.0"
   }
 }
