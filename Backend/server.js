@@ -109,7 +109,7 @@ app.post("/login", checkLoginAttempts, (req, res) => {
 
     if (!req.body.name || !req.body.password) {
         const remainingAttempts = MAX_LOGIN_ATTEMPTS - req.session.failedLoginAttempts;
-        return res.status(400).json(`Fehlende Anmeldedaten, übrige Versuche: ${remainingAttempts}`);
+        return res.status(400).json(`Fehlende Anmeldedaten`);
     }
 
     const user_id = datenbank.Lehrer.benutzername.indexOf(req.body.name);
