@@ -311,7 +311,9 @@ export function GameManagerProvider({ children }) {
             };
           case 'skip':
             console.log('skipping round...');
-            return state
+            return { ...state, 
+              player_count: state.total_player_count,
+            }
           case 'exit':
             console.log('kicking every player out...');
 
