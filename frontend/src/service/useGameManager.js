@@ -126,7 +126,7 @@ export function GameManagerProvider({ children }) {
                 title: `Spiel ${current_game} / Runde ${current_round}`,
                 game_name: message.data.name,
                 body: <PlayingHost />,
-                is_previous_offer_accepted: null,
+                is_previous_offer_accepted: undefined,
               };
             case 'place_offer':
               console.log('you should place an offer now...');
@@ -140,9 +140,10 @@ export function GameManagerProvider({ children }) {
                 body: <AnswerOffer amount={message.data.amount} />,
               };
             case 'final':
+              if (message.data.accepted === undefined) return state;
               console.log('previous offer was: ', message.data.accepted ? 'accepted' : 'declined');
               return { ...state,
-                feedback: message.data.accepted,
+                is_previous_offer_accepted: message.data.accepted,
               };
             case 'total_players':
               console.log('setting total player count to: ', message.data.amount);
@@ -311,7 +312,9 @@ export function GameManagerProvider({ children }) {
             };
           case 'skip':
             console.log('skipping round...');
-            return state
+            return { ...state, 
+              player_count: state.total_player_count,
+            }
           case 'exit':
             console.log('kicking every player out...');
 

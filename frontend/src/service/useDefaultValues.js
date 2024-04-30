@@ -13,7 +13,7 @@ export default function useDefaultValues() {
     top_right: <MyButton sx={{width: 'auto', paddingInline: '0.8em'}} onClick={() => navigate('/login')}>Login</MyButton>,
     body: <Home />,
     error: '',
-    is_previous_offer_accepted: null,
+    is_previous_offer_accepted: undefined,
     is_host: false,
     is_logged_in: false, //is_host has a specific usecase
     code: null,
