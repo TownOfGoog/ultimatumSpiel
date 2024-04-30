@@ -18,13 +18,14 @@ export default function Register() {
         />
         
         <MyInput
-        
+          password
           label={"Passwort"}
           value={password}
           setValue={setPassword}
         />
         
         <MyInput
+          password
           label={"Passwort erneut eingeben"}
           value={passwordRepeat}
           setValue={setPasswordRepeat}
