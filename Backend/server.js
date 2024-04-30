@@ -315,8 +315,10 @@ app.post("/register", (req, res) => {
       }
       
       
-      if (index !== -1) {
+      if (index !== -1 && datenbank.Lobby.spielID[lobbycode][datenbank.Lobby.spielID[lobbycode].length - 1]) {
+
           runden = datenbank.Lobby.spielID[lobbycode][datenbank.Lobby.spielID[lobbycode].length - 1]
+
           runden = datenbank.Spiel.runden_id[runden][datenbank.Spiel.runden_id[runden].length - 1]
 
           datenbank.Lobby.spieler_id[lobbycode].splice(index, 1)
@@ -350,8 +352,57 @@ app.post("/register", (req, res) => {
             
 
           }
-        }}
-
+        }
+        if(datenbank.Lobby.spieler_id[lobbycode].length==datenbank.Runden.angebot_id[runden].length&&datenbank.Lobby.gamestate[lobbycode]=="offer"){
+          datenbank.Lobby.gamestate[lobbycode] = "answer_offer"
+        let temp = []
+        //let geber = []
+        //let angebote =[]
+        //angebote = datenbank.Runden.angebot_id[runde-1]
+        //angebote.forEach(function(element){
+        //  geber = datenbank.Angebote.
+        //})
+  
+        //temp wird gecleared
+        temp = []
+        //temp zeigt alle leute die abgegeben haben in chronologischer Reihenfolge
+        datenbank.Runden.angebot_id[runden].forEach(function(element) {
+          temp.push(datenbank.Angebote.angebot_geber[element])
+          }
+        )
+  
+        //die angebot_geber werden vermischt
+        temp = shuffle(temp)
+        temp.forEach(function(element) {
+          datenbank.Angebote.angebot_nehmer.push(element)
+          }
+        )
+        //alle angebot_IDs der Runde 
+        let angebote
+        angebote = []
+        angebote = datenbank.Runden.angebot_id[runden]
+  
+        //die vermischten angebot_geber werden in die angebot_nehmer gefüllt
+        for (var i = 0; i < temp.length; i++) {
+          datenbank.Angebote.angebot_nehmer[angebote[i]] = temp[i]
+        }
+  
+  
+        //alle angebot_nehmer bekommen die angebote der angebot geber
+        for (var i = 0; i < temp.length; i++) {
+          var n = temp[i];
+          datenbank.Spieler.websocket[n].send(JSON.stringify({ //wird an den spieler geschickt oder
+          type: "answer_offer",
+          data: {
+            amount: datenbank.Angebote.angebot_summe[angebote[i]]
+          }
+        }))}
+        datenbank.Lobby.gamestate[lobbycode] = "answer_offer"
+  
+          //schicke jedem message.type = answer_offer
+        }
+      }
+        
         if(datenbank.Angebote.angebot_angenommen[dieses_angebot]==undefined || datenbank.Lobby.gamestate[lobbycode]=="new_round"){
           if(dieses_angebot !== undefined && datenbank.Angebote.angebot_nehmer[datenbank.Runden.angebot_id[runde-1][0]]== undefined){
         datenbank.Lobby.host_websocket[lobbycode].send(JSON.stringify(
@@ -367,58 +418,13 @@ app.post("/register", (req, res) => {
           data: {
             amount: (datenbank.Lobby.temp && datenbank.Lobby.temp[lobbycode]) ? datenbank.Lobby.temp[lobbycode] : datenbank.Lobby.spieler_id[lobbycode].length 
           }
-        }))}
+        }))
       }
+      
+    }
 
 
-      if(datenbank.Lobby.spieler_id[lobbycode].length==datenbank.Runden.angebot_id[runden].length&&datenbank.Lobby.gamestate[lobbycode]=="offer"){
-        datenbank.Lobby.gamestate[lobbycode] = "answer_offer"
-      let temp = []
-      //let geber = []
-      //let angebote =[]
-      //angebote = datenbank.Runden.angebot_id[runde-1]
-      //angebote.forEach(function(element){
-      //  geber = datenbank.Angebote.
-      //})
 
-      //temp wird gecleared
-      temp = []
-      //temp zeigt alle leute die abgegeben haben in chronologischer Reihenfolge
-      datenbank.Runden.angebot_id[runden].forEach(function(element) {
-        temp.push(datenbank.Angebote.angebot_geber[element])
-        }
-      )
-
-      //die angebot_geber werden vermischt
-      temp = shuffle(temp)
-      temp.forEach(function(element) {
-        datenbank.Angebote.angebot_nehmer.push(element)
-        }
-      )
-      //alle angebot_IDs der Runde 
-      let angebote
-      angebote = []
-      angebote = datenbank.Runden.angebot_id[runden]
-
-      //die vermischten angebot_geber werden in die angebot_nehmer gefüllt
-      for (var i = 0; i < temp.length; i++) {
-        datenbank.Angebote.angebot_nehmer[angebote[i]] = temp[i]
-      }
-
-
-      //alle angebot_nehmer bekommen die angebote der angebot geber
-      for (var i = 0; i < temp.length; i++) {
-        var n = temp[i];
-        datenbank.Spieler.websocket[n].send(JSON.stringify({ //wird an den spieler geschickt oder
-        type: "answer_offer",
-        data: {
-          amount: datenbank.Angebote.angebot_summe[angebote[i]]
-        }
-      }))}
-      datenbank.Lobby.gamestate[lobbycode] = "answer_offer"
-
-        //schicke jedem message.type = answer_offer
-      }
       let angebote2 = datenbank.Runden.angebot_id[runde-1]
       let antworten2 = []
       for (var i = 0; i < angebote2.length; i++) {
@@ -514,14 +520,7 @@ app.post("/register", (req, res) => {
               }
             }))
             datenbank.Spieler.websocket[n].send(JSON.stringify({ //wird an den spieler geschickt oder
-              type: "place_offer",
-              data: {
-                game: datenbank.Lobby.spielID[lobbycode].length,
-                round: datenbank.Spiel.runden_id[spiel2].length,
-                class: datenbank.Lobby.name[lobbycode],
-                name: datenbank.Spiel.spiel_name[datenbank.Spiel.spiel_id.length-1]
-
-              }
+              type: "place_offer"
             }))
         }
         
@@ -570,8 +569,7 @@ app.post("/register", (req, res) => {
               }
             }))
           datenbank.Spieler.websocket[n].send(JSON.stringify({ //wird an den spieler geschickt oder
-            type: "place_offer",
-            data: {}
+            type: "place_offer"
           }))
         }
           datenbank.Lobby.host_websocket[lobbycode].send(JSON.stringify({
