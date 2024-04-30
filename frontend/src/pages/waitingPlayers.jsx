@@ -15,7 +15,7 @@ export default function WaitingPlayers() {
         <Grid xs={3} sx={{ height: "40%", justifyContent: "center", alignItems: 'center' }}>
 
         {game.state.is_previous_offer_accepted !== undefined && (
-          <MyText title>Dein vorheriges Angebot wurde <MyText bold>{game.state.is_previous_offer_accepted ? 'Akzeptiert' : 'Abgelehnt'}</MyText>.</MyText>
+          <MyText>Dein vorheriges Angebot wurde <MyText bold>{game.state.is_previous_offer_accepted ? 'Akzeptiert' : 'Abgelehnt'}</MyText>.</MyText>
         )}
         </Grid>
         {/* square in the middle */}
@@ -33,7 +33,7 @@ export default function WaitingPlayers() {
           xs={3}
           sx={{ height: "40%", display: "flex", justifyContent: "center" }}
         >
-          <MyText>Warte auf anderen Spieler...</MyText>
+          <MyText>{game.state.is_previous_offer_accepted !== undefined ? 'Warte auf nächste Runde...' : 'Warte auf anderen Spieler...'}</MyText>
         </Grid>
       </Grid>
 
