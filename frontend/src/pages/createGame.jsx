@@ -58,8 +58,10 @@ export default function CreateGame() {
           <MyButton
             onClick={() => {
               console.log('creating lobby...');
+              console.log('process.env.REACT_APP_BACKEND_URL: ', process.env.REACT_APP_BACKEND_URL);
               //when creating a lobby, save the code and join it's lobby
-              fetch(`http://${process.env.REACT_APP_BACKEND_URL}/lobby/create`, {
+              console.log('fetchstring:', `https://${process.env.REACT_APP_BACKEND_URL}/lobby/create`);
+              fetch(`https://${process.env.REACT_APP_BACKEND_URL}/lobby/create`, {
                 method: "POST",
                 headers: {
                   "Content-Type": "application/json",
@@ -67,6 +69,30 @@ export default function CreateGame() {
                 credentials: 'include',
                 body: JSON.stringify({ name: lobby_name }),
               })
+              .then((response) => {
+                if (response.status !== 200) {
+                  response.json().then((msg) => game.dispatch({type: 'error', payload: msg}))
+                  return
+                }
+                return response.json()
+              })
+              .then((data) => {
+                if (!data) return
+                console.log("lobbycode will be: ", data);
+                const lobby_code = data;
+                game.dispatch({ type: "connect_lobby_host", payload: { lobby_code, lobby_name, game_name }})
+                game.navigate(`/lobby/${lobby_code}`);
+              })
+              .catch((error) => {
+                console.log(error, "trying again with http");
+                fetch(`http://${process.env.REACT_APP_BACKEND_URL}/lobby/create`, {
+                  method: "POST",
+                  headers: {
+                    "Content-Type": "application/json",
+                  },
+                  credentials: 'include',
+                  body: JSON.stringify({ name: lobby_name }),
+                })
                 .then((response) => {
                   if (response.status !== 200) {
                     response.json().then((msg) => game.dispatch({type: 'error', payload: msg}))
@@ -78,16 +104,10 @@ export default function CreateGame() {
                   if (!data) return
                   console.log("lobbycode will be: ", data);
                   const lobby_code = data;
-                  // game.join_lobby(lobby_code, lobby_name, game_name);
-                  //this will set is_teacher to true
                   game.dispatch({ type: "connect_lobby_host", payload: { lobby_code, lobby_name, game_name }})
-                  //navigation now will set the view for host
                   game.navigate(`/lobby/${lobby_code}`);
-                  // game.dispatch({ type: 'connect_lobby', payload: {lobby_code}}   )
-                })
-                .catch((error) => {
-                  console.error("Error:", error);
-                });
+                }).catch(err => console.error(err));
+              });
             }}
           >
             Lobby erstellen

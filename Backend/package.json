@@ -8,11 +8,11 @@
   },
   "type": "module",
   "scripts": {
-    "goog": "echo watch date a live",
     "test": "node --experimental-vm-modules node_modules/jest/bin/jest.js"
   },
   "devDependencies": {
     "jest": "^29.7.0",
-    "nodemon": "^3.1.0"
+    "nodemon": "^3.1.0",
+    "supertest": "^7.0.0"
   }
 }

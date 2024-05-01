@@ -3,9 +3,11 @@ import logo from "../assets/logo.png"
 import useGameManager from "../service/useGameManager";
 import MyText from "./myText";
 import MyButton from "./myButton";
+import { useLocation } from "react-router-dom";
 
 export default function Nav() {
   const game = useGameManager();
+  const location = useLocation();
   return (
     <Grid container columns={{ xs: 3 }} sx={{ flexGrow: 1, bgcolor: "black", color: "white", height: "100%", flexWrap: "nowrap" }}>
       <Grid
@@ -15,16 +17,20 @@ export default function Nav() {
           justifyContent: "flex-start",
         }}
       >
+        {/* window.innerwidth only updates on page reloads IN REACT */}
+      {window.innerWidth > 600 &&
         <img
         src={logo}
         alt="Logo"
         onClick={() => game.navigate('/')}
         style={{
-          height: '15vh',
-          marginInline: '0.5em'
+          height: '15vw',
+          maxHeight: '15vh',
+          marginInline: '0.5em',
+          cursor: 'pointer'
         }}
-      />
-
+        />
+      }
       </Grid>
  
       <Grid xs={1} sx={{
@@ -32,11 +38,9 @@ export default function Nav() {
           flexDirection: "column",
           alignItems: "center",
           justifyContent: "center",
-          fontWeight: "bold",
-          fontSize: 64,
           minWidth: '10em'
         }}>
-        <div>{game.state.title}</div>
+        <MyText isInNav title>{game.state.title}</MyText>
         <MyText isInNav>{game.state.game_name}</MyText>
       </Grid>
  
@@ -45,29 +49,20 @@ export default function Nav() {
           alignItems: "center",
           justifyContent: "flex-end",
         }}>
-          {/* <button onClick={() => {
-            fetch('http://localhost:8080/test', {
-              method: 'GET',
-              headers: {
-                'Content-Type': 'application/json'
-              },
-              credentials: 'include',
-            }).then(
-              res => res.text()
-            ).then(
-              text => console.log(text)
-            )
-          }}>text</button>
+        {/* 
+        testing buttons, very useful for debugging
+        <button onClick={() => {console.log(game.state)}}>state</button>
+        <button onClick={game.test}>give 14 gold</button>  
         */}
-        {/* <button onClick={() => {console.log(game.state)}}>state</button>
-        <button onClick={game.test}>give 14 gold</button>  */}
-          {game.state.is_logged_in && !game.state.is_host &&
+          {(window.innerWidth > 600) && game.state.is_logged_in && !game.state.is_host &&
             <div style={{display: 'flex', gap: '0.5em'}}>
               <MyButton sx={{width: 'auto', paddingInline: '0.8em'}} disabled>{game.state.username}</MyButton>
               <MyButton sx={{width: 'auto', paddingInline: '0.8em'}} onClick={() => game.navigate('/logout')}>logout</MyButton>
             </div>
           }
-        <div style={{marginInline: '0.8em'}}>{game.state.top_right}</div>
+          {(window.innerWidth > 600 || location.pathname !== '/') && 
+            <div style={{marginInline: '0.8em'}}>{game.state.top_right}</div>
+          }
       </Grid>
     </Grid>
   );

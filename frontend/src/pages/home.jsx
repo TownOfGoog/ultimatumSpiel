@@ -14,16 +14,17 @@ export default function Home() {
     <Grid
       container
       columns={2}
-      sx={{ flexGrow: 1, bgcolor: "white", height: "100%" }}
+      sx={{ flexGrow: 1, height: "100%" }}
     >
       <Grid
-        xs={1}
+        xs={2}
+        sm={1}
         sx={{
           position: "relative",
           display: "flex",
           flexDirection: "column",
           justifyContent: "center",
-          borderRight: "1px solid black",
+          border: "1px solid black",
         }}
       >
         <div
@@ -53,10 +54,6 @@ export default function Home() {
             big={true}
             title={"Code eingeben"}
           />
-          {/* error handling for another day */}
-          {/* 
-                Dieser Code muss 5-stellig sein.
-              */}
         </FormControl>
         
         <div style={{margin: '0.3em 0 0.3em 0'}}></div>
@@ -70,13 +67,14 @@ export default function Home() {
       </Grid>
 
       <Grid
-        xs={1}
+        xs={2}
+        sm={1}
         sx={{
           position: "relative",
           display: "flex",
           flexDirection: "column",
           justifyContent: "center",
-          borderLeft: "1px solid black",
+          border: "1px solid black",
         }}
       >
         <div
