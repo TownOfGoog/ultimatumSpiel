@@ -26,7 +26,7 @@ let datenbank = {
     "host_websocket":[],
     "gamestate":[],
     "open":[],
-    "temp":[]
+    "aktive_spieler":[]
   },
   "Lehrer":{
     "LehrerID":[0],
@@ -63,6 +63,8 @@ export function startExpress() {
   var app = express();
   var expressWss = expressWs(app);
   //Wss 
+  app.use(express.static(path.join(path.resolve('.'), 'frontend', 'build')));
+
 
   app.use(cors(
     {origin:process.env.FRONTEND_URL,
@@ -416,7 +418,7 @@ app.post("/register", (req, res) => {
         datenbank.Lobby.host_websocket[lobbycode].send(JSON.stringify({ //wird an den spieler geschickt oder
           type: "total_players",
           data: {
-            amount: (datenbank.Lobby.temp && datenbank.Lobby.temp[lobbycode]) ? datenbank.Lobby.temp[lobbycode] : datenbank.Lobby.spieler_id[lobbycode].length 
+            amount: (datenbank.Lobby.aktive_spieler && datenbank.Lobby.aktive_spieler[lobbycode]) ? datenbank.Lobby.aktive_spieler[lobbycode] : datenbank.Lobby.spieler_id[lobbycode].length 
           }
         }))
       }
@@ -480,7 +482,7 @@ app.post("/register", (req, res) => {
         
         case "start_round":
           runde = datenbank.Runden.runden_id.length
-          datenbank.Lobby.temp[lobbycode] = undefined
+          datenbank.Lobby.aktive_spieler[lobbycode] = undefined
           datenbank.Lobby.open[lobbycode] = false
 
           //findet Heraus in welchem Spiel wir uns Befinden
@@ -539,7 +541,7 @@ app.post("/register", (req, res) => {
           break
         case "start_game":
           runde = datenbank.Runden.runden_id.length
-          datenbank.Lobby.temp[lobbycode] = undefined
+          datenbank.Lobby.aktive_spieler[lobbycode] = undefined
           datenbank.Lobby.open[lobbycode] = false
           console.log(datenbank.Lobby.open[lobbycode])
           //aktualisiert die Datenbank
@@ -839,7 +841,7 @@ app.post("/register", (req, res) => {
               amount: temp.length
             }
           }))
-          datenbank.Lobby.temp[lobbycode] = temp.length
+          datenbank.Lobby.aktive_spieler[lobbycode] = temp.length
           
 
               break
@@ -905,7 +907,9 @@ app.post("/register", (req, res) => {
   })
 
   
-  
+  app.get('/*', (req, res, next) => {
+    res.sendFile(path.join(path.resolve('.'), 'frontend', 'build', '/index.html'))
+  })
 
   
   
