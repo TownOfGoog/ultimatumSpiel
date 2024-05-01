@@ -30,11 +30,9 @@ let datenbank = {
     "aktive_spieler":[]
   },
   "Lehrer":{
-    "LehrerID":[0],
-    "benutzername":["Anita"],
-    "email":["@"],
-    "kennwort":["123456"],
-    "websocket":[]
+    "LehrerID":[],
+    "benutzername":[],
+    "kennwort":[]
   },
   "Spiel":{
     "spiel_id":[],
