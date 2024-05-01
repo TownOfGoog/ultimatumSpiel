@@ -1,169 +1,117 @@
-// import { startExpress } from "./server.js";
-// import express from "express"
-// import expressWs from "express-ws"
-// import WebSocket from "ws"
-// import { conditionWait } from "./util.js";
-
-// var wss
-// //wartet bis der server existiert
-// wss = await startExpress()
-
-// //macht neuen websocket der client heisst
-// var client = new WebSocket("ws://localhost:8080/lobby")
-// //erstellt testdatenvariabel
-// var testData
-// //wartet auf websocket
-// await conditionWait(client, client.OPEN)
-// console.log(client.readyState)
-
-// //client sendet an server "ho"
-// client.send("ho")
-
-// //client fängt an zu hören
-// client.onmessage = (event) => {
-//     //wenn client etwas gehört dann passiert:
-//     console.log(2)
-//     //speichert die variabeln
-//     testData = event.data
-//     //schliesst das client
-//     client.close()
-//     //schliesst den server
-//     wss.close()
-    
-// }
-
-
-// //wartet auf schliessen 
-// await conditionWait(client, client.CLOSED)
-
- 
-
-
-
-
-
-
-
-// test('first test', () => {
-//     expect(testData).toBe('s');
-//   });
-
-
-
-import WebSocket from 'ws';
 import request from 'supertest';
 import { startExpress } from './server.js';
 import { Lobby_tester } from './lobby_tester.js';
+
 const PORT = 9090;
+let app
 let agent;
 let cookie
 let lobbyCode;
-let ws;
-let app
 
 beforeAll((done) => {
-  console.log('start');
+  console.log('starting server...');
   app = startExpress().listen(PORT, () => {
-    console.log('Server running on port '+ PORT);
+    console.log('server running on port '+ PORT);
   })
   agent = request.agent(app);
   done()
 })
 
 afterAll(() => {
-  console.log('end');
+  console.log('closing server...');
   app.close();
 });
 
-describe('Teste Endpunkte', function() { 
+describe('Teste Endpunkte', () => { 
   
-  test('Registration vom Benutzer «» mit Passwort «» (leer lassen)', function(done) {
+  test('Registration vom Benutzer «» mit Passwort «» (leer lassen)', done => {
     agent
       .post('/register')
       .send({ name: '', password: '' })
       .expect(400)
       .end(function(err, res) {
         if (err) return done(err);
+        //save the cookie given from the first ever request.
         cookie = res.headers['set-cookie'][0]
         if (res.body !== 'Fehlende Anmeldedaten') return done(new Error(`Got ${res.body} instead of 'Fehlende Anmeldedaten'`));
         done()
       });     
   })
 
-  test('Registration vom Benutzer «Test» mit Passwort «geheim»', function(done) {
+  test('Registration vom Benutzer «Test» mit Passwort «geheim»', done => {
     agent
       .post('/register')
       .send({ name: 'Test', password: 'geheim' })
       .expect(400, `"Passwort muss mindestens 7 Zeichen lang sein"`, done)
   })
   
-  test('Registration vom Benutzer «Test» mit Passwort «supergeheim»', function(done) {
+  test('Registration vom Benutzer «Test» mit Passwort «supergeheim»', done => {
     agent
       .post('/register')
       .send({ name: 'Test', password: 'supergeheim' })
       .expect(200, `"Test"`, done)
   })
   
-  test('Ist Benutzer eingeloggt?', function(done) {
+  test('Ist Benutzer eingeloggt?', done => {
     agent
     .get('/check_login')
     .expect(200, `"Test"`, done)
   })  
     
-  test('Logout vom Benutzer', function(done) {
+  test('Logout vom Benutzer', done => {
     agent
     .get('/logout')
     .expect(200, `"Abgemeldet"`, done)
   })
   
-  test('Logout vom Benutzer (erneut)', function(done) {
+  test('Logout vom Benutzer (erneut)', done => {
     agent
     .get('/logout')
     .expect(200, `"Abgemeldet"`, done)
   })
 
-  test('Ist Benutzer eingeloggt?', function(done) {
+  test('Ist Benutzer eingeloggt?', done => {
     agent
     .get('/check_login')
     .expect(401, `"Nicht angemeldet"`, done)
   })
   
-  test('Anonymer Benutzer erstellt eine Lobby', function(done) {
+  test('Anonymer Benutzer erstellt eine Lobby', done => {
     agent
     .post('/lobby/create')
     .send({ name: 'J3a' })
     .expect(401, `"Nicht angemeldet"`, done)
   })
 
-  test('Registration vom Benutzer «Test» mit Passwort «supergeheim» (erneut)', function(done) {
+  test('Registration vom Benutzer «Test» mit Passwort «supergeheim» (erneut)', done => {
     agent
       .post('/register')
       .send({ name: 'Test', password: 'supergeheim' })
       .expect(409, `"Benutzername bereits vergeben"`, done)
   })
 
-  test('Login vom Benutzer «Test» mit Passwort «1234» (falsches Passwort)', function(done) {
+  test('Login vom Benutzer «Test» mit Passwort «1234» (falsches Passwort)', done => {
     agent
       .post('/login')
       .send({ name: 'Test', password: '1234' })
       .expect(401, `"Falsche Anmeldedaten, übrige Versuche: 2"`, done)
   })
 
-  test('Login vom Benutzer «» mit Passwort «» (leer lassen)', function(done) {
+  test('Login vom Benutzer «» mit Passwort «» (leer lassen)', done => {
     agent
       .post('/login')
       .send({ name: '', password: '1' })
       .expect(400, `"Fehlende Anmeldedaten"`, done)
   })
 
-  test('Login vom Benutzer «Test» mit Passwort «supergeheim»', function(done) {
+  test('Login vom Benutzer «Test» mit Passwort «supergeheim»', done => {
     agent
       .post('/login')
       .send({ name: 'Test', password: 'supergeheim' })
       .expect(200, `"Test"`, done)
   })
 
-  test('Benutzer erstellt eine Lobby mit Namen «J3a»', function(done) {
+  test('Benutzer erstellt eine Lobby mit Namen «J3a»', done => {
     agent
     .post('/lobby/create')
     .send({ name: 'J3a' })
@@ -180,7 +128,7 @@ describe('Teste Endpunkte', function() {
   })
 })
 
-describe('Teste Websocket', function() {
+describe('Teste Websocket', () => {
   let lobby;
 
   beforeAll((done) => {
@@ -189,7 +137,7 @@ describe('Teste Websocket', function() {
   });
 
   afterAll((done) => {
-    console.log('ending');
+    console.log('disconnecting players...');
     lobby.close();
     setTimeout(() => {
       done()
@@ -384,15 +332,3 @@ describe('Teste Websocket', function() {
     lobby.host.send({ type: 'exit' }, done);
   })
 })
-
-// nachdem man ein angebot eingereicht hat, und dann leavt, wird das angebot nicht gelöscht.
-// das macht vieles kaputter, aber ist glaub ich schlauer
-// if(datenbank.Runden.angebot_id[runden].includes(angebot)&&datenbank.Angebote.angebot_angenommen[dieses_angebot]==undefined){
-//   datenbank.Runden.angebot_id[runde-1].splice(indexA, 1)
-// }}
-//vergiss nicht final updates hinzuzufügen
-
-//im case start_round SHICKST DU MIR FüR JEDEN SPIELER NEW_ROUND AM HOTS!?
-
-//bbackend crasht beim skippen im accept/decline phase wegen dem final message
-//aber ohne final message geht das skippen ab der 2. runde nicht  
