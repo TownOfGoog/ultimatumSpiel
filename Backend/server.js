@@ -304,7 +304,8 @@ app.post("/register", (req, res) => {
           })
           
         }
-      }}
+      }else{runden = 0}
+    }else{runden = 0}
 
       if(datenbank.Lobby.spielID[lobbycode][datenbank.Lobby.spielID[lobbycode].length - 1] === !undefined){
       runden = datenbank.Lobby.spielID[lobbycode][datenbank.Lobby.spielID[lobbycode].length - 1]
