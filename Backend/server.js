@@ -267,7 +267,7 @@ app.post("/register", (req, res) => {
         }
       }))
       //Lehrperson Playercount wird geupdated
-      datenbank.Lehrer.websocket[lobbycode].send(JSON.stringify({
+      datenbank.Lobby.host_websocket[lobbycode].send(JSON.stringify({
         type: 'new_player',
       }))
       
