@@ -374,9 +374,10 @@ export function GameManagerProvider({ children }) {
   const ws = useRef(null); //websocket connection
 
   useEffect(() => {
-    if (!state.code) return
+    if (!state.code) return 
 
-    ws.current = new WebSocket(`/lobby/${state.code}`);
+    // ws.current = new WebSocket(`/lobby/${state.code}`);
+    ws.current = new WebSocket(process.env.NODE_ENV === 'development' ? `ws://localhost:8080/lobby/${state.code}` : `/lobby/${state.code}`);
 
     ws.current.onopen = () => console.log("websocket connected")
 

@@ -3,8 +3,8 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "front": "cd ./frontend && npm run start",
-    "back": "node ./Backend/start_server.js",
+    "front": "cd ./frontend && npm i && npm run start",
+    "back": "cd ../Backend && npm i && cd .. && node ./Backend/start_server.js",
     "build": "cd ./frontend && npm i && npm run build && cd ../Backend && npm i",
     "start": "node ./Backend/start_server.js",
     "test": "cd ./Backend && node --experimental-vm-modules node_modules/jest/bin/jest.js"
