@@ -1,4 +1,6 @@
 import Button from "@mui/joy/Button";
+import { styled } from '@mui/material/styles';
+
 
 export default function MyButton({
   shouldFillAll,
@@ -8,13 +10,28 @@ export default function MyButton({
   children,
   disabled=false
 }) {
-  // todo: danger style
+
+
+  const MyButton = styled(Button)(({ theme }) => ({
+    [theme.breakpoints.up('lg')]: {
+      fontSize: "2.5em",
+    },
+    [theme.breakpoints.down('lg')]: {
+      fontSize: "2em",
+    },
+    [theme.breakpoints.down('md')]: {
+      fontSize: "1.2em",
+    },
+
+    borderRadius: 12,
+    fontWeight: "100",
+
+
+  }));
+
   let defaultStyle = {
     width: shouldFillAll ? "100%" : answer ? "7em" : "60%",
     height: shouldFillAll ? "100%" : "2em",
-    borderRadius: 12,
-    fontSize: "2.5em",
-    fontWeight: "100",
     ...(answer === "accept" && {
       backgroundColor: "lightGreen",
       "&:hover": {
@@ -38,7 +55,7 @@ export default function MyButton({
         height: shouldFillAll ? "100%" : "auto",
       }}
     >
-      <Button
+      <MyButton
         onClick={onClick}
         sx={defaultStyle}
         color="neutral"
@@ -54,7 +71,7 @@ export default function MyButton({
         }}
       >
         {children}
-      </Button>
+      </MyButton>
     </div>
   );
 }

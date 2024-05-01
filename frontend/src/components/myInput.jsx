@@ -15,7 +15,22 @@ export default function MyInput({label, title, value, setValue, password=false, 
   }
 
   let defaultStyle = {
-    height: "2em", fontSize: '2.5em', borderRadius: 12, width: "60%", ...sx
+    height: "2em", 
+    fontSize: '2.5em', 
+    borderRadius: 12, 
+    width: "60%", 
+    backgroundColor: 'black',
+    color: 'white',
+    '&:hover': {
+      color: 'white', // Change color to red on hover
+    },
+    backgroundImage: 'linear-gradient(to right, rgba(0, 0, 0, 0), #aaa, rgba(0, 0, 0, 0))',
+    backgroundSize: '80% 2px',
+    backgroundPosition: 'bottom center',
+    backgroundRepeat: 'no-repeat',
+    outline: '1px solid #ffffff3b',
+  // backgroundImage: 'linear-gradient(to right, rgba(0, 0, 0, 0), #ffffff, rgba(0, 0, 0, 0))',
+    ...sx
   }
 
   let defaultLabelStyle = {
@@ -26,13 +41,12 @@ export default function MyInput({label, title, value, setValue, password=false, 
   if (big) {
     defaultStyle = {
       ...defaultStyle,
-      
       textAlign: 'center', //styles do not affect the <input> itself sadly
     }
 
     defaultLabelStyle = {
       ...defaultLabelStyle,
-      fontSize: '1.7em',
+      fontSize: '1.6em',
       alignSelf: 'center',
     }
   }
@@ -50,9 +64,9 @@ export default function MyInput({label, title, value, setValue, password=false, 
           {title}{label}
         </FormLabel> 
       </div>
-      <CssVarsProvider defaultMode="system">
+      {/* <CssVarsProvider defaultMode="white"> */}
         <Input variant='plain' type={password ? 'password' : undefined} onChange={handleChange} sx={defaultStyle} className={workaround} value={value}/>
-      </CssVarsProvider>
+      {/* </CssVarsProvider> */}
     </div>
   )
 }
