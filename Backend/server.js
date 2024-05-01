@@ -81,7 +81,8 @@ export function startExpress() {
     cookie: {
       maxAge: 86400000+Date.now(),  // 24 stunden
       httpOnly: true,
-      secure: process.env.NODE_ENV === 'production' 
+      secure: process.env.NODE_ENV === 'production',
+      domain:".onrender.com" 
   }
   }));
 
@@ -310,6 +311,9 @@ app.post("/register", (req, res) => {
       }}
 
 
+      runden = datenbank.Lobby.spielID[lobbycode][datenbank.Lobby.spielID[lobbycode].length - 1]
+
+      runden = datenbank.Spiel.runden_id[runden][datenbank.Spiel.runden_id[runden].length - 1]
       
       if(datenbank.Runden.angebot_id[runden].length!= 0||undefined){
       }
@@ -317,9 +321,6 @@ app.post("/register", (req, res) => {
       
       if (index !== -1 && datenbank.Lobby.spielID[lobbycode][datenbank.Lobby.spielID[lobbycode].length - 1]) {
 
-          runden = datenbank.Lobby.spielID[lobbycode][datenbank.Lobby.spielID[lobbycode].length - 1]
-
-          runden = datenbank.Spiel.runden_id[runden][datenbank.Spiel.runden_id[runden].length - 1]
 
           datenbank.Lobby.spieler_id[lobbycode].splice(index, 1)
           if(datenbank.Runden.angebot_id[lobbycode][angebot]!=undefined&&datenbank.Angebote.angebot_angenommen[dieses_angebot]==undefined){
@@ -910,6 +911,5 @@ app.post("/register", (req, res) => {
 }
 
 startExpress()
-
 
 
