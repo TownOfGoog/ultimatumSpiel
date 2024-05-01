@@ -63,6 +63,8 @@ export function startExpress() {
   var app = express();
   var expressWss = expressWs(app);
   //Wss 
+  app.use(express.static(path.join(path.resolve('.'), 'frontend', 'build')));
+
 
   app.use(cors(
     {origin:process.env.FRONTEND_URL,
@@ -905,7 +907,9 @@ app.post("/register", (req, res) => {
   })
 
   
-  
+  app.get('/*', (req, res, next) => {
+    res.sendFile(path.join(path.resolve('.'), 'frontend', 'build', '/index.html'))
+  })
 
   
   
