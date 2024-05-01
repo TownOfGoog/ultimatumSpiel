@@ -34,7 +34,7 @@ export default function Loginpage() {
         {/* due to the programming of MyButton, i need this width: 100% div */}
         <div style={{width: '100%'}}> 
           <MyButton onClick={() => {
-            fetch(`https://${process.env.REACT_APP_BACKEND_URL}/login`, {
+            fetch(`/login`, {
               method: 'POST',
               headers: {
                 "Content-Type": "application/json",
@@ -54,27 +54,7 @@ export default function Loginpage() {
               game.navigate('/')
             }})
             .catch((err) => {
-              console.log(err, 'trying again with http')
-              fetch(`http://${process.env.REACT_APP_BACKEND_URL}/login`, {
-                method: 'POST',
-                headers: {
-                  "Content-Type": "application/json",
-                },
-                credentials: 'include',
-                body: JSON.stringify({ name: username, password: password }),
-              })
-              .then((res) => {
-                if (res.status !== 200) {
-                  res.json().then((msg) => game.dispatch({type: 'error', payload: msg}))
-                } else {
-                  return res.json()
-                }
-              })
-              .then((msg) => {if (msg) {
-                game.dispatch({type: 'logged_in', payload: {username: msg}})
-                game.navigate('/')
-              }})              
-              .catch((err) => {console.error(err)})
+              console.error(err)
             })
           }}>Anmelden</MyButton>
         </div>

@@ -4,9 +4,9 @@
   "private": true,
   "scripts": {
     "front": "cd ./frontend && npm run start",
-    "back": "cd ./Backend && node server.js",
-    "test": "cd ./Backend && node --experimental-vm-modules node_modules/jest/bin/jest.js",
-    "dev": "cd ./Backend && npm i && cd .. && docker-compose -f docker-compose.dev.yaml -p ultimatum-spiel-development up --build",
-    "prod": "docker-compose -p ultimatum-spiel-production up --build"
+    "back": "node ./Backend/start_server.js",
+    "build": "cd ./frontend && npm i && npm run build && cd ../Backend && npm i",
+    "start": "node ./Backend/start_server.js",
+    "test": "cd ./Backend && node --experimental-vm-modules node_modules/jest/bin/jest.js"
   }
 }
