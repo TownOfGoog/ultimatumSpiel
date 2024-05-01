@@ -271,7 +271,6 @@ app.post("/register", (req, res) => {
       }))
       
     }
-    console.log(datenbank.Lehrer, "jeeeeeee")
     
     ;
     let angebot
@@ -281,11 +280,18 @@ app.post("/register", (req, res) => {
     //place_offer answer_offer
     ws.on("close", function(msg) {
       try{
+        //wenn Lehrer Geleaved ist, jedem Spieler exit schicken und lobbycode zerstören
       if(ws == datenbank.Lobby.host_websocket[lobbycode]){
-      datenbank.Lobby.lobby_kennwort[lobbycode] = 99999999999
+        for (var i = 0; i < datenbank.Lobby.spieler_id[lobbycode].length; i++) {
+          var g = datenbank.Lobby.spieler_id[lobbycode][i];
+          datenbank.Spieler.websocket[g].send(JSON.stringify({ 
+          type: "exit",
+          data: {}
+        }))}
+        datenbank.Lobby.lobby_kennwort[lobbycode] = undefined      
       }
 
-
+      
       if(ws != datenbank.Lobby.host_websocket[lobbycode]){
         let index = datenbank.Lobby.spieler_id[lobbycode].indexOf(spieler_id)
         let indexA
@@ -424,7 +430,7 @@ app.post("/register", (req, res) => {
     }
 
 
-
+    if(runde==!undefined){ 
       let angebote2 = datenbank.Runden.angebot_id[runde-1]
       let antworten2 = []
       for (var i = 0; i < angebote2.length; i++) {
@@ -453,7 +459,7 @@ app.post("/register", (req, res) => {
         
 
       }
-
+    }
 
     }catch (error) {
       console.log("Error:", error)
@@ -693,7 +699,7 @@ app.post("/register", (req, res) => {
           })
           
           //aktualisiert die Datenbank
-          datenbank.Angebote.angebot_angenommen[datenbank.Angebote.angebot_nehmer.indexOf(spieler_id)] = true
+          datenbank.Angebote.angebot_angenommen[datenbank.Angebote.angebot_nehmer.lastIndexOf(spieler_id)] = true
           
             //sendet dem Spieler "wait" und dem Lehrer die Daten
             ws.send(JSON.stringify({
@@ -711,7 +717,9 @@ app.post("/register", (req, res) => {
           break
           case "decline_offer":
             //sihe accept_offer
-          datenbank.Angebote.angebot_angenommen[datenbank.Angebote.angebot_nehmer.indexOf(spieler_id)] = false
+            let angebote = datenbank.Runden.angebot_id[runde-1]
+
+            datenbank.Angebote.angebot_angenommen[datenbank.Angebote.angebot_nehmer.lastIndexOf(spieler_id)] = false;
           
           let aktuelle_angebote2 = datenbank.Runden.angebot_id[runde-1]
           let dieses_angebot2
@@ -731,14 +739,17 @@ app.post("/register", (req, res) => {
               accepted: false
             }
           }))
-          let angebote = datenbank.Runden.angebot_id[runde-1]
+
           console.log(angebote)
           let antworten = []
           for (var i = 0; i < angebote.length; i++) {
             var n = angebote[i];
             antworten.push(datenbank.Angebote.angebot_angenommen[n])
           }
-          console.log(antworten)
+          console.log(antworten, "test")
+          console.log(runde-1);
+          console.log(datenbank.Runden.angebot_id)
+          console.log(datenbank.Angebote.angebot_angenommen);
           console.log(!antworten.includes(undefined))
           if(!antworten.includes(undefined)){
             let geber = []
@@ -747,7 +758,7 @@ app.post("/register", (req, res) => {
               geber.push(datenbank.Angebote.angebot_geber[element])
               akzeptiert.push(datenbank.Angebote.angebot_angenommen[element])
               })
-              console.log(geber, akzeptiert)
+              console.log(geber, akzeptiert, "testtest")
 
               for (var i = 0; i < akzeptiert.length; i++) {
                 var n = geber[i];
