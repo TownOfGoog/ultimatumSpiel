@@ -525,7 +525,6 @@ app.post("/register", (req, res) => {
               data:{
                 game: datenbank.Lobby.spielID[lobbycode].length,
                 round: datenbank.Spiel.runden_id[spiel2].length,
-                class:datenbank.Lobby.name[lobbycode],
                 name: datenbank.Spiel.spiel_name[datenbank.Spiel.spiel_id.length-1]
               }
             }))
@@ -583,7 +582,6 @@ app.post("/register", (req, res) => {
               data:{
                 game: datenbank.Lobby.spielID[lobbycode].length,
                 round: datenbank.Spiel.runden_id[spiel].length,
-                class:datenbank.Lobby.name[lobbycode],
                 name: datenbank.Spiel.spiel_name[spiel_id]
               }
             }))
@@ -596,7 +594,6 @@ app.post("/register", (req, res) => {
             data:{
               game: datenbank.Lobby.spielID[lobbycode].length,
               round: datenbank.Spiel.runden_id[spiel].length,
-              class: datenbank.Lobby.name[lobbycode],
               name: message.data.name
             }
           }))
@@ -678,8 +675,6 @@ app.post("/register", (req, res) => {
             datenbank.Spieler.websocket[n].send(JSON.stringify({ //wird an den spieler geschickt oder
             type: "answer_offer",
             data: {
-              game:datenbank.Lobby.spielID[lobbycode].length,
-              round: datenbank.Spiel.runden_id[datenbank.Lobby.spielID[lobbycode].length-1].length,
               amount: datenbank.Angebote.angebot_summe[angebote[i]]
             }
           }))}
@@ -817,8 +812,6 @@ app.post("/register", (req, res) => {
             datenbank.Spieler.websocket[n].send(JSON.stringify({
             type: "answer_offer",
             data: {
-              game:datenbank.Lobby.spielID[lobbycode].length,
-              round: datenbank.Spiel.runden_id[datenbank.Lobby.spielID[lobbycode].length-1].length,
               amount: datenbank.Angebote.angebot_summe[angebote[i]]
             }
           }))}
