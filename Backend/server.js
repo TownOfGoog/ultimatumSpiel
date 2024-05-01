@@ -322,8 +322,7 @@ app.post("/register", (req, res) => {
         for (var i = 0; i < datenbank.Lobby.spieler_id[lobbycode].length; i++) {
           var g = datenbank.Lobby.spieler_id[lobbycode][i];
           datenbank.Spieler.websocket[g].send(JSON.stringify({ 
-          type: "exit",
-          data: {}
+          type: "exit"
         }))}
         datenbank.Lobby.lobby_kennwort[lobbycode] = undefined      
       }
@@ -851,8 +850,7 @@ app.post("/register", (req, res) => {
             for (var i = 0; i < datenbank.Lobby.spieler_id[lobbycode].length; i++) {
               var g = datenbank.Lobby.spieler_id[lobbycode][i];
               datenbank.Spieler.websocket[g].send(JSON.stringify({ 
-              type: "exit",
-              data: {}
+              type: "exit"
             }))}
             datenbank.Lobby.lobby_kennwort[lobbycode] = undefined
           break
