@@ -154,7 +154,6 @@ app.post("/register", (req, res) => {
       return res.status(400).json("Passwort muss mindestens 7 Zeichen lang sein")
     }
 
-    console.log(req.body.name, req.body.password);
     datenbank.Lehrer.LehrerID.push(datenbank.Lehrer.LehrerID.length);
     datenbank.Lehrer.benutzername.push(req.body.name);
     datenbank.Lehrer.kennwort.push(crypto.createHash('sha256').update(req.body.password).digest('hex'));
@@ -169,9 +168,7 @@ app.post("/register", (req, res) => {
 
   //jedes mal wenn wir vom Frontend eine Anfrage für eine Neue Lobby erhalten, /lobby/create   -----
   app.post("/lobby/create", (req, res) => {
-    console.log(req.session.cookie.maxAge, Date.now())
-    if (req.session.userId && req.session.cookie.maxAge >Date.now()){
-
+    if (req.session.userId !== undefined && req.session.cookie.maxAge >Date.now()){
     
 
     //es wird ein neuer Lobbycode generiert
