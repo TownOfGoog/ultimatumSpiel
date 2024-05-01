@@ -57,6 +57,42 @@ let datenbank = {
 
 }
 
+function send_final(runde){
+  let angebote = datenbank.Runden.angebot_id[runde-1]
+  console.log(angebote)
+  let antworten = []
+  for (var i = 0; i < angebote.length; i++) {
+    var n = angebote[i];
+    antworten.push(datenbank.Angebote.angebot_angenommen[n])
+  }
+  console.log(antworten, "test")
+  console.log(runde-1);
+  console.log(datenbank.Runden.angebot_id)
+  console.log(datenbank.Angebote.angebot_angenommen);
+  console.log(!antworten.includes(undefined))
+  if(!antworten.includes(undefined)){
+    let geber = []
+    let akzeptiert = []
+    datenbank.Runden.angebot_id[runde-1].forEach(function(element) {
+      geber.push(datenbank.Angebote.angebot_geber[element])
+      akzeptiert.push(datenbank.Angebote.angebot_angenommen[element])
+      })
+      console.log(geber, akzeptiert, "testtest")
+
+      for (var i = 0; i < akzeptiert.length; i++) {
+        var n = geber[i];
+        datenbank.Spieler.websocket[n].send(JSON.stringify({ //wird an den spieler geschickt oder
+        type: "final",
+        data: {
+          accepted:akzeptiert[i]                  
+        }
+      }))}
+
+    
+
+  }
+}
+
 //express
 export function startExpress() {
   var app = express();
@@ -330,34 +366,9 @@ app.post("/register", (req, res) => {
           datenbank.Lobby.spieler_id[lobbycode].splice(index, 1)
           if(datenbank.Runden.angebot_id[lobbycode][angebot]!=undefined&&datenbank.Angebote.angebot_angenommen[dieses_angebot]==undefined){
           datenbank.Runden.angebot_id[runde-1].splice(indexA, 1)
-          let angebote2 = datenbank.Runden.angebot_id[runde-1]
-          let antworten2 = []
-          for (var i = 0; i < angebote2.length; i++) {
-            var n = angebote2[i];
-            antworten2.push(datenbank.Angebote.angebot_angenommen[n])
-          }
-          console.log(antworten2)
-          console.log(!antworten2.includes(undefined))
-          if(!antworten2.includes(undefined)){
-            let geber = []
-            let akzeptiert = []
-            datenbank.Runden.angebot_id[runde-1].forEach(function(element) {
-              geber.push(datenbank.Angebote.angebot_geber[element])
-              akzeptiert.push(datenbank.Angebote.angebot_angenommen[element])
-              })
-              console.log(geber, akzeptiert)
-              for (var i = 0; i < akzeptiert.length; i++) {
-                var n = geber[i];
-                datenbank.Spieler.websocket[n].send(JSON.stringify({ //wird an den spieler geschickt oder
-                type: "final",
-                data: {
-                  accepted:akzeptiert[i]                  
-                }
-              }))}
 
-            
+          send_final(runde)
 
-          }
         }
         if(datenbank.Lobby.spieler_id[lobbycode].length==datenbank.Runden.angebot_id[runden].length&&datenbank.Lobby.gamestate[lobbycode]=="offer"){
           datenbank.Lobby.gamestate[lobbycode] = "answer_offer"
@@ -691,16 +702,16 @@ app.post("/register", (req, res) => {
         case "accept_offer":
 
           //findet das aktuelle angebot
+          
+          //aktualisiert die Datenbank
+          datenbank.Angebote.angebot_angenommen[datenbank.Angebote.angebot_nehmer.lastIndexOf(spieler_id)] = true
+          
           let aktuelle_angebote = datenbank.Runden.angebot_id[runde-1]
           aktuelle_angebote.forEach(function(element){
             if(datenbank.Angebote.angebot_nehmer[element]==spieler_id){
               dieses_angebot = element
             }
           })
-          
-          //aktualisiert die Datenbank
-          datenbank.Angebote.angebot_angenommen[datenbank.Angebote.angebot_nehmer.lastIndexOf(spieler_id)] = true
-          
             //sendet dem Spieler "wait" und dem Lehrer die Daten
             ws.send(JSON.stringify({
               type: "wait"
@@ -712,15 +723,16 @@ app.post("/register", (req, res) => {
                 accepted: true,
               }            }))
 
+            send_final(runde)
+
 
 
           break
-          case "decline_offer":
+          case "decline_offer": 
             //sihe accept_offer
-            let angebote = datenbank.Runden.angebot_id[runde-1]
-
+            
             datenbank.Angebote.angebot_angenommen[datenbank.Angebote.angebot_nehmer.lastIndexOf(spieler_id)] = false;
-          
+            
           let aktuelle_angebote2 = datenbank.Runden.angebot_id[runde-1]
           let dieses_angebot2
           aktuelle_angebote2.forEach(function(element){
@@ -728,7 +740,7 @@ app.post("/register", (req, res) => {
               dieses_angebot2 = element
             }
           })
-
+          
           ws.send(JSON.stringify({
             type: "wait"
           }))
@@ -740,38 +752,9 @@ app.post("/register", (req, res) => {
             }
           }))
 
-          console.log(angebote)
-          let antworten = []
-          for (var i = 0; i < angebote.length; i++) {
-            var n = angebote[i];
-            antworten.push(datenbank.Angebote.angebot_angenommen[n])
-          }
-          console.log(antworten, "test")
-          console.log(runde-1);
-          console.log(datenbank.Runden.angebot_id)
-          console.log(datenbank.Angebote.angebot_angenommen);
-          console.log(!antworten.includes(undefined))
-          if(!antworten.includes(undefined)){
-            let geber = []
-            let akzeptiert = []
-            datenbank.Runden.angebot_id[runde-1].forEach(function(element) {
-              geber.push(datenbank.Angebote.angebot_geber[element])
-              akzeptiert.push(datenbank.Angebote.angebot_angenommen[element])
-              })
-              console.log(geber, akzeptiert, "testtest")
+          send_final(runde)
+          
 
-              for (var i = 0; i < akzeptiert.length; i++) {
-                var n = geber[i];
-                datenbank.Spieler.websocket[n].send(JSON.stringify({ //wird an den spieler geschickt oder
-                type: "final",
-                data: {
-                  accepted:akzeptiert[i]                  
-                }
-              }))}
-
-            
-
-          }
 
           break
           case "skip":
@@ -855,38 +838,8 @@ app.post("/register", (req, res) => {
 
               break
               case "answer_offer":
-              let angebot = datenbank.Runden.angebot_id[runde-1]
 
-              let antworten = []
-              for (var i = 0; i < angebot.length; i++) {
-                var n = angebot[i];
-                antworten.push(datenbank.Angebote.angebot_angenommen[n])
-              }
-              console.log(antworten)
-              console.log(!antworten.includes(undefined))
-              if(!antworten.includes(undefined)){
-                let geber = []
-                let akzeptiert = []
-                datenbank.Runden.angebot_id[runde-1].forEach(function(element) {
-                  geber.push(datenbank.Angebote.angebot_geber[element])
-                  akzeptiert.push(datenbank.Angebote.angebot_angenommen[element])
-                  })
-                  console.log(geber, akzeptiert)
-    
-                  for (var i = 0; i < akzeptiert.length; i++) {
-                    var n = geber[i];
-                    datenbank.Spieler.websocket[n].send(JSON.stringify({ 
-                    type: "final",
-                    data: {
-                      accepted:akzeptiert[i]                  
-                    }
-                  }))}
-    
-                
-    
-              }
-
-
+                send_final(runde)
 
               break
             }
