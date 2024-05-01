@@ -81,8 +81,7 @@ export function startExpress() {
     cookie: {
       maxAge: 86400000+Date.now(),  // 24 stunden
       httpOnly: true,
-      secure: process.env.NODE_ENV === 'production',
-      domain:".onrender.com" 
+      secure: false
   }
   }));
 
@@ -503,14 +502,7 @@ app.post("/register", (req, res) => {
           //schickt allen spielern alle infos
           for (var i = 0; i < items.length; i++) {
             var n = items[i];
-            datenbank.Lobby.host_websocket[lobbycode].send(JSON.stringify({
-              type: 'new_round',
-              data:{
-                game: datenbank.Lobby.spielID[lobbycode].length,
-                round: datenbank.Spiel.runden_id[spiel2].length,
-                name: datenbank.Spiel.spiel_name[datenbank.Spiel.spiel_id.length-1]
-              }
-            }))
+
             datenbank.Spieler.websocket[n].send(JSON.stringify({
               type: 'new_round',
               data:{
@@ -524,6 +516,15 @@ app.post("/register", (req, res) => {
               type: "place_offer"
             }))
         }
+
+        datenbank.Lobby.host_websocket[lobbycode].send(JSON.stringify({
+          type: 'new_round',
+          data:{
+            game: datenbank.Lobby.spielID[lobbycode].length,
+            round: datenbank.Spiel.runden_id[spiel2].length,
+            name: datenbank.Spiel.spiel_name[datenbank.Spiel.spiel_id.length-1]
+          }
+        }))
         
         datenbank.Lobby.host_websocket[lobbycode].send(JSON.stringify({ //wird an den spieler geschickt oder
           type: "total_players",
@@ -843,10 +844,11 @@ app.post("/register", (req, res) => {
 
               break
               case "answer_offer":
-                
+              let angebot = datenbank.Runden.angebot_id[runde-1]
+
               let antworten = []
-              for (var i = 0; i < angebote.length; i++) {
-                var n = angebote[i];
+              for (var i = 0; i < angebot.length; i++) {
+                var n = angebot[i];
                 antworten.push(datenbank.Angebote.angebot_angenommen[n])
               }
               console.log(antworten)
