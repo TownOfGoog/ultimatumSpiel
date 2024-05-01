@@ -4,6 +4,7 @@
     "express": "^4.18.3",
     "express-session": "^1.18.0",
     "express-ws": "^5.0.2",
+    "supertest": "^7.0.0",
     "ws": "^8.16.0"
   },
   "type": "module",
