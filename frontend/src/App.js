@@ -10,7 +10,7 @@ function App() {
   const params = useParams();
   useEffect(() => {
     //check if user is logged in
-    fetch(`https://${process.env.REACT_APP_BACKEND_URL}/check_login`, {
+    fetch(`/check_login`, {
       method: 'GET',
       headers: {
         "Content-Type": "application/json",
@@ -23,29 +23,12 @@ function App() {
         })
       }
     }).catch((err) => {
-      console.log(err, 'trying again with http')
-        
-      fetch(`http://${process.env.REACT_APP_BACKEND_URL}/check_login`, {
-        method: 'GET',
-        headers: {
-          "Content-Type": "application/json",
-        },
-        credentials: 'include',
-      }).then((res) => {
-        if (res.status === 200) {
-          res.json().then((msg) => {
-            game.dispatch({type: 'logged_in', payload: {username: msg}})
-          })
-        }
-      }).catch((err) => {
-        console.error(err)
+      console.error(err)
       })
-    })
   }, [])
 
   useEffect(() => {
     console.log('new location: ', location.pathname)
-    console.log('params', params)
     //for /lobby/:lobby_code need to use switch(true)
     switch (true) {
       case location.pathname === '/':
@@ -62,7 +45,7 @@ function App() {
         game.dispatch({type: 'change_page', payload: 'login_page'})
         break;
       case location.pathname === '/logout':
-        fetch(`https://${process.env.REACT_APP_BACKEND_URL}/logout`, {
+        fetch(`/logout`, {
           method: 'GET',
           headers: {
             "Content-Type": "application/json",
@@ -76,24 +59,8 @@ function App() {
             game.navigate('/')
           }
         }).catch((err) => {
-          console.log(err, 'trying again with http')
-          fetch(`http://${process.env.REACT_APP_BACKEND_URL}/logout`, {
-            method: 'GET',
-            headers: {
-              "Content-Type": "application/json",
-            },
-            credentials: 'include',
-          }).then((res) => {
-            if (res.status !== 200) {
-              res.json().then((msg) => game.dispatch({type: 'error', payload: msg}))
-            } else {
-              game.dispatch({type: 'logout'})
-              game.navigate('/')
-            }
-          }).catch((err) => {
-            console.error(err)
+          console.error(err)
           })
-        })
         break;
       case location.pathname === '/register':
         game.dispatch({type: 'change_page', payload: 'register_page'})

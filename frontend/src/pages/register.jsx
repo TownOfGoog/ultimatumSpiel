@@ -57,7 +57,7 @@ export default function Register() {
             }
 
 
-            fetch(`https://${process.env.REACT_APP_BACKEND_URL}/register`, {
+            fetch(`/register`, {
               method: 'POST',
               headers: {
                 "Content-Type": "application/json",
@@ -77,28 +77,7 @@ export default function Register() {
               game.navigate('/')
             }})
             .catch((err) => {
-              console.log(err, 'trying again with http')
-              fetch(`http://${process.env.REACT_APP_BACKEND_URL}/register`, {
-                method: 'POST',
-                headers: {
-                  "Content-Type": "application/json",
-                },
-                credentials: 'include',
-                body: JSON.stringify({ name: username, password: password }),
-              })
-              .then((res) => {
-                if (res.status !== 200) {
-                  res.json().then((msg) => game.dispatch({type: 'error', payload: msg}))
-                } else {
-                  return res.json()
-                }
-              })
-              .then((msg) => {if (msg) {
-                game.dispatch({type: 'logged_in', payload: {username: msg}})
-                game.navigate('/')
-              }})
-              .catch(err => console.error(err))
-            })
+               console.error(err)})
           
           }}>Konto eröffnen</MyButton>
         </div>

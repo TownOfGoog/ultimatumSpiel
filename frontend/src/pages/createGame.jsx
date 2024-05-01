@@ -58,10 +58,8 @@ export default function CreateGame() {
           <MyButton
             onClick={() => {
               console.log('creating lobby...');
-              console.log('process.env.REACT_APP_BACKEND_URL: ', process.env.REACT_APP_BACKEND_URL);
               //when creating a lobby, save the code and join it's lobby
-              console.log('fetchstring:', `https://${process.env.REACT_APP_BACKEND_URL}/lobby/create`);
-              fetch(`https://${process.env.REACT_APP_BACKEND_URL}/lobby/create`, {
+              fetch(`/lobby/create`, {
                 method: "POST",
                 headers: {
                   "Content-Type": "application/json",
@@ -84,30 +82,7 @@ export default function CreateGame() {
                 game.navigate(`/lobby/${lobby_code}`);
               })
               .catch((error) => {
-                console.log(error, "trying again with http");
-                fetch(`http://${process.env.REACT_APP_BACKEND_URL}/lobby/create`, {
-                  method: "POST",
-                  headers: {
-                    "Content-Type": "application/json",
-                  },
-                  credentials: 'include',
-                  body: JSON.stringify({ name: lobby_name }),
-                })
-                .then((response) => {
-                  if (response.status !== 200) {
-                    response.json().then((msg) => game.dispatch({type: 'error', payload: msg}))
-                    return
-                  }
-                  return response.json()
-                })
-                .then((data) => {
-                  if (!data) return
-                  console.log("lobbycode will be: ", data);
-                  const lobby_code = data;
-                  game.dispatch({ type: "connect_lobby_host", payload: { lobby_code, lobby_name, game_name }})
-                  game.navigate(`/lobby/${lobby_code}`);
-                }).catch(err => console.error(err));
-              });
+                console.error(error)});
             }}
           >
             Lobby erstellen
