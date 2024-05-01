@@ -243,7 +243,6 @@ app.post("/register", (req, res) => {
     //Kontrolliert Ob es Die Lehrperson ist
     if(counter == 1){
       //Füllt den Lehrer Table
-      datenbank.Lehrer.websocket.push(ws)
       datenbank.Lobby.host_websocket.push(ws)
       console.log(datenbank.Lehrer, "jeeeeeee")
 
