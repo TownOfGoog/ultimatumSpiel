@@ -81,12 +81,13 @@ function send_final(runde, key){
 
       for (var i = 0; i < akzeptiert.length; i++) {
         var n = geber[i];
+        if(akzeptiert[i] != undefined){
         datenbank.Spieler.websocket[n].send(JSON.stringify({ //wird an den spieler geschickt oder
         type: "final",
         data: {
           accepted:akzeptiert[i]                  
         }
-      }))}
+      }))}}
 
     
 
