@@ -306,11 +306,12 @@ app.post("/register", (req, res) => {
         }
       }}
 
-
+      if(datenbank.Lobby.spielID[lobbycode][datenbank.Lobby.spielID[lobbycode].length - 1] === !undefined){
       runden = datenbank.Lobby.spielID[lobbycode][datenbank.Lobby.spielID[lobbycode].length - 1]
+        if(datenbank.Spiel.runden_id[runden][datenbank.Spiel.runden_id[runden].length - 1] === !undefined){
+        runden = datenbank.Spiel.runden_id[runden][datenbank.Spiel.runden_id[runden].length - 1]
+      }}
 
-      runden = datenbank.Spiel.runden_id[runden][datenbank.Spiel.runden_id[runden].length - 1]
-      
       if(datenbank.Runden.angebot_id[runden].length!= 0||undefined){
       }
       
