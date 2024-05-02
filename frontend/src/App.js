@@ -32,6 +32,7 @@ function App() {
     //for /lobby/:lobby_code need to use switch(true)
     switch (true) {
       case location.pathname === '/':
+        game.return_to_menu()
         game.dispatch({type: 'change_page', payload: 'home_page'})
         break;
       case location.pathname === '/create':

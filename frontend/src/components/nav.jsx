@@ -9,9 +9,9 @@ export default function Nav() {
   const game = useGameManager();
   const location = useLocation();
   return (
-    <Grid container columns={{ xs: 3 }} sx={{ flexGrow: 1, bgcolor: "black", color: "white", height: "100%", flexWrap: "nowrap" }}>
+    <Grid container columns={{ xs: 5 }} sx={{ flexGrow: 1, bgcolor: "black", color: "white", height: "100%", flexWrap: "nowrap" }}>
       <Grid
-        xs={1} sx={{
+        xs={0} md={1} sx={{
           display: "flex",
           alignItems: "center",
           justifyContent: "flex-start",
@@ -22,7 +22,7 @@ export default function Nav() {
         <img
         src={logo}
         alt="Logo"
-        onClick={() => game.navigate('/')}
+        onClick={() => {console.log(game.state); if (!game.state.code || game.state.is_host) game.navigate('/')}}
         style={{
           height: '15vw',
           maxHeight: '15vh',
@@ -33,7 +33,7 @@ export default function Nav() {
       }
       </Grid>
  
-      <Grid xs={1} sx={{
+      <Grid xs={5} md={3} sx={{
           display: "flex",
           flexDirection: "column",
           alignItems: "center",
@@ -44,7 +44,7 @@ export default function Nav() {
         <MyText isInNav>{game.state.game_name}</MyText>
       </Grid>
  
-      <Grid xs={1} sx={{
+      <Grid xs={0} md={1} sx={{
           display: "flex",
           alignItems: "center",
           justifyContent: "flex-end",

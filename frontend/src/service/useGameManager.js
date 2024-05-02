@@ -468,7 +468,7 @@ export function GameManagerProvider({ children }) {
 
   function return_to_menu() {
     console.log("returning to menu...");
-    ws.current.close()
+    if (ws.current) ws.current.close()
   }
 
   function test() {
