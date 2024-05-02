@@ -52,7 +52,7 @@ export function GameManagerProvider({ children }) {
             return { ...state, body: <WaitingPlayers /> };
           case "playingHost":
             console.log("going to playingHost page...");
-            return { ...state, body: <PlayingHost /> };
+            return { ...state, title: "Joine die Lobby", body: <PlayingHost /> };
           case "thanks4playing_page":
             console.log("going to thanks4playing page...");
             return { ...state, title: "Danke fürs Spielen!", game_name: '', body: <Thanks4Playing/> };
@@ -90,8 +90,9 @@ export function GameManagerProvider({ children }) {
         }
       case 'connect_lobby_host':
         if (!Number.isInteger(action.payload.lobby_code)) return state
-        console.log("connecting to lobby as host...", action.payload);
+        console.log("connecting to lobby as host...");
         return { ...state,
+          title: "Tritt der Lobby bei",
           code: action.payload.lobby_code, //updating this will cause the useEffect to connect to the websocket
           body: <WaitingPlayersHost />,
           is_host: true,
@@ -176,9 +177,6 @@ export function GameManagerProvider({ children }) {
                   : item
                 ),
               };
-
-
-
 
             case 'offer_response':
               console.log('offer was answered: ', message.data.accepted ? 'accepted' : 'declined');
