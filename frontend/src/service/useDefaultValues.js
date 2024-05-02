@@ -5,20 +5,24 @@ import Home from "../pages/home";
 export default function useDefaultValues() {
   const navigate = useNavigate();
   return {
+    //global values
+    code: null,
     current_game: 0,
     current_round: 0,
     title: 'Willkommen!',
     game_name: '',
-    game_names: [''],
     top_right: <MyButton sx={{width: 'auto', paddingInline: '0.8em'}} onClick={() => navigate('/login')}>Login</MyButton>,
     body: <Home />,
     error: '',
+    //player values
+    last_offer: 0,
     is_previous_offer_accepted: undefined,
-    is_host: false,
     is_logged_in: false, //is_host has a specific usecase
-    code: null,
-    exit: false,
     exit_player: false,
+    //host values
+    is_host: false,
+    game_names: [''],
+    exit: false,
     player_count: 0,
     total_player_count: 0,
     offer_phase: 'make_offer',

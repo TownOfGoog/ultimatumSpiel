@@ -282,7 +282,6 @@ export function GameManagerProvider({ children }) {
                 ...item, accepted: 0, declined: 0 //reset accepted and declined offers
               })
             )
-
             return { ...state,
               //reset data for chart for current round
               offer_phase: 'make_offer',
@@ -298,8 +297,11 @@ export function GameManagerProvider({ children }) {
               title: action.payload.data.name,
               game_names: [...state.game_names, action.payload.data.name],
               body: <WaitingPlayersHost />,
-
-              // player_count: 0,
+            }
+          case 'offer':
+            console.log('offering ', action.payload.data.amount);
+            return { ...state,
+              last_offer: action.payload.data.amount,
             }
           case 'answer_offer':
             console.log('offer was answered: ', action.payload.data.accepted ? 'accepted' : 'declined');
@@ -471,17 +473,6 @@ export function GameManagerProvider({ children }) {
     if (ws.current) ws.current.close()
   }
 
-  function test() {
-    console.log("crashing...");
-    const message = {
-      type: "offer",
-      data: {
-        amount: true
-      },
-    };
-    ws.current.send(JSON.stringify(message));
-    dispatch({type: 'sent_message', payload: message})
-  }
   //#region Return
   //all the variables and functions made global
   let publicVariables = {
@@ -495,7 +486,6 @@ export function GameManagerProvider({ children }) {
     skip,
     exit,
     return_to_menu,
-    test
   };
 
   return (
