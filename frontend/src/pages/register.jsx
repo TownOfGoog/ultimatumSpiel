@@ -9,8 +9,15 @@ export default function Register() {
   const [passwordRepeat, setPasswordRepeat] = useState('')
   const game = useGameManager()
   return (
-    <div  style={{width: '100%', display: 'flex', alignItems: 'center', height: '100%', justifyContent: 'center'}}>
-      <div style={{width: '50%', display: 'flex', alignItems: 'center', flexDirection: 'column'}}>
+    <div style={{
+      width: '100%', height: '100%', 
+      display: 'flex', alignItems: 'center', justifyContent: 'center',      
+      boxShadow: "inset 0 0 0 1px black",
+    }}>
+      <div style={{
+        width: '50%', 
+        display: 'flex', alignItems: 'center', flexDirection: 'column'
+      }}>
         <MyInput
           label={"Benutzername"}
           value={username}

@@ -22,11 +22,8 @@ export default function PlayingHost() {
   return (
     <div style={{
       height: '100%',
-      display: 'flex',
-      flexWrap: 'wrap',
-      alignItems: 'flex-end',
-      justifyContent: 'space-evenly',
-      userSelect: 'none'
+      display: 'flex', flexWrap: 'wrap', alignItems: 'flex-end', justifyContent: 'space-evenly',
+      userSelect: 'none', boxShadow: "inset 0 0 0 1px black",
     }}>
       {/* top part - graphs */}
       {totalView ?

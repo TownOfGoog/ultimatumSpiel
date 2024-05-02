@@ -14,7 +14,7 @@ export default function WaitingPlayersHost() {
     <Grid
       container
       columns={4}
-      sx={{ flexGrow: 1, height: "100%", flexWrap: 'nowrap' }}
+      sx={{ flexGrow: 1, height: "100%", flexWrap: 'nowrap', border: "1px solid black", }}
     >
 
       <Grid xs={1} sx={{ height: "100%", display: 'flex' }} />

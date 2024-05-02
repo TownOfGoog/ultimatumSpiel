@@ -12,7 +12,7 @@ export default function PlaceOffer() {
   const [amountToGiveAway, setAmountToGiveAway] = useState(0);
 
   return !game.is_mobile() ? (
-    <MyGrid container columns={5}>
+    <MyGrid container columns={5} sx={{ border: "1px solid black" }}>
       {/* left side - gold counter */}
       <MyGrid xs={1} container columns={5}>
         {/* <MyGrid xs={5} sx={{ height: "20%", justifyContent: 'center', alignItems: 'center' }}>
@@ -70,7 +70,8 @@ export default function PlaceOffer() {
   (
     <div style={{
       width: '100%', height: '100%',
-      display: 'flex', flexDirection: 'row-reverse', alignItems: 'center', justifyContent: 'space-evenly'
+      display: 'flex', flexDirection: 'row-reverse', alignItems: 'center', justifyContent: 'space-evenly', 
+      boxShadow: "inset 0 0 0 1px black",
     }}>
       <div style={{
         width: 140, height: '80%',

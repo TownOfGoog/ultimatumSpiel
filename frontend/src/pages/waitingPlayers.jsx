@@ -7,9 +7,9 @@ export default function WaitingPlayers() {
   return (
     <div style={{
       width: '100%', height: '100%', 
-      display: 'flex', flexDirection: 'column', justifyContent: 'center', alignItems: 'center', gap: '10vh'
-    }}
-    >
+      display: 'flex', flexDirection: 'column', justifyContent: 'center', alignItems: 'center', gap: '10vh', 
+      boxShadow: "inset 0 0 0 1px black",
+    }}>
       {game.state.is_previous_offer_accepted !== undefined && (
         <MyText>Dein vorheriges Angebot (<MyText bold>{game.state.last_offer}</MyText>) wurde <MyText bold>{game.state.is_previous_offer_accepted ? 'Akzeptiert' : 'Abgelehnt'}</MyText>.</MyText>
       )}

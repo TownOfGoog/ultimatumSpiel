@@ -10,10 +10,14 @@ export default function AnswerOffer({ amount }) {
   const emoji = window.innerWidth > 550 ?  '⚠️' : '';
   setTimeout(() => {setSkip(true)}, 2500) //2.5 seconds before user can decide.
   return (
-    <div style={{
-      width: '100%', height: window.innerWidth > 600 ? '85%' : '100%', 
-      display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: '15vh'
-    }} onClick={() => {setSkip(true)}}>
+    <div
+      style={{
+        width: '100%', height: window.innerWidth > 600 ? '85%' : '100%', 
+        display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: '15vh', 
+        boxShadow: "inset 0 0 0 1px black",
+      }}
+      onClick={() => {setSkip(true)}}
+    >
 
       <MyText title={window.innerWidth > 600} bold={window.innerWidth < 600} fontSize='4.5vh' className={!skip ? 'title' : ''}>{emoji} Handelsangebot {emoji}</MyText>
 
