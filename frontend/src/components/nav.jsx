@@ -9,9 +9,9 @@ export default function Nav() {
   const game = useGameManager();
   const location = useLocation();
   return (
-    <Grid container columns={{ xs: 5 }} sx={{ flexGrow: 1, bgcolor: "black", color: "white", height: "100%", flexWrap: "nowrap" }}>
+    <Grid container columns={{ xs: 7 }} sx={{ flexGrow: 1, bgcolor: "black", color: "white", height: "100%", flexWrap: "nowrap" }}>
       <Grid
-        xs={0} md={1} sx={{
+        xs={1} sx={{
           display: "flex",
           alignItems: "center",
           justifyContent: "flex-start",
@@ -33,7 +33,7 @@ export default function Nav() {
       }
       </Grid>
  
-      <Grid xs={5} md={3} sx={{
+      <Grid xs={5} sx={{
           display: "flex",
           flexDirection: "column",
           alignItems: "center",
@@ -41,27 +41,30 @@ export default function Nav() {
           minWidth: '10em'
         }}>
         <MyText isInNav title>{game.state.title}</MyText>
-        <MyText isInNav>{game.state.game_name}</MyText>
+        {!game.is_mobile() && 
+          //this text is shown somewhere else on mobile screen
+          <MyText isInNav>{game.state.game_name}</MyText>
+        }
       </Grid>
  
-      <Grid xs={0} md={1} sx={{
+      <Grid xs={1} sx={{
           display: "flex",
           alignItems: "center",
           justifyContent: "flex-end",
         }}>
-        {/* 
-        testing buttons, very useful for debugging
-        <button onClick={() => {console.log(game.state)}}>state</button>
-        <button onClick={game.test}>give 14 gold</button>  
-        */}
+        {/* <button onClick={() => {console.log(game.state)}}>log state</button>   */}
+       
           {(window.innerWidth > 600) && game.state.is_logged_in && !game.state.is_host &&
             <div style={{display: 'flex', gap: '0.5em'}}>
               <MyButton sx={{width: 'auto', paddingInline: '0.8em'}} disabled>{game.state.username}</MyButton>
               <MyButton sx={{width: 'auto', paddingInline: '0.8em'}} onClick={() => game.navigate('/logout')}>logout</MyButton>
             </div>
           }
-          {(window.innerWidth > 600 || location.pathname !== '/') && 
-            <div style={{marginInline: '0.8em'}}>{game.state.top_right}</div>
+          {(window.innerWidth > 600 || location.pathname !== '/' || location.pathname !== '/thanks4playing') && 
+            <div style={{marginInline: '0.8em'}}>
+              {/* if game.state.topright is text, use <MyText> */}
+              {typeof game.state.top_right === 'string' && game.state.top_right !== '' ? <MyText isInNav>{game.state.top_right}</MyText> : game.state.top_right}
+            </div>
           }
       </Grid>
     </Grid>

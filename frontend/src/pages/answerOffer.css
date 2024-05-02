@@ -1,0 +1,24 @@
+
+.title {  
+  opacity: 0;
+  animation: fade-in 1s 0s ease-in-out forwards;
+}
+
+.description {  
+  opacity: 0;
+  animation: fade-in 1s 1s ease-in-out forwards;
+}
+
+.buttons {
+  opacity: 0;
+  animation: fade-in 1s 1.5s ease-in-out forwards;
+}
+
+@keyframes fade-in {
+  0% {
+    opacity: 0;
+  }
+  100% {
+    opacity: 1;
+  }
+}

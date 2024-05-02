@@ -378,8 +378,7 @@ export function GameManagerProvider({ children }) {
   useEffect(() => {
     if (!state.code) return 
 
-    // ws.current = new WebSocket(`/lobby/${state.code}`);
-    ws.current = new WebSocket(process.env.NODE_ENV === 'development' ? `ws://localhost:8080/lobby/${state.code}` : `/lobby/${state.code}`);
+    ws.current = new WebSocket(`ws${process.env.REACT_APP_HTTPS ? 's' : ''}://${process.env.NODE_ENV === 'development' ? 'localhost:8080' : window.location.host}/lobby/${state.code}`);
 
     ws.current.onopen = () => console.log("websocket connected")
 
@@ -473,6 +472,10 @@ export function GameManagerProvider({ children }) {
     if (ws.current) ws.current.close()
   }
 
+  function is_mobile() {
+    return window.innerWidth < 600
+  } 
+
   //#region Return
   //all the variables and functions made global
   let publicVariables = {
@@ -486,6 +489,7 @@ export function GameManagerProvider({ children }) {
     skip,
     exit,
     return_to_menu,
+    is_mobile
   };
 
   return (

@@ -14,7 +14,6 @@ root.render(
       <GameManagerProvider>
         <Routes>
           <Route path="/" element={<App />} />
-          <Route path="/create" element={<App />} />
           <Route path="/lobby/:lobby_code" element={<App />} />
           <Route path="*"element={<App />} />
         </Routes>

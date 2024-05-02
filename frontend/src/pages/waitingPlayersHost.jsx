@@ -30,10 +30,10 @@ export default function WaitingPlayersHost() {
 
         {/* left center part of the screen */}
         <Grid xs={1} sx={{ height: "40%", display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center' }} >
-          <MyText level="title-sm" fontSize="2.5em" sx={{marginBottom: '-20px'}}>
+          <MyText fontSize="2.5em" sx={{marginBottom: '-20px'}}>
             Der Code:
           </MyText>
-          <MyText level="h1" fontSize="5em">
+          <MyText fontSize="5em">
             {game.state.code}
           </MyText>
         </Grid>
@@ -45,8 +45,8 @@ export default function WaitingPlayersHost() {
 
         {/* bottom center part of the screen */}
         <Grid xs={2} sx={{ height: "40%", display: 'flex', justifyContent: 'center'}} >
-          <MyText>
-            Spieler: {game.state.total_player_count }
+          <MyText fontSize="2.5em">
+            Spieler: {game.state.total_player_count}
           </MyText>
         </Grid>
       </Grid> 

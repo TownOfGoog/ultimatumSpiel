@@ -4,6 +4,7 @@ import { styled } from '@mui/material/styles';
 
 export default function MyButton({
   shouldFillAll,
+  isCoinContainer=false,
   answer,
   onClick,
   sx,
@@ -20,13 +21,11 @@ export default function MyButton({
       fontSize: "2em",
     },
     [theme.breakpoints.down('md')]: {
-      fontSize: "1.2em",
+      fontSize: isCoinContainer ? "1.7em" : answer !== undefined ? '2em' : '1.2em',
     },
 
     borderRadius: 12,
     fontWeight: "100",
-
-
   }));
 
   let defaultStyle = {

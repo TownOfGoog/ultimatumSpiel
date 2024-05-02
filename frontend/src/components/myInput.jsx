@@ -1,7 +1,6 @@
 import Input from '@mui/joy/Input';
 import './workaround.css'
 import FormLabel from '@mui/joy/FormLabel';
-import { CssVarsProvider } from '@mui/joy/styles';
 export default function MyInput({label, title, value, setValue, password=false, style, sx, big,}) {
   //if a title is given, make the label bigger, thats the only difference
   function handleChange(event) {
@@ -50,7 +49,6 @@ export default function MyInput({label, title, value, setValue, password=false, 
       alignSelf: 'center',
     }
   }
-  
 
   //because i couldnt find a way to influence the <input> component directly in Joy UI, i use this workaround
   let workaround = big ? 'workaround' : ''
@@ -64,9 +62,7 @@ export default function MyInput({label, title, value, setValue, password=false, 
           {title}{label}
         </FormLabel> 
       </div>
-      {/* <CssVarsProvider defaultMode="white"> */}
-        <Input variant='plain' type={password ? 'password' : undefined} onChange={handleChange} sx={defaultStyle} className={workaround} value={value}/>
-      {/* </CssVarsProvider> */}
+      <Input variant='plain' type={password ? 'password' : undefined} onChange={handleChange} sx={defaultStyle} className={workaround} value={value}/>
     </div>
   )
 }
