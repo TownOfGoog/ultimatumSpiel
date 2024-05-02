@@ -7,8 +7,8 @@ import { useState } from "react";
 import useGameManager from "../service/useGameManager";
 
 export default function CreateGame() {
-  const [lobbyName, setLobbyName] = useState("");
-  const [gameName, setGameName] = useState("");
+  const [lobby_name, setLobbyName] = useState("");
+  const [game_name, setGameName] = useState("");
   const game = useGameManager();
 
   return (
@@ -36,23 +36,57 @@ export default function CreateGame() {
         >
           <MyInput
             label={"Lobby Name"}
-            value={lobbyName}
+            value={lobby_name}
             setValue={setLobbyName}
           />
-          <MyInput
-            label="Erstes Spiel Name"
-            value={gameName}
+        </FormControl>
+        
+        <MyInput
+            label="Szenario des erstes Spiels"
+            value={game_name}
             setValue={setGameName}
           />
           <div style={{margin: '0.3em 0 0.3em 0'}}></div>
+          
+        {game.state.error && (
+          <>
+            <div style={{color: 'red', display: 'flex', justifyContent: 'center'}}>{game.state.error}</div>
+            <div style={{margin: '0.3em 0 0.3em 0'}}></div>
+          </>
+        )}
+        
           <MyButton
             onClick={() => {
-              game.create_lobby(lobbyName, gameName);
+              console.log('creating lobby...');
+              //when creating a lobby, save the code and join it's lobby
+              fetch(`/lobby/create`, {
+                method: "POST",
+                headers: {
+                  "Content-Type": "application/json",
+                },
+                credentials: 'include',
+                body: JSON.stringify({ name: lobby_name }),
+              })
+              .then((response) => {
+                if (response.status !== 200) {
+                  response.json().then((msg) => game.dispatch({type: 'error', payload: msg}))
+                  return
+                }
+                return response.json()
+              })
+              .then((data) => {
+                if (!data) return
+                console.log("lobbycode will be: ", data);
+                const lobby_code = data;
+                game.dispatch({ type: "connect_lobby_host", payload: { lobby_code, lobby_name, game_name }})
+                game.navigate(`/lobby/${lobby_code}`);
+              })
+              .catch((error) => {
+                console.error(error)});
             }}
           >
             Lobby erstellen
           </MyButton>
-        </FormControl>
       </Grid>
 
       <Grid xs={1} />

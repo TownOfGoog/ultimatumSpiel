@@ -5,6 +5,7 @@ import QRCode from 'react-qr-code';
 import useGameManager from '../service/useGameManager';
 import MyText from '../components/myText';
 import MyButton from '../components/myButton';
+import { Link } from 'react-router-dom';
 
 export default function WaitingPlayersHost() {
   const game = useGameManager();
@@ -22,36 +23,36 @@ export default function WaitingPlayersHost() {
 
         {/* top center part of the screen */}
         <Grid xs={2} sx={{ height: "20%", display: 'flex', alignItems: 'center', justifyContent: 'center' }} >
-          <MyText level="h1" fontSize="3em" sx={{textDecoration: 'underline'}} >
-            {window.location.href}
+          <MyText level="h1" fontSize="3em" >
+            <Link style={{color:'black'}} target="_blank" to={window.location.href}>{window.location.href}</Link>
           </MyText>
         </Grid>
 
         {/* left center part of the screen */}
         <Grid xs={1} sx={{ height: "40%", display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center' }} >
-          <MyText level="title-sm" fontSize="2.5em" sx={{marginBottom: '-20px'}}>
+          <MyText fontSize="2.5em" sx={{marginBottom: '-20px'}}>
             Der Code:
           </MyText>
-          <MyText level="h1" fontSize="5em">
-            {game.code}
+          <MyText fontSize="5em">
+            {game.state.code}
           </MyText>
         </Grid>
 
         {/* right center part of the screen */}
         <Grid xs={1} sx={{ height: "40%", display: 'flex', justifyContent: 'center', alignItems: 'center' }} >
-          <QRCode value={window.location.href + 'lobby/' + game.code} size={200} />
+          <QRCode value={window.location.href} size={200} />
         </Grid>
 
         {/* bottom center part of the screen */}
         <Grid xs={2} sx={{ height: "40%", display: 'flex', justifyContent: 'center'}} >
-          <MyText>
-            Spieler: {game.playerCount }
+          <MyText fontSize="2.5em">
+            Spieler: {game.state.total_player_count}
           </MyText>
         </Grid>
       </Grid> 
 
       <Grid xs={1} sx={{ height: "100%", justifyContent: 'flex-end', alignContent: 'flex-end', flexWrap: 'wrap' }} >
-        <MyButton disabled={game.playerCount <= 0} sx={{width: 'auto', padding: '1em', margin: '0.5em'}} onClick={() => game.new_game(game.subTitle)}>
+        <MyButton disabled={game.state.total_player_count <= 0} sx={{width: 'auto', padding: '1em', margin: '0.5em'}} onClick={() => game.new_game(game.state.game_name)}>
           Starten
         </MyButton>
       </Grid>

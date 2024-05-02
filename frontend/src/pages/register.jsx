@@ -1,11 +1,12 @@
-import { useState } from "react"
-import MyInput from "../components/myInput"
-import MyButton from "../components/myButton"
+import { useState } from "react";
+import MyButton from "../components/myButton";
+import MyInput from "../components/myInput";
 import useGameManager from "../service/useGameManager";
 
-export default function Loginpage() {
-  const [username, setUsername] = useState('') 
+export default function Register() {
+  const [username, setUsername] = useState('')
   const [password, setPassword] = useState('')
+  const [passwordRepeat, setPasswordRepeat] = useState('')
   const game = useGameManager()
   return (
     <div  style={{width: '100%', display: 'flex', alignItems: 'center', height: '100%', justifyContent: 'center'}}>
@@ -15,13 +16,20 @@ export default function Loginpage() {
           value={username}
           setValue={setUsername}
         />
-
+        
         <MyInput
           password
           label={"Passwort"}
           value={password}
           setValue={setPassword}
-        /> 
+        />
+        
+        <MyInput
+          password
+          label={"Passwort erneut eingeben"}
+          value={passwordRepeat}
+          setValue={setPasswordRepeat}
+        />
 
         <div style={{margin: '0.3em 0 0.3em 0'}}></div>
 
@@ -31,10 +39,25 @@ export default function Loginpage() {
             <div style={{margin: '0.3em 0 0.3em 0'}}></div>
           </>
         )}
+
         {/* due to the programming of MyButton, i need this width: 100% div */}
         <div style={{width: '100%'}}> 
           <MyButton onClick={() => {
-            fetch(`/login`, {
+
+            // check if all fields are filled
+            if ( !password || !passwordRepeat || !username ) {
+              game.dispatch({type: 'error', payload: 'Bitte füllen Sie alle Felder aus'})
+              return
+            }
+
+            // check if password and passwordRepeat are the same
+            if (password !== passwordRepeat) {
+              game.dispatch({type: 'error', payload: 'Passwörter stimmen nicht überein'})
+              return
+            }
+
+
+            fetch(`/register`, {
               method: 'POST',
               headers: {
                 "Content-Type": "application/json",
@@ -54,9 +77,9 @@ export default function Loginpage() {
               game.navigate('/')
             }})
             .catch((err) => {
-              console.error(err)
-            })
-          }}>Anmelden</MyButton>
+               console.error(err)})
+          
+          }}>Konto eröffnen</MyButton>
         </div>
       </div>
     </div>

@@ -3,9 +3,9 @@ import { FaCoins } from "react-icons/fa6";
 import { GiCoins } from "react-icons/gi";
 import MyText from "./myText";
 
-export default function MyCoin({ amount }) {
+export default function MyCoin({ amount, color }) {
   return (
-    <MyText sx={{display: 'flex', alignItems: 'center'}}>
+    <MyText sx={{display: 'flex', alignItems: 'center', color: color}}>
       {amount}
       &nbsp;
       {

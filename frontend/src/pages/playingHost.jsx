@@ -4,11 +4,13 @@ import MyChart from "../components/myChart";
 import MyText from "../components/myText";
 import useGameManager from "../service/useGameManager";
 import * as XLSX from 'xlsx';
+import { BsFillArrowLeftCircleFill, BsFillArrowRightCircleFill } from "react-icons/bs";
 
 export default function PlayingHost() {
   const game = useGameManager();
   const [totalView, setTotalView] = useState(false)
-
+  const [indexLeft, setIndexLeft] = useState(0)
+  const [indexRight, setIndexRight] = useState(game.state.offer_per_money_total_percent.length - 1)
   function aggregate_obj_in_arr(arr, obj) {
     let counter = 0
     arr.forEach((element) => {
@@ -22,23 +24,31 @@ export default function PlayingHost() {
       height: '100%',
       display: 'flex',
       flexWrap: 'wrap',
-      alignContent: 'flex-end'
+      alignItems: 'flex-end',
+      justifyContent: 'space-evenly',
+      userSelect: 'none'
     }}>
       {/* top part - graphs */}
-      {totalView ? 
+      {totalView ?
+      //#region Total Chart 
       //if host clicks on 'total view', show the total view
-      <MyChart 
-      //players who have answered this offer / totalofferscount * 100
-        dataset={game.offerPerMoneyTotalPercent}
+      <>
+      <div style={{display: 'flex', alignItems: 'center'}}>
+        <BsFillArrowLeftCircleFill color="#555e68" style={{ cursor: 'pointer' }}
+        onClick={() => setIndexLeft((prev) => game.state.offer_per_money_total_percent[prev - 1] ? prev - 1 : prev)}>{'<'}
+        </BsFillArrowLeftCircleFill>
+
+        <MyChart 
+        //players who have answered this offer / totalofferscount * 100
+        dataset={game.state.offer_per_money_total_percent[indexLeft]}
         yAxis={ [
           {
-            label: 'Antworten in %',
-            // valueFormatter: (value) => `${value}%`,
+            label: 'Antworten'
           },
         ]}
         xAxis={[
           {
-            label: 'Angebote',
+            label: `Totale Angebote${indexLeft === 0 ? '' : ` von Spiel ${indexLeft}`}`,
             dataKey: 'amount',
             scaleType: 'band',
           }
@@ -46,19 +56,61 @@ export default function PlayingHost() {
         series={[
           {
             dataKey: 'accepted',
-            label: 'Angenommen', color: '#0afff7' //#5eec77 green
+            label: 'Angenommen', stack: 'a', color: '#0afff7' , valueFormatter: (v) => `${v}% (${game.state.offer_per_money_total[indexLeft][game.state.offer_per_money_total_percent[indexLeft].findIndex(o => o.accepted === v)].accepted})`
           },
           {
             dataKey: 'declined',
-            label: 'Abgelehnt', color: '#ff8113'
+            label: 'Abgelehnt', stack: 'a', color: '#ff8113', valueFormatter: (v) => `${v}% (${game.state.offer_per_money_total[indexLeft][game.state.offer_per_money_total_percent[indexLeft].findIndex(o => o.declined === v)].declined})`
           },
         ]}
-      />
+        />
+        <BsFillArrowRightCircleFill  color="#555e68" style={{ cursor: 'pointer' }}
+        onClick={() => setIndexLeft((prev) => game.state.offer_per_money_total_percent[prev + 1] ? prev + 1 : prev)}>{'>'}
+        </BsFillArrowRightCircleFill>
+      </div>
+      <div style={{display: 'flex', alignItems: 'center'}}>
+
+        <BsFillArrowLeftCircleFill color="#555e68" style={{ cursor: 'pointer' }}
+        onClick={() => setIndexRight((prev) => game.state.offer_per_money_total_percent[prev - 1] ? prev - 1 : prev)}>{'<'}
+        </BsFillArrowLeftCircleFill>
+        <MyChart 
+        //players who have answered this offer / totalofferscount * 100
+          dataset={game.state.offer_per_money_total_percent[indexRight]}
+          yAxis={ [
+            {
+              label: 'Antworten',
+            },
+          ]}
+          xAxis={[
+            {
+              label: `Totale Angebote${indexRight === 0 ? '' : ` von Spiel ${indexRight}`}`,
+              dataKey: 'amount',
+              scaleType: 'band',
+            }
+          ]}
+          series={[
+            {
+              dataKey: 'accepted',
+              label: 'Angenommen', stack: 'a', color: '#0afff7', valueFormatter: (v) => `${v}% (${game.state.offer_per_money_total[indexRight][game.state.offer_per_money_total_percent[indexRight].findIndex(o => o.accepted === v)].accepted})`
+            },
+            {
+              dataKey: 'declined',
+              label: 'Abgelehnt', stack: 'a', color: '#ff8113', valueFormatter: (v) => `${v}% (${game.state.offer_per_money_total[indexRight][game.state.offer_per_money_total_percent[indexRight].findIndex(o => o.declined === v)].declined})`
+            },
+          ]}
+        />
+        <BsFillArrowRightCircleFill color="#555e68" style={{ cursor: 'pointer' }}
+        onClick={() => setIndexRight((prev) => game.state.offer_per_money_total_percent[prev + 1] ? prev + 1 : prev)}>{'>'}
+        </BsFillArrowRightCircleFill>
+      </div>
+
+      </>
     :
+    //#region Relative Chart
     //if totalView is false, show the normal view
       <>
         <MyChart 
-          dataset={game.offerPerMoney}
+          dataset={game.state.offer_per_money}
           yAxis={ [
             {
               label: 'Anzahl der Angebote',
@@ -67,6 +119,7 @@ export default function PlayingHost() {
           ]}
           xAxis={[
             {
+              label: 'Angebote',
               dataKey: 'amount',
               scaleType: 'band',
             }
@@ -83,42 +136,46 @@ export default function PlayingHost() {
             },
           ]}
         />
-        <MyChart 
-          layout="horizontal"
-          grid={{ vertical: true }}
-          xAxis={[
-            {
-              label: 'Anzahl Spieler',
-              tickMinStep: 1,
-            },
-          ]}
-          yAxis={[
-            {
-              data: ['Angebote angenommen', 'Angebote abgelehnt', 'Anzahl Spieler'],
-              scaleType: 'band',
-            }
-          ]}
-          series={[
-            {
-              data: [aggregate_obj_in_arr(game.offerPerMoney, 'accepted'), 0, 0], stack: 'a', label: 'Angenommen', color: '#0afff7' 
-            },
-            {
-              data: [0, aggregate_obj_in_arr(game.offerPerMoney, 'declined'), 0], stack: 'a', label: 'Abgelehnt', color: '#ff8113'
-            },
-            {
-              data: [0, 0, game.totalPlayerCount - aggregate_obj_in_arr(game.offerPerMoney, 'open')], stack: 'a', label: 'Spieler', color: 'black'
-            },
-            {
-              data: [0, 0, aggregate_obj_in_arr(game.offerPerMoney, 'open')], stack: 'a', label: 'Angeboten', color: '#555E68'
-            },
-          ]}
-        />
+        {game.state.total_player_count !== Infinity && 
+          <MyChart 
+            layout="horizontal"
+            grid={{ vertical: true }}
+            xAxis={[
+              {
+                label: 'Anzahl Spieler',
+                tickMinStep: 1,
+              },
+            ]}
+            yAxis={[
+              {
+                data: ['Angebote angenommen', 'Angebote abgelehnt', 'Anzahl Spieler'],
+                scaleType: 'band',
+              }
+            ]}
+            series={[
+              {
+                data: [aggregate_obj_in_arr(game.state.offer_per_money, 'accepted'), 0, 0], stack: 'a', label: 'Angenommen', color: '#0afff7' 
+              },
+              {
+                data: [0, aggregate_obj_in_arr(game.state.offer_per_money, 'declined'), 0], stack: 'a', label: 'Abgelehnt', color: '#ff8113'
+              },
+              {
+                data: [0, 0, game.state.total_player_count - aggregate_obj_in_arr(game.state.offer_per_money, 'open') ], stack: 'a', label: 'Spieler', color: 'black'
+              },
+              {
+                data: [0, 0, aggregate_obj_in_arr(game.state.offer_per_money, 'open')], stack: 'a', label: 'Angebote', color: '#555E68'
+              },
+            ]}
+            tooltip={{ trigger: 'item' }}
+          />
+        }
       </>
     }
 
       {/* bottom part - buttons */}
       <div style={{
-        width: '100%', display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', 
+        //#region Buttons
+        width: '100%', display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', alignSelf: 'flex-end',
         borderTop: '2px solid black', //black line
         padding: '0.5em', gap: '0.5em', //space between buttons
       }}>
@@ -127,61 +184,87 @@ export default function PlayingHost() {
         <div style={{width: '100%', display: 'flex', gap: '0.5em'}}>
           <MyText sx={{marginInline: 'auto', alignContent: 'center'}}>
             {
-              game.offerPhase === 'make_offer'
-              ? 
-              `${game.playerCount} / ${game.totalPlayerCount} Spieler haben ein Angebot gegeben.`
-              : 
-              game.offerPhase === 'answer_offer'
-              ? 
-              `${game.playerCount} / ${game.totalPlayerCount} Spieler haben ein Angebot abgelehnt oder angenommen.`
-              :
-              'Alle haben geantwortet.'
+              game.state.offer_phase === 'make_offer' ? 
+              `${game.state.player_count} / ${game.state.total_player_count} Spieler haben ein Angebot gegeben.`
+              
+              : game.state.offer_phase === 'answer_offer' ? 
+              `${game.state.player_count} / ${game.state.total_player_count} Spieler haben ein Angebot abgelehnt oder angenommen.`
+              
+              : game.state.exit ? 
+              'Spiel beendet.'
+              : game.state.total_player_count === 0 ? 'Niemand ist mehr hier.' : 'Alle haben geantwortet.'
             }
           </MyText>
-          {game.offerPhase === 'wait' ?
-          //when everyone has given their answer, show buttons to continue game
-          <>
-            <MyButton sx={{width: 'auto', padding: '0.8em'}} onClick={() => {game.new_game(prompt('Name des neuen Spieles'))}}>
-              Neues Spiel
-            </MyButton>
-            <MyButton sx={{width: 'auto', padding: '0.8em'}} onClick={() => {game.new_round()}}>
-              Neue Runde
-            </MyButton>
-          </>
-          :
-            <MyButton disabled={game.playerCount === 0} sx={{width: 'auto', padding: '0.8em'}} onClick={() => {game.skip()}}>
-              Fortfahren
-            </MyButton>
+          {!game.state.exit && 
+            <>
+            {game.state.offer_phase === 'wait' && game.state.total_player_count !== 0 ?
+              //when everyone has given their answer, show buttons to continue game
+              <>
+                <MyButton sx={{width: 'auto', padding: '0.8em'}} onClick={() => {game.new_game(prompt('Szenario des neuen Spieles'))}}>
+                  Neues Spiel
+                </MyButton>
+                <MyButton sx={{width: 'auto', padding: '0.8em'}} onClick={() => {game.new_round()}}>
+                  Neue Runde
+                </MyButton>
+              </>
+            :
+              <MyButton disabled={game.state.player_count === 0} sx={{width: 'auto', padding: '0.8em'}} onClick={() => {game.skip()}}>
+                  Fortfahren
+              </MyButton>
+            }
+            </>
           }
         </div>
         
         {/* lower half - current lobby controls */}
         <div style={{width: '100%', display: 'flex', justifyContent: 'flex-end', gap: '0.5em'}}>
-          {game.offerPhase === 'wait' &&
+          {game.state.offer_phase === 'wait' && !game.state.exit &&
             //only when everyone has answered, show the close button
             <MyButton sx={{width: 'auto', padding: '0.8em'}} onClick={() => {game.exit()}}>
               Beenden
             </MyButton>
           }
+          {game.state.exit &&
+            //only when the game is finished, show the new game button
+            <MyButton sx={{width: 'auto', padding: '0.8em'}} onClick={() => {game.return_to_menu()}}>
+              Zurück zum Menü
+            </MyButton>
+          }
 
           {totalView && 
+            //#region Excel logic
             // only when total view is active, show the download button
             <MyButton sx={{width: 'auto', padding: '0.8em'}} onClick={() => {
-              console.log('game.offerPerMoneyTotalPercent: ', game.offerPerMoneyTotalPercent);
-              const rows = game.offerPerMoneyTotal.map((row, index) => ({
-                Geld: row.amount,
-                Angenommen: row.accepted,
-                Abgelehnt: row.declined,
-                AbsolutAngenommen: game.offerPerMoneyTotalPercent[index].accepted,
-                AbsolutAbgelehnt: game.offerPerMoneyTotalPercent[index].declined,
-              }));
-              const worksheet = XLSX.utils.json_to_sheet(rows);
-              //set column width
-              worksheet["!cols"] = [ { width: 5 }, { width: 12 }, { width: 9 }, { width: 19 }, { width: 16 } ];
+              console.log('game.offerPerMoneyTotalPercent: ', game.state.offer_per_money_total_percent);
+              console.log('game names:', game.state.game_names)
               const workbook = XLSX.utils.book_new();
-              XLSX.utils.book_append_sheet(workbook, worksheet, game.topRight || 'Namenlose Lobby'); //topright is our class
-              
-              XLSX.writeFile(workbook, "Presidents.xlsx");
+              console.log('was it possible to create new book without rows?');
+              //game_names has the same length as offer_per_money_total and _percent, always.
+              game.state.game_names.forEach((element, i) => {
+                console.log('game.state.offer_per_money_total[i]: ', game.state.offer_per_money_total[i]);
+                const rows = game.state.offer_per_money_total[i].map((row, index) => ({
+                  Geld: row.amount,
+                  Angenommen: game.state.offer_per_money_total_percent[i][index].accepted,
+                  Abgelehnt: game.state.offer_per_money_total_percent[i][index].declined,
+                  AbsolutAngenommen: row.accepted,
+                  AbsolutAbgelehnt: row.declined,
+                }));
+
+                const worksheet = XLSX.utils.json_to_sheet(rows);
+                //set column width
+                worksheet["!cols"] = [ { width: 5 }, { width: 12 }, { width: 9 }, { width: 19 }, { width: 16 } ];
+                XLSX.utils.book_append_sheet(
+                  workbook, 
+                  worksheet, 
+                  i === 0 ? 'Alle Spiele Total' : `Spiel ${i}`
+                ); //topright is our class
+
+                //add scenario to the end of the sheet
+                XLSX.utils.sheet_add_aoa(worksheet, [[i === 0 ? "Alle Spiele Total" : "Szenario: " + element || 'Keins.']], {origin: -1});
+              })
+
+              //write file with name of the lobby + current date
+              XLSX.writeFile(workbook, `${game.state.top_right} ${new Date().toISOString().slice(0, 10)}.xlsx`.trim());
             }}>
               Herunterladen
             </MyButton>
@@ -190,7 +273,6 @@ export default function PlayingHost() {
           <MyButton sx={{width: 'auto', padding: '0.8em'}} onClick={() => {setTotalView((prev) => !prev)}}>
             {!totalView ? 'Totale' : 'Normale'} Ansicht
           </MyButton>
-          {/* <button onClick={() => {console.log(game.offerPerMoney)}}>test</button> */}
         </div>
       </div>
     </div>
