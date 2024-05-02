@@ -200,7 +200,7 @@ export default function PlayingHost() {
             {game.state.offer_phase === 'wait' && game.state.total_player_count !== 0 ?
               //when everyone has given their answer, show buttons to continue game
               <>
-                <MyButton sx={{width: 'auto', padding: '0.8em'}} onClick={() => {game.new_game(prompt('Name des neuen Spieles'))}}>
+                <MyButton sx={{width: 'auto', padding: '0.8em'}} onClick={() => {game.new_game(prompt('Szenario des neuen Spieles'))}}>
                   Neues Spiel
                 </MyButton>
                 <MyButton sx={{width: 'auto', padding: '0.8em'}} onClick={() => {game.new_round()}}>

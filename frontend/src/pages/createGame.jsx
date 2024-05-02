@@ -42,7 +42,7 @@ export default function CreateGame() {
         </FormControl>
         
         <MyInput
-            label="Erstes Spiel Name"
+            label="Szenario des erstes Spiels"
             value={game_name}
             setValue={setGameName}
           />
