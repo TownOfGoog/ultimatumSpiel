@@ -9,12 +9,12 @@ export default function Nav() {
   const game = useGameManager();
   const location = useLocation();
   return (
-    <Grid container columns={{ xs: 7 }} sx={{ flexGrow: 1, bgcolor: "black", color: "white", height: "100%", flexWrap: "nowrap" }}>
+    <Grid container columns={{ xs: 9 }} sx={{ flexGrow: 1, bgcolor: "black", color: "white", height: "100%", flexWrap: "nowrap" }}>
       <Grid
-        xs={1} sx={{
+        xs={2} sx={{
           display: "flex",
           alignItems: "center",
-          justifyContent: "flex-start",
+          justifyContent: "center",
         }}
       >
         {/* window.innerwidth only updates on page reloads IN REACT */}
@@ -47,10 +47,10 @@ export default function Nav() {
         }
       </Grid>
  
-      <Grid xs={1} sx={{
+      <Grid xs={2} sx={{
           display: "flex",
           alignItems: "center",
-          justifyContent: "flex-end",
+          justifyContent: "center",
         }}>
         {/* <button onClick={() => {console.log(game.state)}}>log state</button>   */}
        
@@ -61,7 +61,7 @@ export default function Nav() {
             </div>
           }
           {(window.innerWidth > 600 || location.pathname !== '/' || location.pathname !== '/thanks4playing') && 
-            <div style={{marginInline: '0.8em'}}>
+            <div >
               {/* if game.state.topright is text, use <MyText> */}
               {typeof game.state.top_right === 'string' && game.state.top_right !== '' ? <MyText isInNav>{game.state.top_right}</MyText> : game.state.top_right}
             </div>
