@@ -65,12 +65,15 @@ export function create_new_game(lobbycode, message, key){
             game.GameID.push(new_game)
             lobby.GameID[lobbycode].push(new_game)
             game.game_name.push(message.data.name)
+            game.RoundID.push([])
             
             setGame(game)
         }
         current_game = lobby.GameID[lobbycode][lobby.GameID[lobbycode].length-1] //finds out the current game
         console.log(current_game, game.RoundID)
         rounds.RoundID.push(round) //updates database
+        console.log(current_game)
+        console.log(game)
         game.RoundID[current_game].push(round)
         rounds.OfferID.push([])
         
