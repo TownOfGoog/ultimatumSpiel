@@ -378,6 +378,7 @@ app.post("/lobby/create", (req, res) => {
 
           setRound(rounds)
           setOffer(offers)
+          console.log(getRound())
           
           players_to_process = lobby.PlayerID[lobbycode]
           lobby.host_websocket[lobbycode].send(JSON.stringify({ // lets the host know how many palyers have given an offer
@@ -477,7 +478,7 @@ app.post("/lobby/create", (req, res) => {
               data:{
                 amount: offers.offer_sum[this_offer],
                 accepted: true,
-              }            }))
+              }}))
 
             send_final(round)
 
@@ -531,14 +532,20 @@ app.post("/lobby/create", (req, res) => {
 
             switch(lobby.gamestate[lobbycode]){ // when skip is sent, there are many different cases to be differentiated, based on the gamestate
               case "offer":
+                rounds = getRound()
+                offers = getOffer()
+                lobby = getLobby()
+                players = getPlayer()
+                console.log("skipping offer")
                 lobby.gamestate[lobbycode] = "answer_offer"
                 
                 let players_to_be_shuffled=[]
 
                 players_to_be_shuffled = []
-                console.log(rounds.OfferID[round-1])
-                rounds.OfferID[round-1].forEach(function(element) {
-                  players_to_be_shuffled.push(offers.giver[element])
+                console.log(rounds)
+                console.log(rounds.OfferID[round],round)
+                rounds.OfferID[round].forEach(function(element) {
+                  players_to_be_shuffled.push(offers.giver[element]) // finds all the players who managed to give an offer
                   }
                 )
                 let players_too_late
@@ -556,13 +563,13 @@ app.post("/lobby/create", (req, res) => {
                   offers.reciever.push(element)
                   }
                 )
-                let angebote
-                angebote = []
-                angebote = rounds.OfferID[round-1]
+                let offers_to_recieve
+                offers_to_recieve = []
+                offers_to_recieve = rounds.OfferID[round]
 
 
                 for (var i = 0; i < players_to_be_shuffled.length; i++) {
-                  offers.reciever[angebote[i]] = players_to_be_shuffled[i]
+                  offers.reciever[offers_to_recieve[i]] = players_to_be_shuffled[i]
                 }
 
                 for (var i = 0; i < players_to_be_shuffled.length; i++) {
@@ -570,7 +577,7 @@ app.post("/lobby/create", (req, res) => {
                   players.websocket[n].send(JSON.stringify({
                   type: "answer_offer",
                   data: {
-                    amount: offers.offer_sum[angebote[i]]
+                    amount: offers.offer_sum[offers_to_recieve[i]]
                   }
                 }))}
                 for (var i = 0; i < players_too_late.length; i++) {
