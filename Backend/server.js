@@ -4,7 +4,23 @@ import session from "express-session"
 import cors from "cors"
 import crypto from 'crypto'
 import path from "path"
-
+import { close } from './close.js';
+import { getLobby } from './datenbank_functiones.js';
+import { getHost } from './datenbank_functiones.js';
+import { getGame } from './datenbank_functiones.js';
+import { getRound } from './datenbank_functiones.js';
+import { getOffer } from './datenbank_functiones.js';
+import { getPlayer } from './datenbank_functiones.js';
+import { setLobby } from './datenbank_functiones.js';
+import { setHost } from './datenbank_functiones.js';
+import { setGame } from './datenbank_functiones.js';
+import { setRound } from './datenbank_functiones.js';
+import { setOffer } from './datenbank_functiones.js';
+import { setPlayer } from './datenbank_functiones.js';
+import { createHost } from './datenbank_functiones.js';
+import { send_final } from './datenbank_functiones.js';
+import { createLobby } from './datenbank_functiones.js';
+import { createPlayer } from './datenbank_functiones.js';
 
 
 
@@ -15,84 +31,10 @@ function shuffle(array) {
   return array
 }
 
-//Initialisiere Datenbank
-let datenbank = {
-  "Lobby":{
-    "LobbyID":[],
-    "spielID":[[]],
-    "wirt":[],
-    "spieler_id":[[]],
-    "lobby_kennwort":[],
-    "name": [],
-    "host_websocket":[],
-    "gamestate":[],
-    "open":[],
-    "aktive_spieler":[]
-  },
-  "Lehrer":{
-    "LehrerID":[],
-    "benutzername":[],
-    "kennwort":[]
-  },
-  "Spiel":{
-    "spiel_id":[],
-    "spiel_name":[],
-    "runden_id":[[]]
-  },
-  "Runden":{
-    "runden_id":[],
-    "angebot_id":[[]]
-  },
-  "Angebote":{
-    "angebot_id":[],
-    "angebot_nehmer":[],
-    "angebot_geber":[],
-    "angebot_summe":[],
-    "angebot_angenommen":[]
-  },
-  "Spieler":{
-    "spieler_id":[],
-    "websocket":[]
-  }
 
-}
 
-function send_final(runde, key){
-  let angebote = datenbank.Runden.angebot_id[runde-1]
-  console.log(angebote)
-  let antworten = []
-  for (var i = 0; i < angebote.length; i++) {
-    var n = angebote[i];
-    antworten.push(datenbank.Angebote.angebot_angenommen[n])
-  }
-  console.log(antworten, "test")
-  console.log(runde-1);
-  console.log(datenbank.Runden.angebot_id)
-  console.log(datenbank.Angebote.angebot_angenommen);
-  console.log(!antworten.includes(undefined))
-  if(!antworten.includes(undefined) || key != undefined){
-    let geber = []
-    let akzeptiert = []
-    datenbank.Runden.angebot_id[runde-1].forEach(function(element) {
-      geber.push(datenbank.Angebote.angebot_geber[element])
-      akzeptiert.push(datenbank.Angebote.angebot_angenommen[element])
-      })
-      console.log(geber, akzeptiert, "testtest")
 
-      for (var i = 0; i < akzeptiert.length; i++) {
-        var n = geber[i];
-        if(akzeptiert[i] != undefined){
-        datenbank.Spieler.websocket[n].send(JSON.stringify({ //wird an den spieler geschickt oder
-        type: "final",
-        data: {
-          accepted:akzeptiert[i]                  
-        }
-      }))}}
 
-    
-
-  }
-}
 
 //express
 export function startExpress() {
@@ -123,22 +65,17 @@ export function startExpress() {
   }
   }));
 
-let user_id
-  //login
-  function checkLoginAttempts(req, res, next) {
-    const MAX_LOGIN_ATTEMPTS = 3;
-    const BUFFER_PERIOD_DURATION = 5 * 60 * 1000; // 5 min
 
-    if (!req.session.failedLoginAttempts) {
-        req.session.failedLoginAttempts = 0;
-    }
 
-    if (req.session.bufferPeriod && req.session.bufferPeriod > Date.now()) {
-        const remainingTime = Math.ceil((req.session.bufferPeriod - Date.now()) / 1000);
-        return res.status(400).json(`Sie haben die maximalen Anmeldeversuche erreicht. Bitte versuchen Sie es in ${remainingTime} Sekunden erneut.`);
-    }
-
-    next();
+function checkLoginAttempts(req, res, next) {
+  if (!req.session.failedLoginAttempts) {
+      req.session.failedLoginAttempts = 0;
+  }
+  if (req.session.bufferPeriod && req.session.bufferPeriod > Date.now()) {
+      const remainingTime = Math.ceil((req.session.bufferPeriod - Date.now()) / 1000);
+      return res.status(400).json(`Sie haben die maximalen Anmeldeversuche erreicht. Bitte versuchen Sie es in ${remainingTime} Sekunden erneut.`);
+  }
+  next();
 }
 
 app.post("/login", checkLoginAttempts, (req, res) => {
@@ -150,15 +87,16 @@ app.post("/login", checkLoginAttempts, (req, res) => {
         return res.status(400).json(`Fehlende Anmeldedaten`);
     }
 
-    const user_id = datenbank.Lehrer.benutzername.indexOf(req.body.name);
-
-    if (user_id !== -1 && crypto.createHash('sha256').update(req.body.password).digest('hex') === datenbank.Lehrer.kennwort[user_id]) {
+    
+    let host = getHost()
+    const HostID = host.username.indexOf(req.body.name);
+    //checkt ob das Passwort existiert und ob es mit dem echten verschlüsselten übereinstimmt
+    if (HostID !== -1 && crypto.createHash('sha256').update(req.body.password).digest('hex') === host.password[HostID]) {//Checks if Password exists and if it corresponds with the real Password
         req.session.failedLoginAttempts = 0;
+        req.session.user_id = host.HostID[HostID];
 
-        req.session.userId = datenbank.Lehrer.LehrerID[user_id];
-
-        return res.status(200).json(datenbank.Lehrer.benutzername[user_id]);
-    } else {
+        return res.status(200).json(host.username[HostID]);
+    } else { //if something is wrong with the Password LoginAttempts gets altered
         if (!req.session.failedLoginAttempts) {
             req.session.failedLoginAttempts = 1;
         } else {
@@ -166,525 +104,343 @@ app.post("/login", checkLoginAttempts, (req, res) => {
         }
 
         const remainingAttempts = MAX_LOGIN_ATTEMPTS - req.session.failedLoginAttempts;
-        if (req.session.failedLoginAttempts >= MAX_LOGIN_ATTEMPTS) {
+        if (req.session.failedLoginAttempts >= MAX_LOGIN_ATTEMPTS) { //checks if any LoginAttempts remain
             req.session.bufferPeriod = Date.now() + BUFFER_PERIOD_DURATION;
             return res.status(401).json(`Sie haben die maximalen Anmeldeversuche erreicht. Bitte versuchen Sie es in 5 Minuten erneut.`);
         }
 
-        return res.status(401).json(`Falsche Anmeldedaten, übrige Versuche: ${remainingAttempts}`);
+        return res.status(401).json(`Falsche Anmeldedaten, übrige Versuche: ${remainingAttempts}`); //sends how many LoginAttempts remain if password is wrong
     }
 });
 
-
-
-  
-
-
 app.post("/register", (req, res) => {
-    if (!req.body.name || !req.body.password) {
+  let host = getHost()
+    if (!req.body.name || !req.body.password) {// Checks if data is missing
         return res.status(400).json("Fehlende Anmeldedaten");
     }
-    if (datenbank.Lehrer.benutzername.includes(req.body.name)) {
+    if (host.username.includes(req.body.name)) {// Checks if username is already taken
         return res.status(409).json("Benutzername bereits vergeben");
     }
-    if (req.body.password.length < 7){
+    if (req.body.password.length < 7){//
       return res.status(400).json("Passwort muss mindestens 7 Zeichen lang sein")
     }
 
-    datenbank.Lehrer.LehrerID.push(datenbank.Lehrer.LehrerID.length);
-    datenbank.Lehrer.benutzername.push(req.body.name);
-    datenbank.Lehrer.kennwort.push(crypto.createHash('sha256').update(req.body.password).digest('hex'));
-    const user_id = datenbank.Lehrer.benutzername.indexOf(req.body.name);
-    req.session.userId = datenbank.Lehrer.LehrerID[user_id];
+    createHost(req.body.name, req.body.password)//creates a new Host
+
+    const HostID = host.username.indexOf(req.body.name); // gets the ID of the newly created host
+    req.session.user_id = host.HostID[HostID]; // inserts the HostID into the session
     
     res.status(200).json(req.body.name);
 });
 
-  
-  let counter = 0
+app.post("/lobby/create", (req, res) => { 
+    if (req.session.user_id !== undefined && req.session.cookie.maxAge >Date.now()){
 
-  //jedes mal wenn wir vom Frontend eine Anfrage für eine Neue Lobby erhalten, /lobby/create   -----
-  app.post("/lobby/create", (req, res) => {
-    if (req.session.userId !== undefined && req.session.cookie.maxAge >Date.now()){
-    
+    let newCode = Math.floor(Math.random() * 90000) + 10000 //generates a new Lobbycode
 
-    //es wird ein neuer Lobbycode generiert
-    let newCode = Math.floor(Math.random() * 90000) + 10000
+    let lobby = getLobby()
+    console.log(getLobby())
+    lobby.lobbycode.push(newCode) //saves the Lobbycode for later use
+    setLobby(lobby)
 
-    //und in der Datenbank gespeichert
-    datenbank.Lobby.lobby_kennwort.push(newCode)
+    res.status(200).json(newCode) // sends the code to the Frontend
 
-    //sende den generierten lobbycode an das frontend
-    res.status(200).json(newCode)
-
-    //initialisiere Neuen Datenbank Tuppel
-    datenbank.Lobby.LobbyID[datenbank.Lobby.LobbyID.length] = datenbank.Lobby.LobbyID.length
-    datenbank.Lobby.wirt.push(datenbank.Lehrer.LehrerID[0])
-    datenbank.Lobby.spieler_id.push([])
-    datenbank.Lobby.spielID.push([])
-    datenbank.Spiel.runden_id.push([])
-    datenbank.Lobby.open.push(true)
-    counter = 0
-    datenbank.Lobby.name.push(req.body.name)
+    createLobby(req.session.user_id, req.body.name) //Creates new Lobby
+    console.log(req.body.name)
   }else{
     res.status(401).json("Nicht angemeldet")
   }
   })
+
+  
   app.get("/check_login", (req, res) =>{
-  if(req.session.userId === undefined){
+  if(req.session.user_id === undefined){ //checks if user is logged in
     res.status(401).json("Nicht angemeldet")
   } else {
-    res.status(200).json(datenbank.Lehrer.benutzername[req.session.userId])
+    let host = getHost()
+    res.status(200).json(host.username[req.session.user_id])
   } 
-  
   })
 
   app.get('/logout', (req, res) => {
-    delete req.session.userId
+    delete req.session.user_id //loggs the User out by deleting the HostID out of their session
     res.status(200).json('Abgemeldet')
   })
-  
-  // Hier werden Daten aus der Datenbank exportiert (heruntergeladen) /lobby/:00000/export   -----
-  // Speichere den Code der Anfrage in eine Variabel  
-  // Datenbank nach Code durchsuchen 
-  // Code Existiert nicht:
-    // Wird 404 geschickt
-  // ist der Code vorhanden:
-    // hohle daten aus der datenbank mit dem Lobbycode
-    // lade es zum nutzer so
-   var wss = expressWss.getWss('/lobby/:lobby');
-  // Das ist ein Websocket/Lobbie   /lobby/:00000   -----
-  app.ws('/lobby/:lobby', function(ws, req) {
-    //initialisiere Variabeln
-    let runden
-    let lobbycode
-    let runde
-    let spieler_id
-    counter = counter +1
-    let dieses_angebot
+   
+  app.ws('/lobby/:lobby', function(ws, req) {  
+    console.log("trying to connect")
+    let lobbycode //initiates relevant Variables
+    let round
+    let player_id
+    let this_offer
+    let player_offer
+    let lobby
+    let game
+    let players
+    let rounds
+    let current_game
+    let offers
+    let offer_info
     
-    //Verifiziert den Lobbycode
-    if(datenbank.Lobby.lobby_kennwort.includes(parseInt(req.params.lobby))){
-      //Setzt lobbycode(wichtigste Variabel)
-      lobbycode = datenbank.Lobby.lobby_kennwort.indexOf(parseInt(req.params.lobby))
-      datenbank.Lobby.open[lobbycode] == true
-      console.log(datenbank.Lehrer, "jeeeeeee")
-
-    } else {
-      
-      
+    lobby = getLobby()
+    if(lobby.lobbycode.includes(parseInt(req.params.lobby))){ //verifies the code entered by the user
+      lobbycode = lobby.lobbycode.indexOf(parseInt(req.params.lobby)) // sets variable lobbycode for easy use
+      lobby.open[lobbycode] == true // this allows users to joint the lobby
+      setLobby(lobby)
+      console.log("success")
+    } else { // if the lobbycode entered by the user did not exist theire connection gets cut
+      console.log("wrong code from player")
       ws.close()
       return
     }
-    datenbank.Lobby.open[lobbycode]==true
-    //Kontrolliert Ob es Die Lehrperson ist
-    if(counter == 1){
-      //Füllt den Lehrer Table
-      datenbank.Lobby.host_websocket.push(ws)
-      console.log(datenbank.Lehrer, "jeeeeeee")
+
+    lobby.open[lobbycode]==true
+    
+    if(lobby.host_websocket[lobbycode] == undefined){ // counter will only be 1 for the host
+      
+      lobby.host_websocket.push(ws)
+      console.log("Host created lobby")
 
     }
-    datenbank.Lobby.gamestate[lobbycode] = "pre"
-    let amount
-    //Jeder ausser die Lehrperson updated den Playercount und wird auf Pause gesetzt
-    console.log(ws !== datenbank.Lobby.host_websocket[lobbycode]&&datenbank.Lobby.open[lobbycode]===true)
-    console.log(datenbank.Lobby.open[lobbycode])
-    if(ws !== datenbank.Lobby.host_websocket[lobbycode]&&datenbank.Lobby.open[lobbycode]===true){
-      console.log("Schüler ist beigetereteten ")
-      let spieler = datenbank.Spieler.spieler_id.length
-      datenbank.Spieler.spieler_id.push(spieler)
-      spieler_id=spieler
-      datenbank.Spieler.websocket.push(ws)
-      datenbank.Lobby.spieler_id[lobbycode].push(spieler)
-      ws.send(JSON.stringify({
-        type: "wait",
-        data: {
-          class: datenbank.Lobby.name[lobbycode]
-        }
-      }))
-      //Lehrperson Playercount wird geupdated
-      datenbank.Lobby.host_websocket[lobbycode].send(JSON.stringify({
-        type: 'new_player',
-      }))
+    lobby.gamestate[lobbycode] = "pre" // "pre" signals that no game has started jet
+    setLobby(lobby)
+    
+    console.log(ws !== lobby.host_websocket[lobbycode]&&lobby.open[lobbycode]===true,ws !== lobby.host_websocket[lobbycode],lobby.open[lobbycode]===true)
+    if(ws !== lobby.host_websocket[lobbycode]&&lobby.open[lobbycode]===true){ // checks if lobby is still open for entry and if the user is not the host
+      console.log("Player has joined ")
+
+      player_id = createPlayer(ws, lobbycode) //creates new player
       
     }
     
-    ;
-    let angebot
-    // if nachricht == "spiel startet":
-      // Alle aus der Lobby erhalten Signal: "Spiel Startet"
-      // nächste runde in die datenbank
-    //place_offer answer_offer
     ws.on("close", function(msg) {
-      try{
-        //wenn Lehrer Geleaved ist, jedem Spieler exit schicken und lobbycode zerstören
-      if(ws == datenbank.Lobby.host_websocket[lobbycode]){
-        for (var i = 0; i < datenbank.Lobby.spieler_id[lobbycode].length; i++) {
-          var g = datenbank.Lobby.spieler_id[lobbycode][i];
-          datenbank.Spieler.websocket[g].send(JSON.stringify({ 
-          type: "exit"
-        }))}
-        datenbank.Lobby.lobby_kennwort[lobbycode] = undefined      
-      }
-
-      
-      if(ws != datenbank.Lobby.host_websocket[lobbycode]){
-        let index = datenbank.Lobby.spieler_id[lobbycode].indexOf(spieler_id)
-        let indexA
-        if(datenbank.Lobby.gamestate[lobbycode] == "pre"){
-          datenbank.Lobby.spieler_id[lobbycode].splice(index,1)
-        }
-        if(angebot!=undefined){
-        if(datenbank.Runden.angebot_id[lobbycode][angebot]!=undefined){
-          indexA = datenbank.Runden.angebot_id[runde-1].indexOf(angebot)
-          if(datenbank.Lobby.spieler_id.length==datenbank.Runden.angebot_id[runde-1].length){
-          let aktuelle_angebote = datenbank.Runden.angebot_id[runde-1]
-          aktuelle_angebote.forEach(function(element){
-            if(datenbank.Angebote.angebot_nehmer[element]==spieler_id){
-              angebot = element
-            }
-          })
-          
-        }
-      }
-    }
-
-      if(datenbank.Lobby.spielID[lobbycode][datenbank.Lobby.spielID[lobbycode].length - 1] === !undefined){
-      runden = datenbank.Lobby.spielID[lobbycode][datenbank.Lobby.spielID[lobbycode].length - 1]
-        if(datenbank.Spiel.runden_id[runden][datenbank.Spiel.runden_id[runden].length - 1] === !undefined){
-        runden = datenbank.Spiel.runden_id[runden][datenbank.Spiel.runden_id[runden].length - 1]
-      }else{runden = 0}
-    }else{runden = 0}
-
-      if(datenbank.Runden.angebot_id[runden].length!= 0||undefined){
-      }
-      
-      
-      if (index !== -1 && datenbank.Lobby.spielID[lobbycode][datenbank.Lobby.spielID[lobbycode].length - 1]) {
-
-
-          datenbank.Lobby.spieler_id[lobbycode].splice(index, 1)
-          if(datenbank.Runden.angebot_id[lobbycode][angebot]!=undefined&&datenbank.Angebote.angebot_angenommen[dieses_angebot]==undefined){
-          datenbank.Runden.angebot_id[runde-1].splice(indexA, 1)
-
-          send_final(runde, "key")
-
-        }
-        if(datenbank.Lobby.spieler_id[lobbycode].length==datenbank.Runden.angebot_id[runden].length&&datenbank.Lobby.gamestate[lobbycode]=="offer"){
-          datenbank.Lobby.gamestate[lobbycode] = "answer_offer"
-        let temp = []
-        //let geber = []
-        //let angebote =[]
-        //angebote = datenbank.Runden.angebot_id[runde-1]
-        //angebote.forEach(function(element){
-        //  geber = datenbank.Angebote.
-        //})
-  
-        //temp wird gecleared
-        temp = []
-        //temp zeigt alle leute die abgegeben haben in chronologischer Reihenfolge
-        datenbank.Runden.angebot_id[runden].forEach(function(element) {
-          temp.push(datenbank.Angebote.angebot_geber[element])
-          }
-        )
-  
-        //die angebot_geber werden vermischt
-        temp = shuffle(temp)
-        temp.forEach(function(element) {
-          datenbank.Angebote.angebot_nehmer.push(element)
-          }
-        )
-        //alle angebot_IDs der Runde 
-        let angebote
-        angebote = []
-        angebote = datenbank.Runden.angebot_id[runden]
-  
-        //die vermischten angebot_geber werden in die angebot_nehmer gefüllt
-        for (var i = 0; i < temp.length; i++) {
-          datenbank.Angebote.angebot_nehmer[angebote[i]] = temp[i]
-        }
-  
-  
-        //alle angebot_nehmer bekommen die angebote der angebot geber
-        for (var i = 0; i < temp.length; i++) {
-          var n = temp[i];
-          datenbank.Spieler.websocket[n].send(JSON.stringify({ //wird an den spieler geschickt oder
-          type: "answer_offer",
-          data: {
-            amount: datenbank.Angebote.angebot_summe[angebote[i]]
-          }
-        }))}
-        datenbank.Lobby.gamestate[lobbycode] = "answer_offer"
-  
-          //schicke jedem message.type = answer_offer
-        }
-      }
-        
-        if(datenbank.Angebote.angebot_angenommen[dieses_angebot]==undefined || datenbank.Lobby.gamestate[lobbycode]=="new_round"){
-          if(dieses_angebot !== undefined && datenbank.Angebote.angebot_nehmer[datenbank.Runden.angebot_id[runde-1][0]]== undefined){
-        datenbank.Lobby.host_websocket[lobbycode].send(JSON.stringify(
-          {
-            type: "undo_offer",
-            data:{
-              amount: amount
-            }
-          }
-        ))}
-        datenbank.Lobby.host_websocket[lobbycode].send(JSON.stringify({ //wird an den spieler geschickt oder
-          type: "total_players",
-          data: {
-            amount: (datenbank.Lobby.aktive_spieler && datenbank.Lobby.aktive_spieler[lobbycode]) ? datenbank.Lobby.aktive_spieler[lobbycode] : datenbank.Lobby.spieler_id[lobbycode].length 
-          }
-        }))
-      }
-      
-    }
-
-
-    if(runde==!undefined){ 
-      let angebote2 = datenbank.Runden.angebot_id[runde-1]
-      let antworten2 = []
-      for (var i = 0; i < angebote2.length; i++) {
-        var n = angebote2[i];
-        antworten2.push(datenbank.Angebote.angebot_angenommen[n])
-      }
-      console.log(antworten2)
-      console.log(!antworten2.includes(undefined))
-      if(!antworten2.includes(undefined)){
-        let geber = []
-        let akzeptiert = []
-        datenbank.Runden.angebot_id[runde-1].forEach(function(element) {
-          geber.push(datenbank.Angebote.angebot_geber[element])
-          akzeptiert.push(datenbank.Angebote.angebot_angenommen[element])
-          })
-          console.log(geber, akzeptiert)
-          for (var i = 0; i < akzeptiert.length; i++) {
-            var n = geber[i];
-            datenbank.Spieler.websocket[n].send(JSON.stringify({ //wird an den spieler geschickt oder
-            type: "final",
-            data: {
-              accepted:akzeptiert[i]                  
-            }
-          }))}
-
-        
-
-      }
-    }
-
-    }catch (error) {
-      console.log("Error:", error)
-    }
+      close(send_final, lobbycode, player_id, player_offer, offer_info, this_offer, shuffle, ws)
     })
-    let items
-
-
-
-
-
+    let players_to_process
 
     ws.on("message", function(msg) {
-      try{
+      console.log(msg)
+      try{      
+        let message = JSON.parse(msg)
+        game = getGame()
+        lobby = getLobby()
+        console.log(game.RoundID[lobby.GameID[lobbycode][lobby.GameID[lobbycode].length - 1]]!== undefined)
+        if(message.type !== undefined){
 
-      if(datenbank.Spiel.runden_id[datenbank.Lobby.spielID[lobbycode][datenbank.Lobby.spielID[lobbycode].length - 1]]!== undefined){
-      runde = datenbank.Lobby.spielID[lobbycode][datenbank.Lobby.spielID[lobbycode].length - 1]
-      runde = datenbank.Spiel.runden_id[runde][datenbank.Spiel.runden_id[runde].length - 1]+1}
 
-      let message = JSON.parse(msg)
 
-      //switch Case der alle Spielstatusse unterscheiden kann
       switch(message.type){
-        
         case "start_round":
-          runde = datenbank.Runden.runden_id.length
-          datenbank.Lobby.aktive_spieler[lobbycode] = undefined
-          datenbank.Lobby.open[lobbycode] = false
+          console.log("start round")
+          lobby = getLobby()
+          rounds = getRound()
+          game = getGame()
+          players = getPlayer()
+          console.log(1,rounds, lobby, game, players)
+          round = rounds.RoundID.length
 
-          //findet Heraus in welchem Spiel wir uns Befinden
-          let spiel2 = datenbank.Lobby.spielID[lobbycode][datenbank.Lobby.spielID[lobbycode].length-1]
+          if (lobby.active_players[lobbycode] != undefined){
+            lobby.active_players[lobbycode] = undefined // if player actions have previously been skipped by the host, this line will reinstate, that all players are participateing
+          }
+          current_game = lobby.GameID[lobbycode][lobby.GameID[lobbycode].length-1] //finds out the current game
 
-          //findet heraus wie Viele runden existieren
-          let temp = datenbank.Runden.runden_id.length
+          let all_rounds = rounds.RoundID.length //generates the next RoundID
+          console.log(2,rounds, lobby, game, players)
 
-          //Datenbank wird aktualisiert
-          datenbank.Runden.runden_id.push(temp)
-          datenbank.Spiel.runden_id[spiel2].push(temp)
-          datenbank.Runden.angebot_id.push([])
+          rounds.RoundID.push(all_rounds) //updates database
+          game.RoundID[current_game].push(all_rounds)
+          rounds.OfferID.push([])
+          console.log(3,rounds, lobby, game, players)
 
-          //
-          items = datenbank.Lobby.spieler_id[lobbycode]
+          players_to_process = lobby.PlayerID[lobbycode]
 
-          //aktualisiert den gamestate, für den Fall eines "skip"s
-          datenbank.Lobby.gamestate[lobbycode] = "new_round"
-          //schickt allen spielern alle infos
-          for (var i = 0; i < items.length; i++) {
-            var n = items[i];
+          lobby.gamestate[lobbycode] = "new_round" // changes the gamestate to signal a fresh round starting
 
-            datenbank.Spieler.websocket[n].send(JSON.stringify({
+          setLobby(lobby)
+          setRound(rounds)
+
+          console.log(players_to_process)
+          for (var i = 0; i < players_to_process.length; i++) { //iterates through all players to send info
+            var n = players_to_process[i];
+            players.websocket[n].send(JSON.stringify({
               type: 'new_round',
               data:{
-                game: datenbank.Lobby.spielID[lobbycode].length,
-                round: datenbank.Spiel.runden_id[spiel2].length,
-                name: datenbank.Spiel.spiel_name[datenbank.Spiel.spiel_id.length-1]
+                game: lobby.GameID[lobbycode].length,
+                round: game.RoundID[current_game].length,
+                name: game.game_name[game.GameID.length-1] //as this is the newest game in the database we can simply get the newest game
               }
             }))
-            datenbank.Spieler.websocket[n].send(JSON.stringify({ //wird an den spieler geschickt oder
+            players.websocket[n].send(JSON.stringify({ 
               type: "place_offer"
             }))
-        }
+          }
 
-        datenbank.Lobby.host_websocket[lobbycode].send(JSON.stringify({
+        lobby.host_websocket[lobbycode].send(JSON.stringify({
           type: 'new_round',
           data:{
-            game: datenbank.Lobby.spielID[lobbycode].length,
-            round: datenbank.Spiel.runden_id[spiel2].length,
-            name: datenbank.Spiel.spiel_name[datenbank.Spiel.spiel_id.length-1]
+            game: lobby.GameID[lobbycode].length,
+            round: game.RoundID[current_game].length,
+            name: game.game_name[game.GameID.length-1] //as this is the newest game in the database we can simply get the newest game
           }
         }))
         
-        datenbank.Lobby.host_websocket[lobbycode].send(JSON.stringify({ //wird an den spieler geschickt oder
+        lobby.host_websocket[lobbycode].send(JSON.stringify({ 
           type: "total_players",
           data: {
-            amount: datenbank.Lobby.spieler_id[lobbycode].length
+            amount: lobby.PlayerID[lobbycode].length
           }
         }))
         
           break
-        case "crash":
-          console.log(hallo)
+        case "crash": // case for testing purposes
+          console.log(hallo) // log for testing purposes
           break
         case "start_game":
-          runde = datenbank.Runden.runden_id.length
-          datenbank.Lobby.aktive_spieler[lobbycode] = undefined
-          datenbank.Lobby.open[lobbycode] = false
-          console.log(datenbank.Lobby.open[lobbycode])
-          //aktualisiert die Datenbank
-          datenbank.Lobby.gamestate[lobbycode] = "new_round"
-          let spiel_id = datenbank.Spiel.spiel_id.length
-          datenbank.Spiel.runden_id.push([])
-          datenbank.Spiel.spiel_id.push(spiel_id)
-          datenbank.Lobby.spielID[lobbycode].push(spiel_id)
-          datenbank.Runden.runden_id.push(runde)
-          datenbank.Spiel.runden_id[spiel_id].push(runde)
-          datenbank.Runden.angebot_id.push([])
-          datenbank.Spiel.spiel_name.push(message.data.name)
-          
-          //findet heraus in welchem Spiel wir uns befinden
-          let spiel = datenbank.Lobby.spielID[lobbycode][datenbank.Lobby.spielID[lobbycode].length-1]
+          lobby = getLobby()
+          rounds = getRound()
+          game = getGame()
+          players = getPlayer()
 
-          items = datenbank.Lobby.spieler_id[lobbycode]
+          round = rounds.RoundID.length
+          lobby.active_players[lobbycode] = undefined
+          lobby.open[lobbycode] = false //closes the lobby so no more players can join
 
-          //schickt allen Spielern die Informationen, die sie brauchen
-          for (var i = 0; i < items.length; i++) {
-            var n = items[i];
-            datenbank.Spieler.websocket[n].send(JSON.stringify({
+          lobby.gamestate[lobbycode] = "new_round" // changes the gamestate to signal a fresh round starting
+          let player_count = game.GameID.length
+          game.RoundID.push([])
+          game.GameID.push(player_count)
+          lobby.GameID[lobbycode].push(player_count)
+          rounds.RoundID.push(round)
+          game.RoundID[player_count].push(round)
+          rounds.OfferID.push([])
+          game.game_name.push(message.data.name)
+
+          current_game = lobby.GameID[lobbycode][lobby.GameID[lobbycode].length-1]
+
+          players_to_process = lobby.PlayerID[lobbycode]
+
+          setLobby(lobby)
+          setRound(rounds)
+          setGame(game)
+          console.log(game, game.game_name[current_game],message.data.name, "sus")
+          for (var i = 0; i < players_to_process.length; i++) { //iterates through all players to send info
+            var n = players_to_process[i];
+            players.websocket[n].send(JSON.stringify({
               type: 'new_round',
               data:{
-                game: datenbank.Lobby.spielID[lobbycode].length,
-                round: datenbank.Spiel.runden_id[spiel].length,
-                name: datenbank.Spiel.spiel_name[spiel_id]
+                game: lobby.GameID[lobbycode].length,
+                round: game.RoundID[current_game].length,
+                name: message.data.name
               }
             }))
-          datenbank.Spieler.websocket[n].send(JSON.stringify({ //wird an den spieler geschickt oder
+          players.websocket[n].send(JSON.stringify({ 
             type: "place_offer"
           }))
         }
-          datenbank.Lobby.host_websocket[lobbycode].send(JSON.stringify({
+          lobby.host_websocket[lobbycode].send(JSON.stringify({
             type: 'new_round',
             data:{
-              game: datenbank.Lobby.spielID[lobbycode].length,
-              round: datenbank.Spiel.runden_id[spiel].length,
+              game: lobby.GameID[lobbycode].length,
+              round: game.RoundID[current_game].length,
               name: message.data.name
             }
           }))
-          datenbank.Lobby.host_websocket[lobbycode].send(JSON.stringify({ //wird an den spieler geschickt oder
+          lobby.host_websocket[lobbycode].send(JSON.stringify({ 
             type: "total_players",
             data: {
-              amount: datenbank.Lobby.spieler_id[lobbycode].length
+              amount: getLobby().PlayerID[lobbycode].length
             }
           }))
           
+          
           break
         case "offer":
+          lobby = getLobby()
+          rounds = getRound()
+          game = getGame()
+          players = getPlayer()
+          offers = getOffer()
+          let amount
+
           if([0, 10, 20, 30, 40, 50, 60, 70, 80, 90, 100].includes(message.data.amount)){
-          //aktualisiert datenbank
-          datenbank.Lobby.gamestate[lobbycode] = "offer"
-          angebot = datenbank.Angebote.angebot_id.length
-          datenbank.Runden.angebot_id[runde-1].push(datenbank.Angebote.angebot_id.length)
-          datenbank.Angebote.angebot_id.push(datenbank.Angebote.angebot_id.length)
-          datenbank.Angebote.angebot_summe.push(JSON.parse(msg).data.amount)
-          datenbank.Angebote.angebot_geber.push(spieler_id)
+            round = lobby.GameID[lobbycode][lobby.GameID[lobbycode].length - 1]
+            round = game.RoundID[round][game.RoundID[round].length - 1]+1
           
-          //Schickt dem Frontend wie viel der Spieler angeboten haben
-          items = datenbank.Lobby.spieler_id[lobbycode]
-          datenbank.Lobby.host_websocket[lobbycode].send(JSON.stringify({
+          let all_offers
+          lobby.gamestate[lobbycode] = "offer"
+          all_offers = offers.OfferID.length
+          player_offer = offers.OfferID.length
+          rounds.OfferID[round-1].push(offers.OfferID.length)
+          offers.OfferID.push(offers.OfferID.length)
+          offers.offer_sum.push(JSON.parse(msg).data.amount)
+          offers.giver.push(player_id)
+          console.log(offers.giver, player_id);
+
+          setRound(rounds)
+          setOffer(offers)
+          
+          players_to_process = lobby.PlayerID[lobbycode]
+          lobby.host_websocket[lobbycode].send(JSON.stringify({ // lets the host know how many palyers have given an offer
             type: 'new_offer',
             data:{
               amount:message.data.amount
             }
           }))
           amount = message.data.amount
-          //wenn nicht jeder abgegeben hat wird dem Spieler "wait" geschickt
-          console.log(datenbank.Runden.angebot_id) 
-          if(datenbank.Lobby.spieler_id[lobbycode].length!=datenbank.Runden.angebot_id[runde-1].length){
+
+          if(lobby.PlayerID[lobbycode].length!=rounds.OfferID[round-1].length){
+            
+            offer_info = "offer given" // saves the info that this websocket has sent an offer
             
             ws.send(JSON.stringify({
               type: "wait"
               
             }))
-            dieses_angebot = "a"
-          }else{
-            datenbank.Lobby.gamestate[lobbycode] = "answer_offer"
+          }else{ // happens when everyone has given an offer
+            lobby.gamestate[lobbycode] = "answer_offer"
             
-          let temp = []
-          //let geber = []
-          //let angebote =[]
-          //angebote = datenbank.Runden.angebot_id[runde-1]
-          //angebote.forEach(function(element){
-          //  geber = datenbank.Angebote.
-          //})
+            
+          let data_to_shuffle = []
 
-          //temp wird gecleared
-          temp = []
-          //temp zeigt alle leute die abgegeben haben in chronologischer Reihenfolge
-          datenbank.Runden.angebot_id[runde-1].forEach(function(element) {
-            temp.push(datenbank.Angebote.angebot_geber[element])
+          data_to_shuffle = []
+          rounds.OfferID[round-1].forEach(function(element) {
+            data_to_shuffle.push(offers.giver[element]) // shows in chronological order who gave an offer
+            console.log(offers.giver, getOffer().giver)
             }
           )
 
-          //die angebot_geber werden vermischt
-          temp = shuffle(temp)
-          temp.forEach(function(element) {
-            datenbank.Angebote.angebot_nehmer.push(element)
+          data_to_shuffle = shuffle(data_to_shuffle) // shuffles the player's IDs
+          data_to_shuffle.forEach(function(element) {
+            offers.reciever.push(element) // declares who will recieve the offers
             }
           )
-          //alle angebot_IDs der Runde 
-          let angebote
-          angebote = []
-          angebote = datenbank.Runden.angebot_id[runde-1]
+          
+          let every_offer
+          every_offer = []
+          every_offer = rounds.OfferID[round-1]
 
-          //die vermischten angebot_geber werden in die angebot_nehmer gefüllt
-          for (var i = 0; i < temp.length; i++) {
-            datenbank.Angebote.angebot_nehmer[angebote[i]] = temp[i]
+          for (var i = 0; i < data_to_shuffle.length; i++) {
+            offers.reciever[every_offer[i]] = data_to_shuffle[i] // updates the database with shuffeled data
           }
-
-
-          //alle angebot_nehmer bekommen die angebote der angebot geber
-          for (var i = 0; i < temp.length; i++) {
-            var n = temp[i];
-            datenbank.Spieler.websocket[n].send(JSON.stringify({ //wird an den spieler geschickt oder
+          console.log(data_to_shuffle)
+          for (var i = 0; i < data_to_shuffle.length; i++) { // itterates through every player
+            var n = data_to_shuffle[i];
+            players.websocket[n].send(JSON.stringify({ 
             type: "answer_offer",
             data: {
-              amount: datenbank.Angebote.angebot_summe[angebote[i]]
+              amount: offers.offer_sum[every_offer[i]] // declares
             }
           }))}
-          datenbank.Lobby.gamestate[lobbycode] = "answer_offer"
+          lobby.gamestate[lobbycode] = "answer_offer"
+          setRound(rounds)
+          setOffer(offers)
+          setLobby(lobby)
 
             //schicke jedem message.type = answer_offer
           }
-        }else{
+          }else{
           
-          ws.send(JSON.stringify({ //wird an den spieler geschickt oder
+          ws.send(JSON.stringify({ // if the offer given was a bad value the player will be asked to try giving an offer again through this message
             type: "place_offer",
             data: {
               error: "Ungültiges Angebot"
@@ -696,183 +452,184 @@ app.post("/register", (req, res) => {
           break
         case "accept_offer":
 
-          //findet das aktuelle angebot
+        lobby = getLobby()
+        rounds = getRound()
+        game = getGame()
+        players = getPlayer()
+        offers = getOffer()
+        offer_info = "offer evaluatede"
+
+          offers.offer_accepted[offers.offer_accepted.lastIndexOf(player_id)] = true
+          setOffer(offers)
           
-          //aktualisiert die Datenbank
-          datenbank.Angebote.angebot_angenommen[datenbank.Angebote.angebot_nehmer.lastIndexOf(spieler_id)] = true
-          
-          let aktuelle_angebote = datenbank.Runden.angebot_id[runde-1]
-          aktuelle_angebote.forEach(function(element){
-            if(datenbank.Angebote.angebot_nehmer[element]==spieler_id){
-              dieses_angebot = element
+          this_offer = rounds.OfferID[round-1]
+          this_offer.forEach(function(element){
+            if(offers.reciever[element]==player_id){
+              this_offer = element
             }
           })
             //sendet dem Spieler "wait" und dem Lehrer die Daten
             ws.send(JSON.stringify({
               type: "wait"
             }))
-            datenbank.Lobby.host_websocket[lobbycode].send(JSON.stringify({
+            lobby.host_websocket[lobbycode].send(JSON.stringify({
               type:"offer_response",
               data:{
-                amount: datenbank.Angebote.angebot_summe[dieses_angebot],
+                amount: offers.offer_sum[this_offer],
                 accepted: true,
               }            }))
 
-            send_final(runde)
-
-
+            send_final(round)
 
           break
           case "decline_offer": 
-            //sihe accept_offer
+
+          lobby = getLobby()
+          rounds = getRound()
+          game = getGame()
+          players = getPlayer()
+          offers = getOffer()
+          offer_info = "offer evaluatede"
+
+            offers.offer_accepted[offers.offer_accepted.lastIndexOf(player_id)] = false;
+            setOffer(offers)
             
-            datenbank.Angebote.angebot_angenommen[datenbank.Angebote.angebot_nehmer.lastIndexOf(spieler_id)] = false;
-            
-          let aktuelle_angebote2 = datenbank.Runden.angebot_id[runde-1]
-          let dieses_angebot2
-          aktuelle_angebote2.forEach(function(element){
-            if(datenbank.Angebote.angebot_nehmer[element]==spieler_id){
-              dieses_angebot2 = element
+          let offer_here = rounds.OfferID[round-1]
+          let offer_now
+          offer_here.forEach(function(element){
+            if(offers.reciever[element]==player_id){
+              offer_now = element
             }
           })
           
           ws.send(JSON.stringify({
             type: "wait"
           }))
-          datenbank.Lobby.host_websocket[lobbycode].send(JSON.stringify({
+          lobby.host_websocket[lobbycode].send(JSON.stringify({
             type:"offer_response",
             data:{
-              amount:datenbank.Angebote.angebot_summe[dieses_angebot2],
+              amount:offers.offer_sum[offer_now],
               accepted: false
             }
           }))
 
-          send_final(runde)
+          send_final(round)
           
 
 
           break
           case "skip":
-
-
+            lobby = getLobby()
+            rounds = getRound()
+            game = getGame()
+            players = getPlayer()
+            offers = getOffer()
           
-            if(ws === datenbank.Lobby.host_websocket){
-
+            if(ws != lobby.host_websocket[lobbycode]){
               return
             }
 
-
-
-            switch(datenbank.Lobby.gamestate[lobbycode]){
+            switch(lobby.gamestate[lobbycode]){ // when skip is sent, there are many different cases to be differentiated, based on the gamestate
               case "offer":
-                datenbank.Lobby.gamestate[lobbycode] = "answer_offer"
+                lobby.gamestate[lobbycode] = "answer_offer"
                 
+                let players_to_be_shuffled=[]
+
+                players_to_be_shuffled = []
+                console.log(rounds.OfferID[round-1])
+                rounds.OfferID[round-1].forEach(function(element) {
+                  players_to_be_shuffled.push(offers.giver[element])
+                  }
+                )
+                let players_too_late
+                let everyone
+                players_too_late = []
+                for(var i = 0; i < lobby.PlayerID[lobbycode].length; i++){
+                  everyone = lobby.PlayerID[lobbycode][i]
+                  if(!players_to_be_shuffled.includes(everyone)){ // sorts through the players find, who out of everyone did not manage to give an offer
+                    players_too_late.push(everyone)
+                  }
+                }
+
+                players_to_be_shuffled = shuffle(players_to_be_shuffled)
+                players_to_be_shuffled.forEach(function(element) {
+                  offers.reciever.push(element)
+                  }
+                )
+                let angebote
+                angebote = []
+                angebote = rounds.OfferID[round-1]
 
 
-                let temp=[]
-          //let geber = []
-          //let angebote =[]
-          //angebote = datenbank.Runden.angebot_id[runde-1]
-          //angebote.forEach(function(element){
-          //  geber = datenbank.Angebote.
-          //})
+                for (var i = 0; i < players_to_be_shuffled.length; i++) {
+                  offers.reciever[angebote[i]] = players_to_be_shuffled[i]
+                }
 
-          temp = []
-          datenbank.Runden.angebot_id[runde-1].forEach(function(element) {
-            temp.push(datenbank.Angebote.angebot_geber[element])
-            }
-          )
-          let enten
-          let mensch
-          enten = []
-          for(var i = 0; i < datenbank.Lobby.spieler_id[lobbycode].length; i++){
-            mensch = datenbank.Lobby.spieler_id[lobbycode][i]
-            if(!temp.includes(mensch)){
-              enten.push(mensch)
-            }
-          }
-
-
-          temp = shuffle(temp)
-          temp.forEach(function(element) {
-            datenbank.Angebote.angebot_nehmer.push(element)
-            }
-          )
-          let angebote
-          angebote = []
-          angebote = datenbank.Runden.angebot_id[runde-1]
-
-
-          for (var i = 0; i < temp.length; i++) {
-            datenbank.Angebote.angebot_nehmer[angebote[i]] = temp[i]
-          }
-
-          for (var i = 0; i < temp.length; i++) {
-            var n = temp[i];
-            datenbank.Spieler.websocket[n].send(JSON.stringify({
-            type: "answer_offer",
-            data: {
-              amount: datenbank.Angebote.angebot_summe[angebote[i]]
-            }
-          }))}
-          for (var i = 0; i < enten.length; i++) {
-            var n = enten[i];
-            datenbank.Spieler.websocket[n].send(JSON.stringify({ 
-            type: "wait"
-          }))}
-          datenbank.Lobby.host_websocket[lobbycode].send(JSON.stringify({ 
-            type: "total_players",
-            data: {
-              amount: temp.length
-            }
-          }))
-          datenbank.Lobby.aktive_spieler[lobbycode] = temp.length
+                for (var i = 0; i < players_to_be_shuffled.length; i++) {
+                  var n = players_to_be_shuffled[i];
+                  players.websocket[n].send(JSON.stringify({
+                  type: "answer_offer",
+                  data: {
+                    amount: offers.offer_sum[angebote[i]]
+                  }
+                }))}
+                for (var i = 0; i < players_too_late.length; i++) {
+                  var n = players_too_late[i];
+                  players.websocket[n].send(JSON.stringify({ 
+                  type: "wait"
+                }))}
+                lobby.host_websocket[lobbycode].send(JSON.stringify({ 
+                  type: "total_players",
+                  data: {
+                    amount: players_to_be_shuffled.length
+                  }
+                }))
+                lobby.active_players[lobbycode] = players_to_be_shuffled.length // tells us how many players with offers given are left
           
+                setLobby(lobby)
+                setOffer(offers)
+                setRound(rounds)
 
               break
               case "answer_offer":
               console.log("answer_offer skip")
-              for (var i = 0; i < datenbank.Lobby.spieler_id[lobbycode].length; i++) {
-                var n = datenbank.Lobby.spieler_id[lobbycode][i];
-                datenbank.Spieler.websocket[n].send(JSON.stringify({ //wird an den spieler geschickt oder
+              for (var i = 0; i < lobby.PlayerID[lobbycode].length; i++) { // sends every player a wait
+                var n = lobby.PlayerID[lobbycode][i];
+                players.websocket[n].send(JSON.stringify({ 
                 type: "wait"
               }))}
 
-                send_final(runde, "key")
+                send_final(round, "key") // will let the players know wheather or not theire offers have been accepted
 
               break
             }
           
-
           break
-          case ("exit"):
-            
-            for (var i = 0; i < datenbank.Lobby.spieler_id[lobbycode].length; i++) {
-              var g = datenbank.Lobby.spieler_id[lobbycode][i];
-              datenbank.Spieler.websocket[g].send(JSON.stringify({ 
-              type: "exit"
-            }))}
-            datenbank.Lobby.lobby_kennwort[lobbycode] = undefined
+          case ("exit"): 
+          lobby = getLobby()
+          players = getPlayer()
+          for (var i = 0; i < lobby.PlayerID[lobbycode].length; i++) { // lets everyone know that no more games will happen 
+            var g = lobby.PlayerID[lobbycode][i];
+            players.websocket[g].send(JSON.stringify({ 
+            type: "exit"
+          }))}
+          lobby.lobbycode[lobbycode] = undefined // destroys the lobbycode
+          setLobby(lobby)
           break
       
 
         
 
       }
-  }catch (error) {
+  }}catch (error) {
     console.log("Error:", error)
   }})
-
-        
   })
 
   
   app.get('/*', (req, res, next) => {
     res.sendFile(path.join(path.resolve('.'), 'frontend', 'build', '/index.html'))
   })
-
-  
-  
   return app
 }
 
