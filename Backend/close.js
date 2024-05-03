@@ -1,18 +1,11 @@
 import { getLobby } from './datenbank_functiones.js';
-import { getHost } from './datenbank_functiones.js';
 import { getGame } from './datenbank_functiones.js';
 import { getRound } from './datenbank_functiones.js';
 import { getOffer } from './datenbank_functiones.js';
 import { getPlayer } from './datenbank_functiones.js';
 import { setLobby } from './datenbank_functiones.js';
-import { setHost } from './datenbank_functiones.js';
-import { setGame } from './datenbank_functiones.js';
 import { setRound } from './datenbank_functiones.js';
-import { setOffer } from './datenbank_functiones.js';
-import { setPlayer } from './datenbank_functiones.js';
-import { send_final } from './datenbank_functiones.js';
 
-//send_final, lobbycode, round, player_id, player_offer, this_offer, ws
 export function close (send_final, lobbycode, player_id, player_offer, offer_info, this_offer, shuffle, ws) {
     try{
     let players = getPlayer()
@@ -21,10 +14,7 @@ export function close (send_final, lobbycode, player_id, player_offer, offer_inf
     let game = getGame()
     let offers = getOffer()
     let round
-    
-
         
-    let amount
       if(ws == lobby.host_websocket[lobbycode]){ // if the host leaves
         for (var i = 0; i < lobby.PlayerID[lobbycode].length; i++) {
           var g = lobby.PlayerID[lobbycode][i];

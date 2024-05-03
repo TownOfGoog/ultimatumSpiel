@@ -12,15 +12,16 @@ import { getRound } from './datenbank_functiones.js';
 import { getOffer } from './datenbank_functiones.js';
 import { getPlayer } from './datenbank_functiones.js';
 import { setLobby } from './datenbank_functiones.js';
-import { setHost } from './datenbank_functiones.js';
-import { setGame } from './datenbank_functiones.js';
 import { setRound } from './datenbank_functiones.js';
 import { setOffer } from './datenbank_functiones.js';
-import { setPlayer } from './datenbank_functiones.js';
 import { createHost } from './datenbank_functiones.js';
 import { send_final } from './datenbank_functiones.js';
 import { createLobby } from './datenbank_functiones.js';
 import { createPlayer } from './datenbank_functiones.js';
+import { evaluate_offer } from './datenbank_functiones.js';
+import { offer } from './offer.js';
+import { create_new_game } from "./new_round.js"
+import { send_new_round_info } from "./new_round.js"
 
 
 
@@ -219,77 +220,30 @@ app.post("/lobby/create", (req, res) => {
     let players_to_process
 
     ws.on("message", function(msg) {
-      console.log(msg)
       try{      
         let message = JSON.parse(msg)
-        game = getGame()
-        lobby = getLobby()
-        console.log(game.RoundID[lobby.GameID[lobbycode][lobby.GameID[lobbycode].length - 1]]!== undefined)
+
         if(message.type !== undefined){
-
-
 
       switch(message.type){
         case "start_round":
-          console.log("start round")
           lobby = getLobby()
           rounds = getRound()
           game = getGame()
           players = getPlayer()
-          console.log(1,rounds, lobby, game, players)
           round = rounds.RoundID.length
+          
+          create_new_game(lobbycode) 
 
-          if (lobby.active_players[lobbycode] != undefined){
-            lobby.active_players[lobbycode] = undefined // if player actions have previously been skipped by the host, this line will reinstate, that all players are participateing
-          }
           current_game = lobby.GameID[lobbycode][lobby.GameID[lobbycode].length-1] //finds out the current game
-
-          let all_rounds = rounds.RoundID.length //generates the next RoundID
-          console.log(2,rounds, lobby, game, players)
-
-          rounds.RoundID.push(all_rounds) //updates database
-          game.RoundID[current_game].push(all_rounds)
-          rounds.OfferID.push([])
-          console.log(3,rounds, lobby, game, players)
-
-          players_to_process = lobby.PlayerID[lobbycode]
-
+          
           lobby.gamestate[lobbycode] = "new_round" // changes the gamestate to signal a fresh round starting
-
+          
           setLobby(lobby)
           setRound(rounds)
-
-          console.log(players_to_process)
-          for (var i = 0; i < players_to_process.length; i++) { //iterates through all players to send info
-            var n = players_to_process[i];
-            players.websocket[n].send(JSON.stringify({
-              type: 'new_round',
-              data:{
-                game: lobby.GameID[lobbycode].length,
-                round: game.RoundID[current_game].length,
-                name: game.game_name[game.GameID.length-1] //as this is the newest game in the database we can simply get the newest game
-              }
-            }))
-            players.websocket[n].send(JSON.stringify({ 
-              type: "place_offer"
-            }))
-          }
-
-        lobby.host_websocket[lobbycode].send(JSON.stringify({
-          type: 'new_round',
-          data:{
-            game: lobby.GameID[lobbycode].length,
-            round: game.RoundID[current_game].length,
-            name: game.game_name[game.GameID.length-1] //as this is the newest game in the database we can simply get the newest game
-          }
-        }))
-        
-        lobby.host_websocket[lobbycode].send(JSON.stringify({ 
-          type: "total_players",
-          data: {
-            amount: lobby.PlayerID[lobbycode].length
-          }
-        }))
+          players_to_process = lobby.PlayerID[lobbycode]
+          
+          send_new_round_info (lobby.GameID[lobbycode].length, game.RoundID[current_game].length, game.game_name[game.GameID.length-1], lobby, players, players_to_process, lobbycode)
         
           break
         case "crash": // case for testing purposes
@@ -302,223 +256,35 @@ app.post("/lobby/create", (req, res) => {
           players = getPlayer()
 
           round = rounds.RoundID.length
-          lobby.active_players[lobbycode] = undefined
-          lobby.open[lobbycode] = false //closes the lobby so no more players can join
-
-          lobby.gamestate[lobbycode] = "new_round" // changes the gamestate to signal a fresh round starting
-          let player_count = game.GameID.length
-          game.RoundID.push([])
-          game.GameID.push(player_count)
-          lobby.GameID[lobbycode].push(player_count)
-          rounds.RoundID.push(round)
-          game.RoundID[player_count].push(round)
-          rounds.OfferID.push([])
-          game.game_name.push(message.data.name)
-
-          current_game = lobby.GameID[lobbycode][lobby.GameID[lobbycode].length-1]
+          current_game = game.GameID.length
+          create_new_game(lobbycode, message, "key")
 
           players_to_process = lobby.PlayerID[lobbycode]
-
-          setLobby(lobby)
-          setRound(rounds)
-          setGame(game)
-          console.log(game, game.game_name[current_game],message.data.name, "sus")
-          for (var i = 0; i < players_to_process.length; i++) { //iterates through all players to send info
-            var n = players_to_process[i];
-            players.websocket[n].send(JSON.stringify({
-              type: 'new_round',
-              data:{
-                game: lobby.GameID[lobbycode].length,
-                round: game.RoundID[current_game].length,
-                name: message.data.name
-              }
-            }))
-          players.websocket[n].send(JSON.stringify({ 
-            type: "place_offer"
-          }))
-        }
-          lobby.host_websocket[lobbycode].send(JSON.stringify({
-            type: 'new_round',
-            data:{
-              game: lobby.GameID[lobbycode].length,
-              round: game.RoundID[current_game].length,
-              name: message.data.name
-            }
-          }))
-          lobby.host_websocket[lobbycode].send(JSON.stringify({ 
-            type: "total_players",
-            data: {
-              amount: getLobby().PlayerID[lobbycode].length
-            }
-          }))
-          
+          send_new_round_info (lobby.GameID[lobbycode].length, game.RoundID[current_game].length, message.data.name, lobby, players, players_to_process, lobbycode)
           
           break
         case "offer":
-          lobby = getLobby()
-          rounds = getRound()
-          game = getGame()
-          players = getPlayer()
-          offers = getOffer()
-          let amount
-
-          if([0, 10, 20, 30, 40, 50, 60, 70, 80, 90, 100].includes(message.data.amount)){
-            round = lobby.GameID[lobbycode][lobby.GameID[lobbycode].length - 1]
-            round = game.RoundID[round][game.RoundID[round].length - 1]+1
-          
-          let all_offers
-          lobby.gamestate[lobbycode] = "offer"
-          all_offers = offers.OfferID.length
-          player_offer = offers.OfferID.length
-          rounds.OfferID[round-1].push(offers.OfferID.length)
-          offers.OfferID.push(offers.OfferID.length)
-          offers.offer_sum.push(JSON.parse(msg).data.amount)
-          offers.giver.push(player_id)
-          console.log(offers.giver, player_id);
-
-          setRound(rounds)
-          setOffer(offers)
-          console.log(getRound())
-          
-          players_to_process = lobby.PlayerID[lobbycode]
-          lobby.host_websocket[lobbycode].send(JSON.stringify({ // lets the host know how many palyers have given an offer
-            type: 'new_offer',
-            data:{
-              amount:message.data.amount
-            }
-          }))
-          amount = message.data.amount
-
-          if(lobby.PlayerID[lobbycode].length!=rounds.OfferID[round-1].length){
-            
-            offer_info = "offer given" // saves the info that this websocket has sent an offer
-            
-            ws.send(JSON.stringify({
-              type: "wait"
-              
-            }))
-          }else{ // happens when everyone has given an offer
-            lobby.gamestate[lobbycode] = "answer_offer"
-            
-            
-          let data_to_shuffle = []
-
-          data_to_shuffle = []
-          rounds.OfferID[round-1].forEach(function(element) {
-            data_to_shuffle.push(offers.giver[element]) // shows in chronological order who gave an offer
-            console.log(offers.giver, getOffer().giver)
-            }
-          )
-
-          data_to_shuffle = shuffle(data_to_shuffle) // shuffles the player's IDs
-          data_to_shuffle.forEach(function(element) {
-            offers.reciever.push(element) // declares who will recieve the offers
-            }
-          )
-          
-          let every_offer
-          every_offer = []
-          every_offer = rounds.OfferID[round-1]
-
-          for (var i = 0; i < data_to_shuffle.length; i++) {
-            offers.reciever[every_offer[i]] = data_to_shuffle[i] // updates the database with shuffeled data
-          }
-          console.log(data_to_shuffle)
-          for (var i = 0; i < data_to_shuffle.length; i++) { // itterates through every player
-            var n = data_to_shuffle[i];
-            players.websocket[n].send(JSON.stringify({ 
-            type: "answer_offer",
-            data: {
-              amount: offers.offer_sum[every_offer[i]] // declares
-            }
-          }))}
-          lobby.gamestate[lobbycode] = "answer_offer"
-          setRound(rounds)
-          setOffer(offers)
-          setLobby(lobby)
-
-            //schicke jedem message.type = answer_offer
-          }
-          }else{
-          
-          ws.send(JSON.stringify({ // if the offer given was a bad value the player will be asked to try giving an offer again through this message
-            type: "place_offer",
-            data: {
-              error: "Ungültiges Angebot"
-            }
-          }))}
-
-          
+          console.log(getLobby().GameID, getGame().RoundID)
+          round = getLobby().GameID[lobbycode][getLobby().GameID[lobbycode].length - 1]
+          round = getGame().RoundID[round][getGame().RoundID[round].length - 1] +1
+          offer_info = "offer given" // saves the info that this websocket has sent an offer
+          player_offer = offer(message, round, lobbycode, player_id, ws, shuffle)
         
           break
         case "accept_offer":
-        console.log("offer accepted")
-        lobby = getLobby()
-        rounds = getRound()
-        game = getGame()
-        players = getPlayer()
-        offers = getOffer()
-        offer_info = "offer evaluatede"
+          console.log("offer accepted")
 
-          offers.offer_accepted[player_offer] = true
-          setOffer(offers)
-          
-          this_offer = rounds.OfferID[round-1]
-          this_offer.forEach(function(element){
-            if(offers.reciever[element]==player_id){
-              this_offer = element
-            }
-          })
-            
-            ws.send(JSON.stringify({
-              type: "wait"
-            }))
-            lobby.host_websocket[lobbycode].send(JSON.stringify({
-              type:"offer_response",
-              data:{
-                amount: offers.offer_sum[this_offer],
-                accepted: true,
-              }}))
-
-            send_final(round)
-
-          break
-          case "decline_offer": 
-          console.log("offer declined")
-
-
-          lobby = getLobby()
-          rounds = getRound()
-          game = getGame()
-          players = getPlayer()
-          offers = getOffer()
-          offer_info = "offer evaluatede"
-
-            offers.offer_accepted[player_offer] = false;
-            setOffer(offers)
-            
-          let offer_here = rounds.OfferID[round-1]
-          let offer_now
-          offer_here.forEach(function(element){
-            if(offers.reciever[element]==player_id){
-              offer_now = element
-            }
-          })
-          
-          ws.send(JSON.stringify({
-            type: "wait"
-          }))
-          lobby.host_websocket[lobbycode].send(JSON.stringify({
-            type:"offer_response",
-            data:{
-              amount:offers.offer_sum[offer_now],
-              accepted: false
-            }
-          }))
+          offer_info = evaluate_offer(player_offer, lobbycode, ws, player_id, round, true)
 
           send_final(round)
-          
 
+          break
+        case "decline_offer": 
+          console.log("offer declined")
+
+          offer_info = evaluate_offer(player_offer, lobbycode, ws, player_id, round, false)
+
+          send_final(round)
 
           break
           case "skip":
@@ -534,70 +300,71 @@ app.post("/lobby/create", (req, res) => {
 
             switch(lobby.gamestate[lobbycode]){ // when skip is sent, there are many different cases to be differentiated, based on the gamestate
               case "offer":
-                rounds = getRound()
-                offers = getOffer()
-                lobby = getLobby()
-                players = getPlayer()
-                console.log("skipping offer")
-                lobby.gamestate[lobbycode] = "answer_offer"
                 
-                let players_to_be_shuffled=[]
+              rounds = getRound()
+              offers = getOffer()
+              lobby = getLobby()
+              players = getPlayer()
+              console.log("skipping offer")
+              lobby.gamestate[lobbycode] = "answer_offer"
+              
+              let players_to_be_shuffled=[]
 
-                players_to_be_shuffled = []
-                console.log(rounds)
-                console.log(rounds.OfferID[round],round)
-                rounds.OfferID[round].forEach(function(element) {
-                  players_to_be_shuffled.push(offers.giver[element]) // finds all the players who managed to give an offer
-                  }
-                )
-                let players_too_late
-                let everyone
-                players_too_late = []
-                for(var i = 0; i < lobby.PlayerID[lobbycode].length; i++){
-                  everyone = lobby.PlayerID[lobbycode][i]
-                  if(!players_to_be_shuffled.includes(everyone)){ // sorts through the players find, who out of everyone did not manage to give an offer
-                    players_too_late.push(everyone)
-                  }
+              players_to_be_shuffled = []
+              console.log(rounds)
+              console.log(rounds.OfferID[round],round)
+              rounds.OfferID[round].forEach(function(element) {
+                players_to_be_shuffled.push(offers.giver[element]) // finds all the players who managed to give an offer
                 }
-
-                players_to_be_shuffled = shuffle(players_to_be_shuffled)
-                players_to_be_shuffled.forEach(function(element) {
-                  offers.reciever.push(element)
-                  }
-                )
-                let offers_to_recieve
-                offers_to_recieve = []
-                offers_to_recieve = rounds.OfferID[round]
-
-
-                for (var i = 0; i < players_to_be_shuffled.length; i++) {
-                  offers.reciever[offers_to_recieve[i]] = players_to_be_shuffled[i]
+              )
+              let players_too_late
+              let everyone
+              players_too_late = []
+              for(var i = 0; i < lobby.PlayerID[lobbycode].length; i++){
+                everyone = lobby.PlayerID[lobbycode][i]
+                if(!players_to_be_shuffled.includes(everyone)){ // sorts through the players find, who out of everyone did not manage to give an offer
+                  players_too_late.push(everyone)
                 }
+              }
 
-                for (var i = 0; i < players_to_be_shuffled.length; i++) {
-                  var n = players_to_be_shuffled[i];
-                  players.websocket[n].send(JSON.stringify({
-                  type: "answer_offer",
-                  data: {
-                    amount: offers.offer_sum[offers_to_recieve[i]]
-                  }
-                }))}
-                for (var i = 0; i < players_too_late.length; i++) {
-                  var n = players_too_late[i];
-                  players.websocket[n].send(JSON.stringify({ 
-                  type: "wait"
-                }))}
-                lobby.host_websocket[lobbycode].send(JSON.stringify({ 
-                  type: "total_players",
-                  data: {
-                    amount: players_to_be_shuffled.length
-                  }
-                }))
-                lobby.active_players[lobbycode] = players_to_be_shuffled.length // tells us how many players with offers given are left
-          
-                setLobby(lobby)
-                setOffer(offers)
-                setRound(rounds)
+              players_to_be_shuffled = shuffle(players_to_be_shuffled)
+              players_to_be_shuffled.forEach(function(element) {
+                offers.reciever.push(element)
+                }
+              )
+              let offers_to_recieve
+              offers_to_recieve = []
+              offers_to_recieve = rounds.OfferID[round]
+
+
+              for (var i = 0; i < players_to_be_shuffled.length; i++) {
+                offers.reciever[offers_to_recieve[i]] = players_to_be_shuffled[i]
+              }
+
+              for (var i = 0; i < players_to_be_shuffled.length; i++) {
+                var n = players_to_be_shuffled[i];
+                players.websocket[n].send(JSON.stringify({
+                type: "answer_offer",
+                data: {
+                  amount: offers.offer_sum[offers_to_recieve[i]]
+                }
+              }))}
+              for (var i = 0; i < players_too_late.length; i++) {
+                var n = players_too_late[i];
+                players.websocket[n].send(JSON.stringify({ 
+                type: "wait"
+              }))}
+              lobby.host_websocket[lobbycode].send(JSON.stringify({ 
+                type: "total_players",
+                data: {
+                  amount: players_to_be_shuffled.length
+                }
+              }))
+              lobby.active_players[lobbycode] = players_to_be_shuffled.length // tells us how many players with offers given are left
+        
+              setLobby(lobby)
+              setOffer(offers)
+              setRound(rounds)
 
               break
               case "answer_offer":

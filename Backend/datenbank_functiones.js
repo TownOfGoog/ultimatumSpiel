@@ -126,26 +126,26 @@ let database = {
   export function send_final(round, key){
     let offer = database.Round.OfferID[round-1]
     console.log(offer, round)
-    let answers = []
+    let reciever = []
     for (var i = 0; i < offer.length; i++) {
       var n = offer[i];
-      answers.push(database.Offer.offer_accepted[n])
+      reciever.push(database.Offer.offer_accepted[n])
     }
-    console.log(database.Offer.offer_accepted, !answers.includes(undefined) || key != undefined)
+    console.log(database.Offer.offer_accepted, !reciever.includes(undefined) || key != undefined)
     console.log(database.Round.OfferID, database.Offer.offer_accepted)
-    console.log(answers)
+    console.log(reciever)
   
-    if(!answers.includes(undefined) || key != undefined){
-      let giver = []
+    if(!reciever.includes(undefined) || key != undefined){
+      let reciever = []
       let accepted = []
       database.Round.OfferID[round-1].forEach(function(element) {
-        giver.push(database.Offer.giver[element])
+        reciever.push(database.Offer.reciever[element])
         accepted.push(database.Offer.offer_accepted[element])
         })
-        console.log(giver, accepted, "testtest")
+        console.log(reciever, accepted, "testtest")
   
         for (var i = 0; i < accepted.length; i++) {
-          var n = giver[i];
+          var n = reciever[i];
           if(accepted[i] != undefined){
           database.Player.websocket[n].send(JSON.stringify({ //wird an den spieler geschickt oder
           type: "final",
@@ -156,3 +156,38 @@ let database = {
     }
   }
 
+  export function evaluate_offer (player_offer, lobbycode, ws, player_id, round, evaluation){
+  let lobby
+  let rounds
+  let game
+  let players
+  let offers
+
+  lobby = getLobby()
+  rounds = getRound()
+  game = getGame()
+  players = getPlayer()
+  offers = getOffer()
+  let offer_info = "offer evaluatede"
+
+    offers.offer_accepted[player_offer] = evaluation
+    setOffer(offers)
+
+    let this_offer = rounds.OfferID[round-1]
+    this_offer.forEach(function(element){
+      if(offers.reciever[element]==player_id){
+        this_offer = element
+      }
+    })
+
+      ws.send(JSON.stringify({
+        type: "wait"
+      }))
+      lobby.host_websocket[lobbycode].send(JSON.stringify({
+        type:"offer_response",
+        data:{
+          amount: offers.offer_sum[this_offer],
+          accepted: evaluation,
+        }}))
+      return offer_info
+  }
