@@ -125,12 +125,15 @@ let database = {
 
   export function send_final(round, key){
     let offer = database.Round.OfferID[round-1]
-    console.log(offer)
+    console.log(offer, round)
     let answers = []
     for (var i = 0; i < offer.length; i++) {
       var n = offer[i];
       answers.push(database.Offer.offer_accepted[n])
     }
+    console.log(database.Offer.offer_accepted, !answers.includes(undefined) || key != undefined)
+    console.log(database.Round.OfferID, database.Offer.offer_accepted)
+    console.log(answers)
   
     if(!answers.includes(undefined) || key != undefined){
       let giver = []

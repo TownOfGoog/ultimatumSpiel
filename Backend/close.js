@@ -45,7 +45,7 @@ export function close (send_final, lobbycode, player_id, player_offer, offer_inf
         setLobby(lobby)
         console.log(lobby.PlayerID)
         
-        if(offer_info != "offer evaluatede"){
+        if(offer_info != "offer evaluatede" && lobby.gamestate != "answer_offer"){
             lobby.host_websocket[lobbycode].send(JSON.stringify({ 
                 type: "total_players",
                 data: {

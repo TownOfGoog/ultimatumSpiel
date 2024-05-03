@@ -452,7 +452,7 @@ app.post("/lobby/create", (req, res) => {
         
           break
         case "accept_offer":
-
+        console.log("offer accepted")
         lobby = getLobby()
         rounds = getRound()
         game = getGame()
@@ -460,7 +460,7 @@ app.post("/lobby/create", (req, res) => {
         offers = getOffer()
         offer_info = "offer evaluatede"
 
-          offers.offer_accepted[offers.offer_accepted.lastIndexOf(player_id)] = true
+          offers.offer_accepted[player_offer] = true
           setOffer(offers)
           
           this_offer = rounds.OfferID[round-1]
@@ -469,7 +469,7 @@ app.post("/lobby/create", (req, res) => {
               this_offer = element
             }
           })
-            //sendet dem Spieler "wait" und dem Lehrer die Daten
+            
             ws.send(JSON.stringify({
               type: "wait"
             }))
@@ -484,6 +484,8 @@ app.post("/lobby/create", (req, res) => {
 
           break
           case "decline_offer": 
+          console.log("offer declined")
+
 
           lobby = getLobby()
           rounds = getRound()
@@ -492,7 +494,7 @@ app.post("/lobby/create", (req, res) => {
           offers = getOffer()
           offer_info = "offer evaluatede"
 
-            offers.offer_accepted[offers.offer_accepted.lastIndexOf(player_id)] = false;
+            offers.offer_accepted[player_offer] = false;
             setOffer(offers)
             
           let offer_here = rounds.OfferID[round-1]
