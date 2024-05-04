@@ -14,11 +14,11 @@ export default function WaitingPlayersHost() {
     <div style={{
       width: '100%', height: '100%',
       display: 'flex', flexDirection: 'column', justifyContent: 'center', alignItems: 'center',
-      gap: '8vh',
+      gap: '8vh', boxShadow: "inset 0 0 0 1px black",
     }}
     >
       <MyText fontSize="3em" >
-        <Link style={{ color: 'black' }} target="_blank" to={window.location.href}>https://ultimatum-spiel.onrender.com/lobby/73038</Link>
+        <Link style={{ color: 'black' }} target="_blank" to={window.location.href}>{window.location.href}</Link>
       </MyText>
       <div style={{
         width: '100%',
