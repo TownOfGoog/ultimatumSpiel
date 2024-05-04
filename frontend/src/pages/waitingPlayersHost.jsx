@@ -19,10 +19,10 @@ export default function WaitingPlayersHost() {
 
       <Grid xs={1} sx={{ height: "100%", display: 'flex' }} />
       
-      <Grid xs={2} sx={{ height: "100%", alignContent: 'flex-start' }} container columns={2} >
+      <Grid xs={2} sx={{ height: "100%", alignContent: 'stretch' }} container columns={2} >
 
         {/* top center part of the screen */}
-        <Grid xs={2} sx={{ height: "20%", display: 'flex', alignItems: 'center', justifyContent: 'center' }} >
+        <Grid xs={2} sx={{ height: "30%", display: 'flex', alignItems: 'center', justifyContent: 'center' }} >
           <MyText level="h1" fontSize="3em" >
             <Link style={{color:'black'}} target="_blank" to={window.location.href}>{window.location.href}</Link>
           </MyText>
@@ -44,7 +44,7 @@ export default function WaitingPlayersHost() {
         </Grid>
 
         {/* bottom center part of the screen */}
-        <Grid xs={2} sx={{ height: "40%", display: 'flex', justifyContent: 'center'}} >
+        <Grid xs={2} sx={{ height: "20%", display: 'flex', justifyContent: 'center'}} >
           <MyText fontSize="2.5em">
             Spieler: {game.state.total_player_count}
           </MyText>
