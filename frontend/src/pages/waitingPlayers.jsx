@@ -16,7 +16,7 @@ export default function WaitingPlayers() {
 
       {/* center loading circles */}
       <div style={{
-        width: '16vw', maxWidth: '15em', height: "16vw",
+        width: '16vw', maxWidth: '12em', height: "16vw",
         display: 'flex', alignItems: 'center'
         }}>
         <ReactLoading 
