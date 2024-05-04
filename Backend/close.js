@@ -1,10 +1,10 @@
-import { getLobby } from './datenbank_functiones.js';
-import { getGame } from './datenbank_functiones.js';
-import { getRound } from './datenbank_functiones.js';
-import { getOffer } from './datenbank_functiones.js';
-import { getPlayer } from './datenbank_functiones.js';
-import { setLobby } from './datenbank_functiones.js';
-import { setRound } from './datenbank_functiones.js';
+import { getLobby } from './datenbank_functions.js';
+import { getGame } from './datenbank_functions.js';
+import { getRound } from './datenbank_functions.js';
+import { getOffer } from './datenbank_functions.js';
+import { getPlayer } from './datenbank_functions.js';
+import { setLobby } from './datenbank_functions.js';
+import { setRound } from './datenbank_functions.js';
 
 export function close (send_final, lobbycode, player_id, player_offer, offer_info, this_offer, shuffle, ws) {
     try{
@@ -65,7 +65,7 @@ export function close (send_final, lobbycode, player_id, player_offer, offer_inf
         
           if(rounds.OfferID[lobbycode][offer]!=undefined&&offers.offer_accepted[this_offer]==undefined){
         
-          send_final(round, "key")
+          send_final(round, lobbycode, "key")
         
             }
         }
@@ -95,7 +95,7 @@ export function close (send_final, lobbycode, player_id, player_offer, offer_inf
           for (var i = 0; i < data_to_shuffle.length; i++) {
             offers.offer_accepted[every_offer[i]] = data_to_shuffle[i] // updates the database with shuffeled data
           }
-
+          console.log(data_to_shuffle, lobby.PlayerID)
           for (var i = 0; i < data_to_shuffle.length; i++) { // itterates through every player
             var n = data_to_shuffle[i];
             players.websocket[n].send(JSON.stringify({ 

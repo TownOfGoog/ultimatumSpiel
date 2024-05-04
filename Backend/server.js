@@ -1,24 +1,23 @@
 import express from "express"
 import expressWs from "express-ws"
 import session from "express-session" 
-import cors from "cors"
 import crypto from 'crypto'
 import path from "path"
 import { close } from './close.js';
-import { getLobby } from './datenbank_functiones.js';
-import { getHost } from './datenbank_functiones.js';
-import { getGame } from './datenbank_functiones.js';
-import { getRound } from './datenbank_functiones.js';
-import { getOffer } from './datenbank_functiones.js';
-import { getPlayer } from './datenbank_functiones.js';
-import { setLobby } from './datenbank_functiones.js';
-import { setRound } from './datenbank_functiones.js';
-import { setOffer } from './datenbank_functiones.js';
-import { createHost } from './datenbank_functiones.js';
-import { send_final } from './datenbank_functiones.js';
-import { createLobby } from './datenbank_functiones.js';
-import { createPlayer } from './datenbank_functiones.js';
-import { evaluate_offer } from './datenbank_functiones.js';
+import { getLobby } from './datenbank_functions.js';
+import { getHost } from './datenbank_functions.js';
+import { getGame } from './datenbank_functions.js';
+import { getRound } from './datenbank_functions.js';
+import { getOffer } from './datenbank_functions.js';
+import { getPlayer } from './datenbank_functions.js';
+import { setLobby } from './datenbank_functions.js';
+import { setRound } from './datenbank_functions.js';
+import { setOffer } from './datenbank_functions.js';
+import { createHost } from './datenbank_functions.js';
+import { send_final } from './datenbank_functions.js';
+import { createLobby } from './datenbank_functions.js';
+import { createPlayer } from './datenbank_functions.js';
+import { evaluate_offer } from './datenbank_functions.js';
 import { offer } from './offer.js';
 import { create_new_game } from "./new_round.js"
 import { send_new_round_info } from "./new_round.js"
@@ -43,12 +42,6 @@ export function startExpress() {
   var expressWss = expressWs(app);
   //Wss 
   app.use(express.static(path.join(path.resolve('.'), 'frontend', 'build')));
-
-
-  app.use(cors(
-    {origin:process.env.FRONTEND_URL,
-    credentials: true}
-  )); 
   
 
   app.use(express.json());
@@ -276,7 +269,7 @@ app.post("/lobby/create", (req, res) => {
 
           offer_info = evaluate_offer(player_offer, lobbycode, ws, player_id, round, true)
 
-          send_final(round)
+          send_final(round, lobbycode)
 
           break
         case "decline_offer": 
@@ -284,7 +277,7 @@ app.post("/lobby/create", (req, res) => {
 
           offer_info = evaluate_offer(player_offer, lobbycode, ws, player_id, round, false)
 
-          send_final(round)
+          send_final(round, lobbycode)
 
           break
           case "skip":
@@ -374,9 +367,7 @@ app.post("/lobby/create", (req, res) => {
                 players.websocket[n].send(JSON.stringify({ 
                 type: "wait"
               }))}
-
-                send_final(round, "key") // will let the players know wheather or not theire offers have been accepted
-
+                send_final(round, lobbycode, "key") // will let the players know wheather or not theire offers have been accepted
               break
             }
           

@@ -123,7 +123,7 @@ let database = {
     return player
   }
 
-  export function send_final(round, key){
+  export function send_final(round, lobbycode, key){
     let offer = database.Round.OfferID[round-1]
     console.log(offer, round)
     let reciever = []
@@ -146,7 +146,8 @@ let database = {
   
         for (var i = 0; i < accepted.length; i++) {
           var n = reciever[i];
-          if(accepted[i] != undefined){
+          console.log(reciever, database.Lobby.PlayerID)
+          if(accepted[i] != undefined && database.Lobby.PlayerID[lobbycode].includes(n)){
           database.Player.websocket[n].send(JSON.stringify({ //wird an den spieler geschickt oder
           type: "final",
           data: {

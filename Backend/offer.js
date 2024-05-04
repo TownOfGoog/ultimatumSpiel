@@ -1,11 +1,11 @@
-import { getLobby } from './datenbank_functiones.js';
-import { getGame } from './datenbank_functiones.js';
-import { getRound } from './datenbank_functiones.js';
-import { getOffer } from './datenbank_functiones.js';
-import { getPlayer } from './datenbank_functiones.js';
-import { setLobby } from './datenbank_functiones.js';
-import { setRound } from './datenbank_functiones.js';
-import { setOffer } from './datenbank_functiones.js';
+import { getLobby } from './datenbank_functions.js';
+import { getGame } from './datenbank_functions.js';
+import { getRound } from './datenbank_functions.js';
+import { getOffer } from './datenbank_functions.js';
+import { getPlayer } from './datenbank_functions.js';
+import { setLobby } from './datenbank_functions.js';
+import { setRound } from './datenbank_functions.js';
+import { setOffer } from './datenbank_functions.js';
 
 
 export function offer(message, round, lobbycode, player_id, ws, shuffle){

@@ -1,10 +1,10 @@
-import { getLobby } from './datenbank_functiones.js';
-import { getGame } from './datenbank_functiones.js';
-import { getRound } from './datenbank_functiones.js';
-import { getPlayer } from './datenbank_functiones.js';
-import { setLobby } from './datenbank_functiones.js';
-import { setRound } from './datenbank_functiones.js';
-import { setGame } from './datenbank_functiones.js';
+import { getLobby } from './datenbank_functions.js';
+import { getGame } from './datenbank_functions.js';
+import { getRound } from './datenbank_functions.js';
+import { getPlayer } from './datenbank_functions.js';
+import { setLobby } from './datenbank_functions.js';
+import { setRound } from './datenbank_functions.js';
+import { setGame } from './datenbank_functions.js';
 
 export function send_new_round_info (game, round, name, lobby, players, players_to_process, lobbycode) {
     for (var i = 0; i < players_to_process.length; i++) { //iterates through all players to send info
@@ -72,8 +72,6 @@ export function create_new_game(lobbycode, message, key){
         current_game = lobby.GameID[lobbycode][lobby.GameID[lobbycode].length-1] //finds out the current game
         console.log(current_game, game.RoundID)
         rounds.RoundID.push(round) //updates database
-        console.log(current_game)
-        console.log(game)
         game.RoundID[current_game].push(round)
         rounds.OfferID.push([])
         
