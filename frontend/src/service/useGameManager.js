@@ -470,8 +470,8 @@ export function GameManagerProvider({ children }) {
     if (ws.current) ws.current.close()
   }
 
-  function is_mobile() {
-    return window.innerWidth < 600
+  function is_mobile(width_considered_mobile = 600) {
+    return window.innerWidth < width_considered_mobile
   } 
 
   //#region Return

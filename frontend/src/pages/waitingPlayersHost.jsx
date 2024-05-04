@@ -1,6 +1,3 @@
-// import { Grid } from '@mui/joy';
-import Grid from '../components/myGrid';
-
 import QRCode from 'react-qr-code';
 import useGameManager from '../service/useGameManager';
 import MyText from '../components/myText';
@@ -42,8 +39,6 @@ export default function WaitingPlayersHost() {
         position: 'absolute',
         bottom: '1vh',
         right: '1vh',
-        // bottom: '5vh',
-        // right: '5vw',
       }}>
         <MyButton disabled={game.state.total_player_count <= 0} sx={{width: 'auto', padding: '1em', margin: '0.5em'}} onClick={() => game.new_game(game.state.game_name)}>
           Starten
