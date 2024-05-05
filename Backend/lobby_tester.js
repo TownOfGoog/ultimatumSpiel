@@ -133,7 +133,7 @@ export class Lobby_tester {
               });
               if (!error) { this.players[i].done() }
               //to give time for the server to handle everything properly
-            }, 50); 
+            }, 2000); 
           },
           done: () => {},
         };
