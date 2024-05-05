@@ -42,7 +42,7 @@ export function GameManagerProvider({ children }) {
             return reset; //reset everything
           case "login_page":
             console.log("going to login page...");
-            return { ...state, title: "Anmelden", body: <Loginpage />, top_right: <MyButton sx={{width: 'auto', paddingInline: '0.8em'}} onClick={() => navigate('/register')}>Registrieren</MyButton> };
+            return { ...state, title: "Anmelden", body: <Loginpage />, code_error: '', top_right: <MyButton sx={{width: 'auto', paddingInline: '0.8em'}} onClick={() => navigate('/register')}>Registrieren</MyButton> };
           case "register_page":
             console.log("going to register page...");
             return { ...state, title: "Registrieren", body: <Register />, top_right: dfault.top_right };
