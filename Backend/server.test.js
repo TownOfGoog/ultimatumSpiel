@@ -5,6 +5,7 @@ import { Lobby_tester } from './lobby_tester.js';
 const PORT = 9090;
 let app
 let agent;
+let agent2
 let cookie
 let lobbyCode;
 
@@ -128,7 +129,7 @@ describe('Teste Endpunkte', () => {
   })
 })
 
-describe('Teste Websocket', () => {
+describe('Teste simple', () => {
   let lobby;
 
   beforeAll((done) => {
@@ -321,8 +322,9 @@ describe('Teste Websocket', () => {
     lobby.player(1).send({ type: 'decline_offer', data: { } }, done);
   })
   test('Host | Fährt fort, ohne auf Spieler 2 zu warten', done => {
-    lobby.player(2).expect_message([{ type: 'wait' }])
-    lobby.host.expect_message([{ type: 'total_players', data: { amount: 1 } }])
+    lobby.player(1).expect_message([{ type: 'wait' }])
+    lobby.player(2).expect_message([{ type: 'wait' }, { type: 'final', data: { accepted: false } }])  
+    lobby.host.expect_message(lobby.no_message_condition)
     lobby.host.send({ type: 'skip' }, done);
   })
   test('Host | Schliesst die Lobby', done => {
@@ -330,5 +332,303 @@ describe('Teste Websocket', () => {
     lobby.player(2).expect_message([{ type: 'exit' }])
     lobby.host.expect_message(lobby.no_message_condition)
     lobby.host.send({ type: 'exit' }, done);
+  })  
+  test('Host (Test) | Verlässt die Lobby', done => {
+    lobby.player(1).expect_message([{ type: 'exit' }])
+    lobby.player(2).expect_message([{ type: 'exit' }])
+
+    lobby.host.expect_message(lobby.no_message_condition)
+    lobby.host.disconnect(done)
+  })   
+})
+
+describe('Teste ausführlich', () => {
+  let lobby;
+  beforeAll((done) => {
+    //create another lobby
+    agent2 = request.agent(app);
+    
+    agent2
+      .post('/register')
+      .send({ name: 'Test2', password: 'supergeheim' })
+      .expect(200)
+      .end(function(err, res) {
+        if (err) return done(err);
+        //save the cookie given from the first ever request.
+        cookie = res.headers['set-cookie'][0]
+        if (res.body !== 'Test2') return done(new Error(`Got ${res.body} instead of 'Test2'`));
+              
+        agent
+          .post('/lobby/create')
+          .send({ name: 'J3a' })
+          .expect(200)
+          .end(function(err, res) {
+            if (err) return done(err);
+            if (parseInt(res.body) >= 10000 && parseInt(res.body) <= 99999) {
+              lobbyCode = res.body
+              lobby = new Lobby_tester(`localhost:${PORT}`, lobbyCode)
+              done()
+            } else {
+              done(new Error(`Got ${res.body} instead of a 5-digit number`));
+            }
+          });
+      });
+  })
+  
+  afterAll((done) => {
+    console.log('disconnecting players...');
+    lobby.close();
+    setTimeout(() => {
+      done()
+    }, 50)
+  });
+
+  test('Host (Test) | Verbindet sich mit der Lobby', done => {
+    lobby.host.expect_message( lobby.no_message_condition )
+
+    lobby.host.connect(done, cookie);
+  })
+
+  test('Neuer Spieler 1 | Verbindet sich mit der Lobby', done => {
+    lobby.player(1).expect_message([{ type: 'wait', data: { class: 'J3a' } }]);
+
+    lobby.host.expect_message([{ type: 'new_player' }]);
+
+    lobby.player(1).connect(done);
+  })
+  
+  test('Neuer Spieler 2 |	Verbindet sich mit der Lobby', done => {
+    lobby.player(2).expect_message([{ type: 'wait', data: { class: 'J3a' } }]);
+
+    lobby.host.expect_message([{ type: 'new_player' }]);
+
+    lobby.player(2).connect(done);
+  })
+
+  test('Neuer Spieler 3 |	Verbindet sich mit der Lobby', done => {
+    lobby.player(3).expect_message([{ type: 'wait', data: { class: 'J3a' } }]);
+
+    lobby.host.expect_message([{ type: 'new_player' }]);
+
+    lobby.player(3).connect(done);
+  })
+
+  test('Neuer Spieler 4 |	Verbindet sich mit der Lobby', done => {
+    lobby.player(4).expect_message([{ type: 'wait', data: { class: 'J3a' } }]);
+
+    lobby.host.expect_message([{ type: 'new_player' }]);
+
+    lobby.player(4).connect(done);
+  })
+
+  test('Neuer Spieler 5 |	Verbindet sich mit der Lobby', done => {
+    lobby.player(5).expect_message([{ type: 'wait', data: { class: 'J3a' } }]);
+
+    lobby.host.expect_message([{ type: 'new_player' }]);
+
+    lobby.player(5).connect(done);
+  })
+
+  test('Neuer Spieler 6 |	Verbindet sich mit der Lobby', done => {
+    lobby.player(6).expect_message([{ type: 'wait', data: { class: 'J3a' } }]);
+
+    lobby.host.expect_message([{ type: 'new_player' }]);
+
+    lobby.player(6).connect(done);
+  })
+
+  test('Neuer Spieler 7 |	Verbindet sich mit der Lobby', done => {
+    lobby.player(7).expect_message([{ type: 'wait', data: { class: 'J3a' } }]);
+
+    lobby.host.expect_message([{ type: 'new_player' }]);
+
+    lobby.player(7).connect(done);
+  })
+
+  test('Spieler 7	| Verlässt Lobby, bevor das Spiel beginnt.', done => {
+    lobby.player(7).expect_message( lobby.no_message_condition );
+
+    lobby.host.expect_message([{ type: 'total_players', data: { amount: 6 } }]);
+
+    lobby.player(7).disconnect(done);
+  })
+  
+  test('Host | Startet neues Spiel', done => {
+    lobby.all_players().forEach(player => player.expect_message([
+      {
+        type: 'new_round',
+        data: {
+          game: 1,
+          round: 1,
+          name: ''
+        }
+      },
+      { type: 'place_offer' }
+    ]));
+
+
+    lobby.host.expect_message([
+      {
+        type: 'new_round',
+        data: {
+          game: 1,
+          round: 1,
+          name: ''
+        }
+      },
+      { type: 'total_players', data: { amount: 6 } }
+    ])
+
+    lobby.host.send({ type: 'start_game', data: { name: '' } }, done);
+  })
+
+  test('Spieler 1	| Verlässt Lobby, bevor er ein Angebot abgibt.', done => {
+    lobby.player(1).expect_message(
+      lobby.no_message_condition
+    );
+    lobby.host.expect_message([{ type: 'total_players', data: { amount: 5 } }])
+    lobby.player(1).disconnect(done);
+  })
+
+  test('Spieler 2	| Vergibt 10 Geld', done => {
+    lobby.player(2).expect_message([{ type: 'wait' }])
+    lobby.host.expect_message([{ type: 'new_offer', data: { amount: 10 } }])
+    lobby.player(2).send({ type: 'offer', data: { amount: 10 } }, done);
+  })
+
+  test('Spieler 3	| Vergibt 10 Geld', done => {
+    lobby.player(3).expect_message([{ type: 'wait' }])
+    lobby.host.expect_message([{ type: 'new_offer', data: { amount: 10 } }])
+    lobby.player(3).send({ type: 'offer', data: { amount: 10 } }, done);
+  })
+
+  test('Spieler 4	| Vergibt 0 Geld', done => {
+    lobby.player(4).expect_message([{ type: 'wait' }])
+    lobby.host.expect_message([{ type: 'new_offer', data: { amount: 0 } }])
+    lobby.player(4).send({ type: 'offer', data: { amount: 0 } }, done);
+  })
+
+  test('Spieler 5	| Vergibt 100 Geld', done => {
+    lobby.player(5).expect_message([{ type: 'wait' }])
+    lobby.host.expect_message([{ type: 'new_offer', data: { amount: 100 } }])
+    lobby.player(5).send({ type: 'offer', data: { amount: 100 } }, done);
+  })
+
+  test('Spieler 6	| Vergibt 999 Geld (manipuliert)', done => {
+    lobby.player(6).expect_message([{ type: 'place_offer', data: { error: 'Ungültiges Angebot'} }])
+    lobby.host.expect_message(lobby.no_message_condition)
+    lobby.player(6).send({ type: 'offer', data: { amount: 999 } }, done);
+  })
+
+  test('Spieler 3 | Verlässt Lobby, nachdem er ein Angebot gibt.', done => {
+    lobby.player(3).expect_message(lobby.no_message_condition)
+    lobby.host.expect_message([
+      {
+        type: 'total_players',
+        data: {
+          amount: 4
+        }
+      },
+      {
+        type: 'undo_offer',
+        data: {
+          amount: 10
+        }
+      }
+    ])
+    lobby.player(3).disconnect(done);
+  })
+
+  test('Spieler 6	| Verlässt Lobby, bevor er ein Angebot gibt.', done => {
+    //on player 6 leave, the offers will be distributed to the remaining players, so we have to test them here
+    lobby.player(2).expect_message([{ type: 'answer_offer', data: { amount: 100 } }])
+    lobby.player(4).expect_message([{ type: 'answer_offer', data: { amount: 10 } }])
+    lobby.player(5).expect_message([{ type: 'answer_offer', data: { amount: 0 } }])
+    lobby.player(6).expect_message(lobby.no_message_condition)
+    lobby.host.expect_message([{ type: 'total_players', data: { amount: 3 } }])
+
+    lobby.player(6).disconnect(done);
+  })
+
+  test('[System] | Alle haben ein Angebot gegeben (3 Spieler sind übrig). Vermische Angebote…', done => {
+    //cant test messages after they have been sent. (they are tested in the previous test)
+    done()
+  })
+
+  test('Spieler 2	| Verlässt Lobby, bevor er eine Entscheidung trifft.', done => {
+    // lobby.player(2).expect_message([{ type: 'wait' }])
+    // lobby.host.expect_message([{ type: 'offer_response', data: { amount: 100, accepted: false } }])
+    // lobby.player(2).send({ type: 'decline_offer', data: { } }, done);
+    lobby.player(2).expect_message(lobby.no_message_condition)
+    lobby.host.expect_message([{ type: 'total_players', data: { amount: 2 } }])
+    lobby.player(2).disconnect(done);
+  })
+
+  test('Spieler 4	| Lehnt Angebot 10 ab.', done => {
+    lobby.player(4).expect_message([{ type: 'wait' }])
+    lobby.host.expect_message([{ type: 'offer_response', data: { amount: 10, accepted: false } }])
+    lobby.player(4).send({ type: 'decline_offer', data: { } }, done);
+  })
+  
+  test('Spieler 4 | Verlässt Lobby, nachdem er eine Entscheidung trifft.', done => {
+    lobby.player(4).expect_message(lobby.no_message_condition)
+    lobby.host.expect_message(lobby.no_message_condition)
+    lobby.player(4).disconnect(done);
+  })
+  
+  test('Spieler 5 | Lehnt Angebot 0 ab.', done => {
+    
+    lobby.player(4).expect_message([{ type: 'final', data: { accepted: false } }])
+    lobby.player(5).expect_message([{ type: 'wait' }, { type: 'final', data: { accepted: false } }])
+    lobby.host.expect_message([{ type: 'offer_response', data: { amount: 0, accepted: false } }])
+    lobby.player(5).send({ type: 'decline_offer', data: { } }, done);
+  })
+  
+  test('[System] | Alle haben auf ein Angebot reagiert. Warte Entscheidung vom Host', done => {
+    //we are waiting for the host to continue, nothing happens here
+    done()
+  })
+
+  test('Host | Startet neues Spiel mit Namen', done => {
+
+    lobby.player(5).expect_message([
+      {
+        type: 'new_round',
+        data: {
+          game: 2,
+          round: 1,
+          name: 'Geerbtes Geld'
+        }
+      },
+      { type: 'place_offer' }
+    ]);
+
+
+    lobby.host.expect_message([
+      {
+        type: 'new_round',
+        data: {
+          game: 2,
+          round: 1,
+          name: 'Geerbtes Geld'
+        }
+      },
+      { type: 'total_players', data: { amount: 1 } }
+    ])
+
+    lobby.host.send({ type: 'start_game', data: { name: 'Geerbtes Geld' } }, done);
+
+  })
+
+  test('Spieler 5 | Vergibt 70 Geld', done => {
+    lobby.player(5).expect_message([{ type: 'answer_offer', data: { amount: 70 } }])
+    lobby.host.expect_message([{ type: 'new_offer', data: { amount: 70 } }])
+    lobby.player(5).send({ type: 'offer', data: { amount: 70 } }, done);
+  })
+
+  test('[System] | haben ein Angebot gegeben (1 Spieler ist übrig) vermische Angebote…', done => {
+    //cant test messages after they have been sent. (they are tested in the previous test)
+    done()
+  
   })
 })
