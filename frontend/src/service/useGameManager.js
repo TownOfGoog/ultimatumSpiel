@@ -33,7 +33,12 @@ export function GameManagerProvider({ children }) {
         switch (action.payload) {
           case "home_page":
             console.log("going to home page...");
-            let reset = { ...dfault, username: state.username, is_logged_in: state.is_logged_in, top_right: state.is_logged_in ? "" : dfault.top_right};
+            let reset = { ...dfault, 
+              username: state.username, 
+              is_logged_in: state.is_logged_in, 
+              top_right: state.is_logged_in ? "" : dfault.top_right,
+              code_error: state.code_error, //needs to persist across pages
+            };
             return reset; //reset everything
           case "login_page":
             console.log("going to login page...");
@@ -81,10 +86,11 @@ export function GameManagerProvider({ children }) {
       case 'connect_lobby':
         if (!Number.isInteger(action.payload.lobby_code)) return state
         console.log("connecting to lobby with code:", action.payload.lobby_code);
-        console.log('action.payload: ', action.payload);
+        console.log('action.payload: ', state.top_right);
         if (state.is_host) return state; //do nothing if its the teacher trying to connect
         return { ...state,
           code: action.payload.lobby_code, //updating this will cause the useEffect to connect to the websocket
+          code_error: '',
           top_right: '',
           game_name: '',
         }
@@ -356,11 +362,16 @@ export function GameManagerProvider({ children }) {
           return state;
         }
       case 'server_close':
-        console.log('server closed connection');
+        console.log('server closed connection', state);
+        let error;
+        if (!state.exit_player && !state.is_host) { //unexpected exit
+          error = 'Falscher Code oder Server nicht erreichbar.'
+        }
         action.payload.current = null
         return { ...state,
           code: null,
           exit_player: false,
+          code_error: error,
         }
       default:
         console.warn("sent something unknown to server: ", action);
