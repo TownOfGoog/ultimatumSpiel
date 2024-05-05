@@ -6,8 +6,10 @@ export default function MyInput({label, title, value, setValue, password=false, 
   function handleChange(event) {
     if (big) {
       const code = event.target.value; //string from the input
-      const sanitizedCode = parseInt(code.replace(/[^\d]/g, '').slice(0, 5)); //remove nondigits and limit length to 5
-      setValue(sanitizedCode);//save the value
+      const sanitizedCode = parseInt(
+        code.replace(/[^\d]/g, '').slice(0, 5) //remove nondigits and limit length to 5
+      ); //and then parse it
+      setValue(sanitizedCode || ''); //save the value + fix NaN if empty
     } else {
       setValue(event.target.value)
     }

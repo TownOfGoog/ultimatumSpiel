@@ -56,6 +56,10 @@ export default function Home() {
           />
         </FormControl>
         
+        {game.state.code_error && (
+            <div style={{color: 'red', textAlign: 'center'}}>{game.state.code_error}</div>
+        )}
+
         <div style={{margin: '0.3em 0 0.3em 0'}}></div>
           <MyButton
             onClick={() => {

@@ -22,11 +22,8 @@ export default function PlayingHost() {
   return (
     <div style={{
       height: '100%',
-      display: 'flex',
-      flexWrap: 'wrap',
-      alignItems: 'flex-end',
-      justifyContent: 'space-evenly',
-      userSelect: 'none'
+      display: 'flex', flexWrap: 'wrap', alignItems: 'flex-end', justifyContent: 'space-evenly',
+      userSelect: 'none', boxShadow: "inset 0 0 0 1px black",
     }}>
       {/* top part - graphs */}
       {totalView ?
@@ -56,11 +53,11 @@ export default function PlayingHost() {
         series={[
           {
             dataKey: 'accepted',
-            label: 'Angenommen', stack: 'a', color: '#0afff7' , valueFormatter: (v) => `${v}% (${game.state.offer_per_money_total[indexLeft][game.state.offer_per_money_total_percent[indexLeft].findIndex(o => o.accepted === v)].accepted})`
+            label: 'Angenommen', stack: 'a', color: '#0afff7' , valueFormatter: (v) => `${Math.round(v * 100) / 100}% (${game.state.offer_per_money_total[indexLeft][game.state.offer_per_money_total_percent[indexLeft].findIndex(o => o.accepted === v)].accepted})`
           },
           {
             dataKey: 'declined',
-            label: 'Abgelehnt', stack: 'a', color: '#ff8113', valueFormatter: (v) => `${v}% (${game.state.offer_per_money_total[indexLeft][game.state.offer_per_money_total_percent[indexLeft].findIndex(o => o.declined === v)].declined})`
+            label: 'Abgelehnt', stack: 'a', color: '#ff8113', valueFormatter: (v) => `${Math.round(v * 100) / 100}% (${game.state.offer_per_money_total[indexLeft][game.state.offer_per_money_total_percent[indexLeft].findIndex(o => o.declined === v)].declined})`
           },
         ]}
         />
@@ -91,11 +88,11 @@ export default function PlayingHost() {
           series={[
             {
               dataKey: 'accepted',
-              label: 'Angenommen', stack: 'a', color: '#0afff7', valueFormatter: (v) => `${v}% (${game.state.offer_per_money_total[indexRight][game.state.offer_per_money_total_percent[indexRight].findIndex(o => o.accepted === v)].accepted})`
+              label: 'Angenommen', stack: 'a', color: '#0afff7', valueFormatter: (v) => `${Math.round(v * 100) / 100}% (${game.state.offer_per_money_total[indexRight][game.state.offer_per_money_total_percent[indexRight].findIndex(o => o.accepted === v)].accepted})`
             },
             {
               dataKey: 'declined',
-              label: 'Abgelehnt', stack: 'a', color: '#ff8113', valueFormatter: (v) => `${v}% (${game.state.offer_per_money_total[indexRight][game.state.offer_per_money_total_percent[indexRight].findIndex(o => o.declined === v)].declined})`
+              label: 'Abgelehnt', stack: 'a', color: '#ff8113', valueFormatter: (v) => `${Math.round(v * 100) / 100}% (${game.state.offer_per_money_total[indexRight][game.state.offer_per_money_total_percent[indexRight].findIndex(o => o.declined === v)].declined})`
             },
           ]}
         />

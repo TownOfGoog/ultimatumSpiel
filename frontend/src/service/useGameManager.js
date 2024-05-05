@@ -33,11 +33,16 @@ export function GameManagerProvider({ children }) {
         switch (action.payload) {
           case "home_page":
             console.log("going to home page...");
-            let reset = { ...dfault, username: state.username, is_logged_in: state.is_logged_in, top_right: state.is_logged_in ? "" : dfault.top_right};
+            let reset = { ...dfault, 
+              username: state.username, 
+              is_logged_in: state.is_logged_in, 
+              top_right: state.is_logged_in ? "" : dfault.top_right,
+              code_error: state.code_error, //needs to persist across pages
+            };
             return reset; //reset everything
           case "login_page":
             console.log("going to login page...");
-            return { ...state, title: "Anmelden", body: <Loginpage />, top_right: <MyButton sx={{width: 'auto', paddingInline: '0.8em'}} onClick={() => navigate('/register')}>Registrieren</MyButton> };
+            return { ...state, title: "Anmelden", body: <Loginpage />, code_error: '', top_right: <MyButton sx={{width: 'auto', paddingInline: '0.8em'}} onClick={() => navigate('/register')}>Registrieren</MyButton> };
           case "register_page":
             console.log("going to register page...");
             return { ...state, title: "Registrieren", body: <Register />, top_right: dfault.top_right };
@@ -52,7 +57,7 @@ export function GameManagerProvider({ children }) {
             return { ...state, body: <WaitingPlayers /> };
           case "playingHost":
             console.log("going to playingHost page...");
-            return { ...state, body: <PlayingHost /> };
+            return { ...state, title: "Joine die Lobby", body: <PlayingHost /> };
           case "thanks4playing_page":
             console.log("going to thanks4playing page...");
             return { ...state, title: "Danke fürs Spielen!", game_name: '', body: <Thanks4Playing/> };
@@ -81,17 +86,19 @@ export function GameManagerProvider({ children }) {
       case 'connect_lobby':
         if (!Number.isInteger(action.payload.lobby_code)) return state
         console.log("connecting to lobby with code:", action.payload.lobby_code);
-        console.log('action.payload: ', action.payload);
+        console.log('action.payload: ', state.top_right);
         if (state.is_host) return state; //do nothing if its the teacher trying to connect
         return { ...state,
           code: action.payload.lobby_code, //updating this will cause the useEffect to connect to the websocket
+          code_error: '',
           top_right: '',
           game_name: '',
         }
       case 'connect_lobby_host':
         if (!Number.isInteger(action.payload.lobby_code)) return state
-        console.log("connecting to lobby as host...", action.payload);
+        console.log("connecting to lobby as host...");
         return { ...state,
+          title: "Tritt der Lobby bei",
           code: action.payload.lobby_code, //updating this will cause the useEffect to connect to the websocket
           body: <WaitingPlayersHost />,
           is_host: true,
@@ -176,9 +183,6 @@ export function GameManagerProvider({ children }) {
                   : item
                 ),
               };
-
-
-
 
             case 'offer_response':
               console.log('offer was answered: ', message.data.accepted ? 'accepted' : 'declined');
@@ -358,11 +362,16 @@ export function GameManagerProvider({ children }) {
           return state;
         }
       case 'server_close':
-        console.log('server closed connection');
+        console.log('server closed connection', state);
+        let error;
+        if (!state.exit_player && !state.is_host) { //unexpected exit
+          error = 'Falscher Code oder Server nicht erreichbar.'
+        }
         action.payload.current = null
         return { ...state,
           code: null,
           exit_player: false,
+          code_error: error,
         }
       default:
         console.warn("sent something unknown to server: ", action);
@@ -472,8 +481,8 @@ export function GameManagerProvider({ children }) {
     if (ws.current) ws.current.close()
   }
 
-  function is_mobile() {
-    return window.innerWidth < 600
+  function is_mobile(width_considered_mobile = 600) {
+    return window.innerWidth < width_considered_mobile
   } 
 
   //#region Return

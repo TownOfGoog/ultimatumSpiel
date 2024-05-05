@@ -7,16 +7,16 @@ export default function WaitingPlayers() {
   return (
     <div style={{
       width: '100%', height: '100%', 
-      display: 'flex', flexDirection: 'column', justifyContent: 'center', alignItems: 'center', gap: '10vh'
-    }}
-    >
+      display: 'flex', flexDirection: 'column', justifyContent: 'center', alignItems: 'center', gap: '10vh', 
+      boxShadow: "inset 0 0 0 1px black",
+    }}>
       {game.state.is_previous_offer_accepted !== undefined && (
         <MyText>Dein vorheriges Angebot (<MyText bold>{game.state.last_offer}</MyText>) wurde <MyText bold>{game.state.is_previous_offer_accepted ? 'Akzeptiert' : 'Abgelehnt'}</MyText>.</MyText>
       )}
 
       {/* center loading circles */}
       <div style={{
-        width: '16vw', maxWidth: '15em', height: "16vw",
+        width: '16vw', maxWidth: '12em', height: "16vw",
         display: 'flex', alignItems: 'center'
         }}>
         <ReactLoading 
