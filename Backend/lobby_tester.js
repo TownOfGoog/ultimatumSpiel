@@ -18,6 +18,18 @@ export class Lobby_tester {
     this.no_message_condition = [{}];
   }
 
+  all_players() {
+    //returns all connected players, excluding the host
+    let active_players = []
+    this.players.forEach((player, index) => {
+      if (player !== undefined && this.websockets[index] !== null) {
+        active_players.push(player);
+      }
+    });
+    active_players.shift(); //remove host
+    return active_players;
+  }
+
   connect_player(playernumber, cookie) {
     const ws = new WebSocket(`ws://${this.address}/lobby/${this.code}`,
     cookie ? { headers: { "cookie": cookie } } : {} );
@@ -112,7 +124,7 @@ export class Lobby_tester {
                   player.conditions_met++
                   //and if no messages were sent at all
                   if (player.wrong_messages.length === 0) {
-                    if (!error) this.players[i].done(new Error(`Die Nachricht ${JSON.stringify(player.message_conditions)} wurde am Spieler ${index} nie gesendet. Gesendet wurde: ${(player.messages ? player.messages : '[nichts].')}`));
+                    if (!error) this.players[i].done(new Error(`Die Nachricht ${JSON.stringify(player.message_conditions)} wurde am Spieler ${index} nie gesendet. Gesendet wurde: ${(player.messages.length !== 0 ? player.messages : '[nichts].')}`));
                   } else { 
                     if (!error) this.players[i].done(new Error(`Antwort ${player.wrong_messages} vom Spieler ${index} ist nicht erwartet, erwartet war ${player.message_conditions.length > 1 ? 'eins der folgenden Antworten ' + JSON.stringify(player.message_conditions) : JSON.stringify(player.message_conditions[0])}`));
                   }
@@ -121,7 +133,7 @@ export class Lobby_tester {
               });
               if (!error) { this.players[i].done() }
               //to give time for the server to handle everything properly
-            }, 30); 
+            }, 50); 
           },
           done: () => {},
         };
