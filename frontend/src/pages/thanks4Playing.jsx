@@ -4,11 +4,17 @@ import useGameManager from "../service/useGameManager"
 export default function Thanks4Playing() {
   const game = useGameManager()
   return (
+    <div style={{
+      width: '100%', height: '100%', position: 'relative',
+      boxShadow: "inset 0 0 0 1px black",
+    }}>
       <div style={{
-        width: '100%', height: '100%', position: 'absolute', top: '50vh', 
-        boxShadow: "inset 0 0 0 1px black",
+        position: 'absolute',
+        width: '90%', maxWidth: '800px',
+        top: '50%', left: '50%', transform: 'translate(-50%, -50%)',
       }}>
-        <MyButton onClick={() => game.navigate('/')}>Zurück zum Menü</MyButton>
+        <MyButton shouldFillAll  onClick={() => game.navigate('/')}>Zurück zum Menü</MyButton>
       </div>
+    </div>
   )
 }
